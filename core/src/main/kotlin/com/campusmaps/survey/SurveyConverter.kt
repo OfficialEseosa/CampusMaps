@@ -283,14 +283,81 @@ object SurveyConverter {
     )
 }
 
-/** `ConvertMain <survey.json> <out.json>`: writes the draft building and prints the gap report. */
+/**
+ * Carry the hand-tuned parts of the current building file over to a fresh survey draft (docs/19 "Klaus refresh, step by step").
+ * The survey wins on geometry and timings; the old file wins on what the survey cannot know.
+ */
+object HandTuned {
+    data class Result(val building: Building, val log: List<String>)
+
+    fun keep(draft: Building, old: Building): Result {
+        val log = mutableListOf<String>()
+        // 1. Node ids the app relies on (S1, S2, T, R-1116, ...): a draft node of the same type named like an old id or old name takes that id.
+        val rename = HashMap<String, String>()
+        val taken = draft.nodes.map { it.id }.toMutableSet()
+        for (o in old.nodes) {
+            if (o.id in taken) continue
+            val hit = draft.nodes.firstOrNull { d -> d.id !in rename && d.type == o.type &&
+                (d.name.equals(o.id, true) || d.name.equals(o.name, true)) } ?: continue
+            rename[hit.id] = o.id; taken -= hit.id; taken += o.id
+            log += "renamed draft node ${hit.id} (\"${hit.name}\") to ${o.id}"
+        }
+        fun id(x: String) = rename[x] ?: x
+        var nodes = draft.nodes.map { if (it.id in rename) it.copy(id = id(it.id)) else it }
+        val edges = draft.edges.map { it.copy(from = id(it.from), to = id(it.to)) }
+        val anchors = draft.anchors.map { it.copy(node = id(it.node)) }
+        // 2. Access windows (posted hours) per entrance, matched by id then by name; the survey never records them.
+        nodes = nodes.map { n ->
+            if (n.type != NodeType.ENTRANCE || n.access != null) return@map n
+            val o = old.nodeOrNull(n.id)?.takeIf { it.type == NodeType.ENTRANCE }
+                ?: old.nodes.firstOrNull { it.type == NodeType.ENTRANCE && it.name.equals(n.name, true) }
+            if (o?.access == null) n else n.copy(access = o.access).also { log += "kept access windows of ${o.id} on ${n.id}" }
+        }
+        // 3. Demo destinations: kept when the room exists in the draft, otherwise listed for a hand fix.
+        val ids = nodes.map { it.id }.toSet()
+        val (kept, lost) = old.demoDestinations.partition { it in ids }
+        kept.forEach { log += "kept demo destination $it" }
+        lost.forEach { log += "DEMO DESTINATION $it IS NOT IN THE SURVEY: add the room node or change demoDestinations" }
+        // 4. Outdoor start points: the survey's START nodes win; otherwise the old ones stay.
+        val starts = draft.startPoints.ifEmpty {
+            old.startPoints.also { if (it.isNotEmpty()) log += "kept start points ${it.joinToString { p -> p.id }} (survey has no START node)" }
+        }
+        // 5. Old node ids the app or tests may name that the draft does not have.
+        old.nodes.filter { it.id !in ids }.forEach { log += "old node ${it.id} (${it.name}) is not in the draft" }
+        return Result(draft.copy(nodes = nodes, edges = edges, anchors = anchors, demoDestinations = kept, startPoints = starts), log)
+    }
+}
+
+/**
+ * `ConvertMain <survey.json | export.zip> <out.json> [--keep <current building.json>]`: writes the draft building and prints the
+ * gap report. A CampusSurvey export zip is read directly (its `survey.json`). With `--keep`, hand-tuned fields of the current file
+ * (node ids such as S1/S2/T, demoDestinations, startPoints, access windows) are carried over, see [HandTuned].
+ */
 object ConvertMain {
+    fun readLog(path: File): String =
+        if (path.name.endsWith(".zip", true)) java.util.zip.ZipFile(path).use { z ->
+            val entry = z.entries().asSequence().firstOrNull { !it.isDirectory && it.name.substringAfterLast('/') == "survey.json" }
+                ?: error("No survey.json inside ${path.name}")
+            z.getInputStream(entry).use { it.readBytes().decodeToString() }
+        } else path.readText()
+
     @JvmStatic
     fun main(args: Array<String>) {
-        require(args.size == 2) { "usage: ConvertMain <survey.json> <out.json>" }
-        val text = File(args[0]).readText()
-        File(args[1]).writeText(BuildingLoader.toJson(SurveyConverter.convert(text)))
+        val k = args.indexOf("--keep")
+        val keep = if (k >= 0) File(args.getOrNull(k + 1) ?: error("--keep needs a file")) else null
+        val files = args.filterIndexed { i, _ -> k < 0 || (i != k && i != k + 1) }
+        require(files.size == 2) { "usage: ConvertMain <survey.json | export.zip> <out.json> [--keep <current building.json>]" }
+        val text = readLog(File(files[0]))
+        var draft = SurveyConverter.convert(text)
         println(SurveyConverter.report(text))
-        println("Wrote ${args[1]}")
+        if (keep != null) {
+            val r = HandTuned.keep(draft, BuildingLoader.fromJson(keep.readText()))
+            draft = r.building
+            println("Kept from ${keep.name}:"); r.log.forEach { println("  - $it") }
+            val problems = BuildingValidator.validate(draft)
+            println("Validator on the merged draft:" + if (problems.isEmpty()) " clean" else ""); problems.forEach { println("  - $it") }
+        }
+        File(files[1]).writeText(BuildingLoader.toJson(draft))
+        println("Wrote ${files[1]}")
     }
 }
