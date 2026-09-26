@@ -54,8 +54,10 @@ export function mount(el, opts = {}) {
   E('stop', { offset: '0', 'stop-color': C.clay }, gChev);
   E('stop', { offset: '1', 'stop-color': C.warm }, gChev);
 
-  const Llinks = E('g', null, svg);
-  const Lbeats = E('g', null, svg);
+  // the story sits a little below the pill, centred in the remaining height
+  const Lstory = E('g', { transform: 'translate(0,22)' }, svg);
+  const Llinks = E('g', null, Lstory);
+  const Lbeats = E('g', null, Lstory);
   const Ltop = E('g', null, svg);
 
   // ---- top pill: everything on the phone, no network ----
@@ -74,12 +76,12 @@ export function mount(el, opts = {}) {
   function layoutPill() {
     let w = 340;
     try { w = pillTx.getComputedTextLength() || w; } catch (e) { /* not rendered yet */ }
-    const total = 28 + 44 + w + 26;   // pad, icon, text, pad
+    const total = 22 + 46 + 12 + w + 26;   // pad, icon, gap, text, pad
     const x0 = 700 - total / 2;
     pillBg.setAttribute('x', x0);
     pillBg.setAttribute('width', total);
-    cloud.setAttribute('transform', `translate(${x0 + 28 + 18},38)`);
-    pillTx.setAttribute('x', x0 + 28 + 44);
+    cloud.setAttribute('transform', `translate(${x0 + 22 + 25},38)`);
+    pillTx.setAttribute('x', x0 + 22 + 46 + 12);
   }
   layoutPill();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutPill).catch(() => {});
@@ -176,7 +178,7 @@ export function mount(el, opts = {}) {
   // ===== Beat 3: Hands-free (glasses + watch) =====
   const B3 = beat(X3, 'Hands-free', ['Glasses speak, the watch buzzes.', 'You never look down.']);
   const rings = [];
-  let watchChev = null, waves = null;
+  let watchChev = null;
   {
     const a = B3.art;
     const gx = X3 - 85, gy = 300;     // glasses centre
@@ -197,12 +199,6 @@ export function mount(el, opts = {}) {
     E('path', { d: `M${gx - 12},${gy - 16} C${gx - 6},${gy - 26} ${gx + 6},${gy - 26} ${gx + 12},${gy - 16}`, fill: 'none' }, gl);
     E('path', { d: `M${gx - 78},${gy - 18} L${gx - 96},${gy - 24}`, fill: 'none' }, gl);
     E('path', { d: `M${gx + 78},${gy - 18} L${gx + 96},${gy - 24}`, fill: 'none' }, gl);
-    // sound waves from the temple
-    waves = E('g', { fill: 'none', stroke: C.teal, 'stroke-width': 3, 'stroke-linecap': 'round' }, a);
-    [0, 1, 2].forEach((k) => {
-      const r = 12 + k * 10, ox = gx - 100, oy = gy + 6;
-      E('path', { d: `M${ox - r * 0.5},${oy - r * 0.87} A${r},${r} 0 0 0 ${ox - r * 0.5},${oy + r * 0.87}`, opacity: 0.9 - k * 0.2 }, waves);
-    });
     // watch
     for (let i = 0; i < 2; i++) rings.push(E('circle', { cx: wx, cy: wy, r: 58, fill: 'none', stroke: C.gold,
       'stroke-width': 3, opacity: 0 }, a));
@@ -228,7 +224,7 @@ export function mount(el, opts = {}) {
     return { p, len, head, pk };
   }
   const K1 = link(X1 + 128, X2 - 196, 264);
-  const K2 = link(X2 + 196, X3 - 206, 264);
+  const K2 = link(X2 + 196, X3 - 196, 264);
 
   // ---- animation ----
   let ctx = null, master = null;
@@ -275,13 +271,12 @@ export function mount(el, opts = {}) {
     cp.set({}, {}, 2.4);
     tl.add(cp, L0);
 
-    // watch: chevron nudge + two haptic rings; glasses: sound waves
+    // watch: chevron nudge + two haptic rings
     const wt = gsap.timeline({ repeat: -1 });
     wt.fromTo(watchChev, { x: 0 }, { x: -6, duration: 0.18, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0);
     rings.forEach((r, i) => {
       wt.fromTo(r, { attr: { r: 58 }, opacity: 0.85 }, { attr: { r: 98 }, opacity: 0, duration: 1.0, ease: 'power2.out' }, i * 0.22);
     });
-    wt.fromTo(waves.children, { opacity: 0.15 }, { opacity: 0.95, duration: 0.3, stagger: 0.12, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0.9);
     wt.set({}, {}, 2.4);
     tl.add(wt, L0 + 0.3);
   }
