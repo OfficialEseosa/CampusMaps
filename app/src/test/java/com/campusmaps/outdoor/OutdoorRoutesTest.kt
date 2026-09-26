@@ -92,4 +92,14 @@ class OutdoorRoutesTest {
         assertEquals(listOf("Head west on Gilmer St"), ok.streetSteps)
         assertEquals(RouteSource.DIRECTIONS, ok.source)
     }
+
+    @Test fun routesApiParser() {
+        val r = DirectionsClient.parseRoutes(
+            """{"routes":[{"distanceMeters":241,"polyline":{"encodedPolyline":"_p~iF~ps|U_ulLnnqC"},
+               "legs":[{"steps":[{"navigationInstruction":{"instructions":"Head south on Park Pl"}},{}]}]}]}"""
+        )!!
+        assertEquals(241.0, r.distanceM, 0.0)
+        assertEquals(listOf("Head south on Park Pl"), r.streetSteps)
+        assertNull(DirectionsClient.parseRoutes("{}"))
+    }
 }
