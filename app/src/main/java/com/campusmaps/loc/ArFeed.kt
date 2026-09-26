@@ -18,11 +18,22 @@ object ArFeed {
     @Volatile var floorHeightM: Double = 3.8
         private set
 
+    /** Building origin (core Origin): lat / lng for the magnetic declination, headingDeg = compass bearing of building +y. */
+    @Volatile var originLat: Double = 0.0
+        private set
+    @Volatile var originLng: Double = 0.0
+        private set
+    @Volatile var originHeadingDeg: Double = 0.0
+        private set
+
     @Volatile private var sink: ArPositionProvider? = null
 
     fun setBuilding(core: CoreBuilding) {
         anchors = core.anchors.associateBy { it.id }
         floorHeightM = core.floorHeightM
+        originLat = core.origin.lat
+        originLng = core.origin.lng
+        originHeadingDeg = core.origin.headingDeg
     }
 
     fun attach(p: ArPositionProvider) { sink = p }
