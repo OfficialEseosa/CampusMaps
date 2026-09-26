@@ -98,6 +98,16 @@ class Speaker(context: Context) {
         }
     }
 
+    // Warms the on-phone clip cache for every sentence a route can say, so nothing waits on the network
+    // mid-route (the demo path stays offline after this). No key: nothing to do.
+    fun prefetch(texts: Collection<String>) {
+        if (API_KEY.isBlank()) return
+        scope.launch(Dispatchers.IO) {
+            for (t in texts.filter { it.isNotBlank() }.distinct()) runCatching { clipFor(t) }
+                .onFailure { Log.w(TAG, "prefetch failed for '$t': ${it.message}") }
+        }
+    }
+
     fun stop() {
         generation++
         stopPlayback()

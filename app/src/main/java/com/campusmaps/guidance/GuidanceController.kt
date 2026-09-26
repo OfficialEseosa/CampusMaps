@@ -113,6 +113,11 @@ class GuidanceController(
     val state: StateFlow<GuidanceState> = _state.asStateFlow()
 
     fun start() {
+        // Warm the voice cache for the whole route (ElevenLabs clips), so mid-route sentences never wait on the network.
+        speaker.prefetch(buildList {
+            route.steps.forEach { s -> add(s.text); s.approachText?.let { add(it) } }
+            lockedNotice?.let { n -> route.steps.firstOrNull()?.let { add("Heads up: ${n.text} ${it.text}") } }
+        })
         watch.reset()
         com.campusmaps.loc.ArFeed.attach(arPosition)
         positionSource.start(arExpected = com.campusmaps.loc.ArFeed.arExpected && !glassesMode)
