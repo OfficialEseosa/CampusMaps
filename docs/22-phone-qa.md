@@ -172,7 +172,7 @@ Verified on the S25 and the Galaxy Watch 8 Classic (watch app installed over Wi-
 |---|---|---|
 | P1 | Klaus: S1, S2 and the table are guesses; re-survey the real table spot; a straight-on poster at the staircase scoring 75+ for an indoor image anchor; door directions at 1116W and COEUS | Data |
 | P2 | Real elevator ride with the barometer on the S25; real walk to Classroom South for street steps and the door hand-over | Hand test |
-| P3 | The S1b "Map" tile starts map-only guidance (camera off) and does not open Explore; decide | Design |
+| P3 | The S1b "Map" tile starts map-only guidance (camera off), not the Explore map. Decided 2026-09-26: keep as built (owner). | Closed |
 | P4 | Outside start on the emulator stays on the first street step for the whole route when the fix is far from the building (fresh fix gate); real GPS is fine | Low |
 | P5 | Home can jump from the picker to Explore up to 3 s after launch while location resolves; "1 rooms" counts destination rooms only; Explore keeps "Turn on location" until restart after a grant; room lost on a relaunch restored from process death; stale sheet distance near the door | Low |
 | P6 | The watch shows "0 m" on the first "Head toward" step | Low |
