@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Shortcut photos live in app private storage under files/shortcut_photos. -->
+    <files-path name="shortcut_photos" path="shortcut_photos/" />
+</paths>
