@@ -4,7 +4,7 @@ Indoor AR campus navigation. Native Kotlin Android on a Galaxy S25 Ultra, Ray-Ba
 
 ## Layout
 - Base is the teammate's structure (integration branch, see [docs/21-integration-notes.md](docs/21-integration-notes.md)): modules `core`, `app`, `shared`, `wear`.
-- `docs/` is the plan: [docs/README.md](docs/README.md) is the index, [docs/NEXT-STEPS.md](docs/NEXT-STEPS.md) is the to-do list, research with sources is in `docs/research/`. [WHATS-LEFT.md](WHATS-LEFT.md) is the teammate's status list, updated at integration.
+- `docs/` is the plan: [docs/README.md](docs/README.md) is the index, research with sources is in `docs/research/`. [WHATS-LEFT.md](WHATS-LEFT.md) is the teammate's status list, updated at integration.
 - `app/` is the phone app (applicationId `com.campusmaps`). **Sources are in `app/src/main/java`, not `kotlin/`.** Routing goes through `route/CoreRouter.kt` (core in, the teammate's `RoutePlan` / `Route` / `RouteStep` out); buildings through `data/campus/CoreBridge.kt` (core JSON in, drawing view out, y flipped to y-down). Screens are in `ui/screens`, guidance in `guidance/`.
 - `core/` is pure Kotlin/JVM: building data model, loader, validator, routing, survey converter. It owns the package `com.campusmaps.routing`; the app's route view models live in `com.campusmaps.route`.
 - `shared/` is the watch step format and haptics; `wear/` is the Wear OS app.

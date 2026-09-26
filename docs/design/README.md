@@ -21,4 +21,4 @@ Open `wireframes.html` in any browser (double-click it). It needs no server and 
 
 ## Sources
 
-The package is based on `docs/07-app-shell-ui.md` (screen spec), `docs/05-ar-guidance.md` (AR content), `docs/01-demos.md`, `docs/13-pitch.md`, `docs/08-watch-companion.md`, `docs/20-ui-status.md`, and the strings in `app/src/main/kotlin/com/campusmaps/ui/` and `core/.../routing/Instructions.kt` as of 2026-09-25. If the code changes, the copy tables may drift; the code wins.
+The package is based on `docs/07-app-shell-ui.md` (screen spec), `docs/05-ar-guidance.md` (AR content), `docs/01-demos.md`, `docs/13-pitch.md`, `docs/08-watch-companion.md`, and the strings in `app/src/main/kotlin/com/campusmaps/ui/` and `core/.../routing/Instructions.kt` as of 2026-09-25. If the code changes, the copy tables may drift; the code wins.
