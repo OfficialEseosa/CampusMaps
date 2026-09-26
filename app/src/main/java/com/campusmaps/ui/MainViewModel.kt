@@ -131,9 +131,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         app.clock.mode,
         app.shortcuts.approvedEdges,
     ) { settings, sel, recentIds, _, approved ->
-        val building = app.building(settings.buildingId).let { b ->
-            sel.gps?.let { com.campusmaps.data.campus.CoreBridge.withGpsStart(b, it.lat, it.lng) } ?: b
-        }
+        val building = ExploreStart.building(app.building(settings.buildingId), sel.gps)
         val start = sel.startId?.let { building.nodes[it] } ?: building.node(building.defaultStartId)
         val destination = sel.destinationId?.let { building.nodes[it] }
         val plan = destination?.let {
@@ -305,16 +303,14 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     // Search field on the Explore top bar.
     fun openSearchFromExplore() = go(Screen.DESTINATION)
 
-    // "Start AR navigation" on Explore: same building, room and entrance as the map. With a fix, S2 routes from the phone's
-    // real position (the "Your location" node, core Start.Outside(lat, lng)), exactly as the map did; without one, from the
-    // building's default start. Then the same S2 path S1b uses (startSession).
+    // "Start AR navigation" on Explore: same building, room and entrance as the map, started from the outdoor start point
+    // nearest the student, then the same S2 path S1b uses (startSession).
     fun startFromExplore(buildingId: String, destinationId: String, entranceId: String, lat: Double?, lng: Double?) {
         if (!settled()) return
         viewModelScope.launch {
             if (settings.value.buildingId != buildingId) app.settings.setBuilding(buildingId)
             val building = app.building(buildingId)
-            val gps = if (lat != null && lng != null) com.campusmaps.data.model.OutdoorStart(lat, lng) else null
-            val startId = if (gps != null) com.campusmaps.data.campus.CoreBridge.GPS_START_ID else building.defaultStartId
+            val (startId, gps) = ExploreStart.start(building, lat, lng) // "Your location" at the fix (ui/ExploreStart.kt)
             updateSelection { Selection(destinationId = destinationId, startId = startId, gps = gps) }
             val t = kotlinx.coroutines.withTimeoutOrNull(3_000L) {
                 trip.first { it.building.id == buildingId && it.destination?.id == destinationId && it.start.id == startId &&
