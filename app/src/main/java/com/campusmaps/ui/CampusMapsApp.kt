@@ -66,6 +66,13 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     val exploreHome by vm.exploreHome.collectAsState()
     val exploreVm: ExploreViewModel = viewModel(factory = ExploreViewModel.Factory(app, LocalContext.current))
     LaunchedEffect(Unit) { if (exploreVm.exploreShouldBeHome()) vm.showExploreAsHome() }
+    // LEG 2: the 40 m trigger, the "Almost there" card and the 900 ms map-to-AR transition (geo/, ui/transition/).
+    val handoffUi by vm.handoff.ui.collectAsState()
+    val fromExplore by vm.fromExplore.collectAsState()
+    val appContext = LocalContext.current.applicationContext
+    val geo = androidx.compose.runtime.remember { com.campusmaps.geo.ArCoreGeospatialProvider(appContext) }
+    // S2 started from the map is drawn inside the map-to-AR host, so the Crossfade must not switch screens for it.
+    val crossTarget = if (screen == Screen.GUIDANCE && fromExplore) Screen.EXPLORE else screen
 
     val systemDark = isSystemInDarkTheme()
     val alwaysDark = screen == Screen.GUIDANCE || screen == Screen.GLASSES
@@ -98,7 +105,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
 
     CampusMapsTheme(darkTheme = screenDark) {
         Box(Modifier.fillMaxSize()) {
-            Crossfade(targetState = screen, animationSpec = tween(250), label = "screen") { target ->
+            Crossfade(targetState = crossTarget, animationSpec = tween(250), label = "screen") { target ->
                 when (target) {
                     Screen.DESTINATION -> DestinationScreen(
                         state = trip.copy(query = vm.searchText), // Synchronous search text (docs/22 #2)
@@ -115,6 +122,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onReset = vm::reset,
                             onSettings = vm::openSettings,
                             onTitleLongPress = vm::toggleDebug,
+                            onExplore = vm::openExplore,
                         ),
                     )
                     Screen.ROUTES -> RouteOptionsScreen(
@@ -135,6 +143,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         GuidanceScreen(
                             state = it, arOverride = arOverride, onEndRoute = vm::endGuidance, onDone = vm::done,
                             buildingToWorld = t, onBuildingToWorld = { v -> controller?.buildingToWorld?.value = v },
+                            geo = geo, outdoorEntrance = handoffUi.entrance, outdoorDistanceM = handoffUi.distanceToEntranceM,
                         )
                     }
                     Screen.GLASSES -> guidance?.let {
@@ -145,6 +154,8 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onRepeat = vm::repeatInstruction,
                             onStop = vm::endGuidance,
                             onFakeStep = vm::debugSkipStep,
+                            onDone = vm::done,
+                            onBackToRoutes = vm::endGuidance,
                         )
                     }
                     Screen.ADD_SHORTCUT -> AddShortcutScreen(shortcutVm, onBack = vm::back)
@@ -153,16 +164,52 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         LaunchedEffect(trip.building.id, trip.destination?.id) {
                             trip.destination?.let { exploreVm.select(trip.building.id, it.id) }
                         }
-                        ExploreScreen(
-                            vm = exploreVm,
-                            actions = ExploreActions(
-                                onSearch = vm::openSearchFromExplore,
-                                onSettings = vm::openSettings,
-                                onStartAr = { p ->
-                                    val f = exploreVm.state.value.fix
-                                    vm.startFromExplore(p.buildingId, p.destinationId, p.entranceId, f?.lat, f?.lng)
-                                },
-                            ),
+                        val exploreState by exploreVm.state.collectAsState()
+                        val plan = exploreState.plan
+                        val scope = androidx.compose.runtime.rememberCoroutineScope()
+                        val startAr: (com.campusmaps.outdoor.EntrancePlan) -> Unit = { p ->
+                            val f = exploreVm.state.value.fix
+                            vm.startFromExplore(p.buildingId, p.destinationId, p.entranceId, f?.lat, f?.lng)
+                        }
+                        // While only the map shows, the hand-off follows the map's recommended entrance so the 40 m
+                        // trigger can raise the "Almost there" card before any S2 session exists.
+                        LaunchedEffect(plan?.buildingId, plan?.entranceId, guidance == null) {
+                            if (guidance == null && plan != null) {
+                                vm.handoff.newRoute(com.campusmaps.geo.GeoEntrance(plan.entranceId, plan.entranceName,
+                                    com.campusmaps.geo.LatLng(plan.entrance.lat, plan.entrance.lng)))
+                                runCatching { vm.handoff.attach(scope, com.campusmaps.geo.FusedLocationFixes.flow(appContext)) }
+                            }
+                        }
+                        // The card's "Go" (or the trigger) moved the hand-off to ANIMATING with no session yet: start S2 now.
+                        LaunchedEffect(handoffUi.phase) {
+                            if (handoffUi.phase == com.campusmaps.geo.HandoffPhase.ANIMATING && guidance == null) plan?.let(startAr)
+                        }
+                        com.campusmaps.ui.transition.MapToArHost(
+                            ui = handoffUi,
+                            controller = vm.handoff,
+                            mapContent = {
+                                ExploreScreen(
+                                    vm = exploreVm,
+                                    actions = ExploreActions(
+                                        onSearch = vm::openSearchFromExplore,
+                                        onSettings = vm::openSettings,
+                                        onStartAr = startAr,
+                                    ),
+                                )
+                            },
+                            arContent = {
+                                val g = guidance
+                                if (g != null && screen == Screen.GUIDANCE) {
+                                    val t by (controller?.buildingToWorld ?: NoTransform).collectAsState()
+                                    GuidanceScreen(
+                                        state = g, arOverride = arOverride, onEndRoute = vm::endGuidance, onDone = vm::done,
+                                        buildingToWorld = t, onBuildingToWorld = { v -> controller?.buildingToWorld?.value = v },
+                                        geo = geo, outdoorEntrance = handoffUi.entrance, outdoorDistanceM = handoffUi.distanceToEntranceM,
+                                    )
+                                } else {
+                                    Box(Modifier.fillMaxSize())
+                                }
+                            },
                         )
                     }
                 }
@@ -201,7 +248,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                     add("start: ${trip.start.id} (${if (trip.start.isOutdoor) "outside" else Formats.floorShort(trip.start.floor)})")
                     add("ar: ${arOverride.label}  ARCore: $arCore")
                     add("barometer: ${pressure?.let { "%.2f hPa".format(it) } ?: "no barometer"}")
-                    add("watch: ${if (watchCount < 0) "not asked yet" else "$watchCount connected"}  glasses: ${if (glassesConnected) "connected (simulated)" else "not connected"}")
+                    add("watch: ${if (watchCount < 0) "not asked yet" else "$watchCount connected"}  glasses: ${if (glassesConnected) "connected (${app.glasses::class.simpleName})" else "not connected"}")
                     add("tts: ${tts.name.lowercase()}  network: ${if (offline) "offline" else "online"}")
                     add("validator: ${problems.size} problems (ERROR/WARN, see Logcat)")
                     if (g != null) {

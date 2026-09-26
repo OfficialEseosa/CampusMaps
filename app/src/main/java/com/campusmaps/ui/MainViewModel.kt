@@ -251,6 +251,10 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         controller.start()
         _guidance.value = controller
         watchEnd.routeStarted()
+        // Outdoor leg (LEG 2): the entrance the route walks to and the FusedLocation distance to it (geo/HandoffController).
+        handoff.newRoute(com.campusmaps.geo.GeoEntrances.forRoute(app.appContext, route))
+        runCatching { handoff.attach(viewModelScope, com.campusmaps.geo.FusedLocationFixes.flow(app.appContext)) }
+            .onFailure { android.util.Log.w("Geo", "no location fixes for the hand-off", it) }
         if (glasses) {
             // Demo C: the first thing the glasses say is core's locked-entrance notice, then the instruction.
             val notice = (t.plan as? RoutePlan.Options)?.lockedNotice
@@ -275,6 +279,14 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     // True once Explore is home (picked at start when far from every building) or was opened; Back on S1 then returns to it.
     private val _exploreHome = MutableStateFlow(false)
     val exploreHome: StateFlow<Boolean> = _exploreHome.asStateFlow()
+
+    // LEG 2 hand-off (geo/): the 40 m trigger, the "Almost there" card and the map-to-AR transition state. One per app.
+    val handoff = com.campusmaps.geo.HandoffController()
+
+    // True while the current S2 session was started from the Explore map: S2 is then drawn inside the map-to-AR host
+    // (CampusMapsApp) and End route returns to the map instead of S1b.
+    private val _fromExplore = MutableStateFlow(false)
+    val fromExplore: StateFlow<Boolean> = _fromExplore.asStateFlow()
 
     fun showExploreAsHome() {
         _exploreHome.value = true
@@ -304,7 +316,11 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
                 trip.first { it.building.id == buildingId && it.destination?.id == destinationId && it.start.id == startId && it.plan != null }
             } ?: return@launch
             when (val plan = t.plan) {
-                is RoutePlan.Options -> startSession((plan.options.firstOrNull { it.entrance?.id == entranceId } ?: plan.options.first()).route, glasses = false)
+                is RoutePlan.Options -> {
+                    _fromExplore.value = true
+                    startSession((plan.options.firstOrNull { it.entrance?.id == entranceId } ?: plan.options.first()).route, glasses = false)
+                    handoff.startHandoff() // plays the 900 ms map-to-AR transition (no jump cut)
+                }
                 is RoutePlan.AlreadyHere -> startSession(plan.route, glasses = false)
                 else -> go(Screen.ROUTES)
             }
@@ -320,8 +336,9 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             val here = if (g.arrived) g.destination else g.route.points.getOrNull(g.progress.segmentIndex)?.node
             if (here != null && here.id != trip.value.start.id) updateSelection { it.copy(startId = here.id) }
         }
+        val toMap = _fromExplore.value
         stopSession()
-        go(Screen.ROUTES)
+        go(if (toMap) Screen.EXPLORE else Screen.ROUTES)
     }
 
     // "Done" on the arrived banner: reset for the next judge.
@@ -339,6 +356,9 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         app.glasses.stop()
         // Not in startSession(): a clear there would race the new route's first step. Once per route (done() calls this twice).
         watchEnd.routeEnded()
+        handoff.detach()
+        handoff.backToMap()
+        _fromExplore.value = false
     }
 
     // ---------- App bar ----------

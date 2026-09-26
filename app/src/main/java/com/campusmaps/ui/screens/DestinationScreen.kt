@@ -69,6 +69,7 @@ class DestinationActions(
     val onReset: () -> Unit,
     val onSettings: () -> Unit,
     val onTitleLongPress: () -> Unit,
+    val onExplore: (() -> Unit)? = null, // "See the campus map" (Explore, leg 1); null hides the row
 )
 
 // S1 Destination (section 4 of the handoff).
@@ -144,6 +145,7 @@ fun DestinationScreen(state: TripUiState, buildings: List<Building>, actions: De
 
             if (!demo) {
                 NavigationRow(icon = AppIcons.addRoad, label = "Found a faster way? Add a shortcut", onClick = actions.onAddShortcut)
+                actions.onExplore?.let { NavigationRow(icon = AppIcons.locationOn, label = "Coming from across campus? See the map", onClick = it) }
             }
 
             state.routeError?.let {

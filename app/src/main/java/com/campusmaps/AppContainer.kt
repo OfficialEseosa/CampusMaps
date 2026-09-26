@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 //   glasses -> the real glasses SDK
 //   (positioning is created per route in GuidanceController)
 class AppContainer(context: Context) {
-    private val appContext = context.applicationContext
+    val appContext: Context = context.applicationContext
 
     // Lives as long as the app process. Used for syncing and the watch.
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
