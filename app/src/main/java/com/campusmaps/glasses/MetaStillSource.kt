@@ -27,6 +27,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -106,7 +108,7 @@ class MetaStillSource(
         watchJobs += scope.launch { s.errors.collect { e -> failure = "session: ${e.description}"; Log.e(TAG, "session error ${e.description}") } }
         try {
             s.start()
-            withTimeout(SESSION_TIMEOUT_MS) {
+            timed(SESSION_TIMEOUT_MS, "session start") {
                 s.state.first { it == DeviceSessionState.STARTED || it == DeviceSessionState.STOPPED || failure != null }
             }
             check()
@@ -127,33 +129,52 @@ class MetaStillSource(
             }
             watchJobs += scope.launch { st.videoStream.collect { } } // Drain frames; stills are the OCR path
             st.start()
-            withTimeout(STREAM_TIMEOUT_MS) {
+            timed(STREAM_TIMEOUT_MS, "stream start") {
                 st.state.first { it == StreamState.STREAMING || it == StreamState.CLOSED || failure != null }
             }
             check()
             if (st.state.value != StreamState.STREAMING) throw GlassesUnavailable("stream ${st.state.value}")
             Log.i(TAG, "BURST camera ON (streaming) at ${SystemClock.elapsedRealtime() - t0} ms")
+            // The real glasses need a moment of streaming before a still succeeds (docs/06: 5 s warm-up on the stream).
+            if (replay == null) delay(WARMUP_MS)
 
             val stills = mutableListOf<Bitmap>()
             for (i in 0 until count) {
                 replay?.beforeCapture(hintAnchorId, i)
                 val c0 = SystemClock.elapsedRealtime()
                 var photo: PhotoData? = null
-                withTimeout(CAPTURE_TIMEOUT_MS) {
-                    st.capturePhoto().onSuccess { photo = it }.onFailure { e, _ -> Log.w(TAG, "capturePhoto failed: ${e.description}") }
+                for (attempt in 1..CAPTURE_ATTEMPTS) {
+                    // A timed-out or failed still is skipped, never fatal: the cycle still speaks the instruction.
+                    val ok = try {
+                        withTimeout(CAPTURE_TIMEOUT_MS) {
+                            st.capturePhoto().onSuccess { photo = it }.onFailure { e, _ -> Log.w(TAG, "capturePhoto failed: ${e.description}") }
+                        }
+                        photo != null
+                    } catch (e: TimeoutCancellationException) {
+                        Log.w(TAG, "capturePhoto timed out after $CAPTURE_TIMEOUT_MS ms (attempt $attempt)")
+                        false
+                    }
+                    check()
+                    if (ok) break
+                    if (attempt < CAPTURE_ATTEMPTS) delay(CAPTURE_RETRY_MS)
                 }
-                check()
+                if (photo == null && i == 0) { Log.w(TAG, "BURST first still failed twice; skipping the rest of this burst"); break }
                 photo?.let(::decode)?.let {
                     stills += it
                     Log.i(TAG, "BURST still ${i + 1}/$count ${it.width}x${it.height} in ${SystemClock.elapsedRealtime() - c0} ms")
                 }
             }
+            if (stills.isEmpty()) Log.w(TAG, "BURST no stills this cycle")
             return stills
         } finally {
             stopCamera()
             Log.i(TAG, "BURST camera OFF (stream and session stopped) at ${SystemClock.elapsedRealtime() - t0} ms")
         }
     }
+
+    // withTimeout throws a CancellationException subclass; as a plain failure it would silently kill the cycle loop.
+    private suspend fun <T> timed(ms: Long, what: String, block: suspend () -> T): T =
+        try { withTimeout(ms) { block() } } catch (e: TimeoutCancellationException) { throw GlassesUnavailable("$what timed out after $ms ms") }
 
     private fun check() {
         failure?.let { _connected.value = false; throw GlassesUnavailable(it) }
@@ -211,6 +232,9 @@ class MetaStillSource(
         const val SESSION_TIMEOUT_MS = 20_000L
         const val STREAM_TIMEOUT_MS = 15_000L
         const val CAPTURE_TIMEOUT_MS = 8_000L
+        const val CAPTURE_ATTEMPTS = 2
+        const val CAPTURE_RETRY_MS = 700L
+        const val WARMUP_MS = 1_500L
         const val SETUP_RETRY_MS = 60_000L
     }
 }

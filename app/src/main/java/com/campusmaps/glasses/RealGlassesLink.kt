@@ -10,6 +10,7 @@ import com.campusmaps.guidance.GlassesPhase
 import com.campusmaps.platform.Speaker
 import com.campusmaps.platform.TtsStatus
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -108,6 +109,11 @@ class RealGlassesLink(
                 val stills: List<Bitmap> = try {
                     // Off the main thread: mock setup, file copies, capture waits and HEIC decoding (an ANR on the emulator).
                     withContext(Dispatchers.IO) { source.burst(STILLS, hint?.anchorId) }
+                } catch (e: TimeoutCancellationException) {
+                    Log.w(TAG, "RECONNECT: burst timed out ($e), retry in ${backoff / 1000} s")
+                    source.disconnect(); ready = false; _connected.value = false
+                    delay(backoff); backoff = min(backoff * 2, MAX_BACKOFF_MS)
+                    continue
                 } catch (e: CancellationException) { throw e } catch (e: Exception) {
                     Log.w(TAG, "RECONNECT: burst failed ($e), retry in ${backoff / 1000} s")
                     source.disconnect()
