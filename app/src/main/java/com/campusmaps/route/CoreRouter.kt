@@ -269,6 +269,15 @@ class CoreRouter {
         // HEAD and EXIT steps finish after this many metres, so the next turn can show its distance (teammate's rule).
         private const val SHORT_STEP_M = 4.0
 
+        // The option that goes in by [entranceId] (the entrance the Explore map drew), directly or as one of its "also via"
+        // entrances (core lists those by name); the first option when none does.
+        fun optionForEntrance(building: Building, options: List<RouteOption>, entranceId: String): RouteOption {
+            val name = building.nodes[entranceId]?.name
+            return options.firstOrNull { it.entrance?.id == entranceId }
+                ?: options.firstOrNull { name != null && name in it.alsoVia }
+                ?: options.first()
+        }
+
         // A shortcut is usable when both ends are in the building file and on the same floor.
         fun usableShortcut(building: Building, e: GraphEdge): Boolean {
             val a = building.core.nodeOrNull(e.from) ?: return false
