@@ -42,7 +42,8 @@ class DirectionsClient(private val apiKey: String) {
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("X-Goog-Api-Key", apiKey)
             setRequestProperty("X-Goog-FieldMask",
-                "routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.steps.navigationInstruction.instructions")
+                "routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.steps.navigationInstruction.instructions," +
+                    STEP_FIELDS)
         }
         return try {
             conn.outputStream.use { it.write(routesBody(from, to).toByteArray()) }
@@ -83,7 +84,8 @@ class DirectionsClient(private val apiKey: String) {
                 (s.jsonObject["navigationInstruction"] as? JsonObject)?.get("instructions")?.jsonPrimitive?.content
                     ?.replace('\n', ' ')?.trim()?.takeIf { it.isNotBlank() }
             }
-            return OutdoorRoute(points, distance, OutdoorRoutes.walkingMinutes(distance), steps, RouteSource.DIRECTIONS)
+            return OutdoorRoute(points, distance, OutdoorRoutes.walkingMinutes(distance), steps, RouteSource.DIRECTIONS,
+                streetLegs = parseRoutesStreetSteps(body))
         }
 
         // Legacy Directions parser (tested on the JVM). Null unless status is OK with at least one route.
@@ -99,7 +101,46 @@ class DirectionsClient(private val apiKey: String) {
             val steps = leg["steps"]?.jsonArray.orEmpty().mapNotNull { s ->
                 s.jsonObject["html_instructions"]?.jsonPrimitive?.content?.let(::plainText)?.takeIf { it.isNotBlank() }
             }
-            return OutdoorRoute(points, distance, OutdoorRoutes.walkingMinutes(distance), steps, RouteSource.DIRECTIONS)
+            return OutdoorRoute(points, distance, OutdoorRoutes.walkingMinutes(distance), steps, RouteSource.DIRECTIONS,
+                streetLegs = parseLegacyStreetSteps(body))
+        }
+
+        // Extra Routes API fields for S2's street steps: each maneuver, where it ends and its length.
+        const val STEP_FIELDS =
+            "routes.legs.steps.navigationInstruction.maneuver,routes.legs.steps.endLocation,routes.legs.steps.distanceMeters"
+
+        // Routes API steps with an end point, for S2 (outdoor/StreetSteps.kt). Steps without text or end point are dropped.
+        fun parseRoutesStreetSteps(body: String): List<StreetStep> {
+            val route = Json.parseToJsonElement(body).jsonObject["routes"]?.jsonArray?.firstOrNull()?.jsonObject ?: return emptyList()
+            return route["legs"]?.jsonArray?.firstOrNull()?.jsonObject?.get("steps")?.jsonArray.orEmpty().mapNotNull { e ->
+                val s = e.jsonObject
+                val nav = s["navigationInstruction"] as? JsonObject
+                val text = nav?.get("instructions")?.jsonPrimitive?.content?.let(::plainText)?.takeIf { it.isNotBlank() }
+                    ?: return@mapNotNull null
+                val ll = ((s["endLocation"] as? JsonObject)?.get("latLng") as? JsonObject) ?: return@mapNotNull null
+                val lat = ll["latitude"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: return@mapNotNull null
+                val lng = ll["longitude"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: return@mapNotNull null
+                val d = s["distanceMeters"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0
+                StreetStep(text, StreetTurn.fromManeuver(nav["maneuver"]?.jsonPrimitive?.content), LatLngPoint(lat, lng), d)
+            }
+        }
+
+        // Legacy Directions steps with an end point (html_instructions, maneuver, end_location, distance.value).
+        fun parseLegacyStreetSteps(body: String): List<StreetStep> {
+            val root = Json.parseToJsonElement(body).jsonObject
+            if (root["status"]?.jsonPrimitive?.content != "OK") return emptyList()
+            val leg = root["routes"]?.jsonArray?.firstOrNull()?.jsonObject?.get("legs")?.jsonArray?.firstOrNull()?.jsonObject
+                ?: return emptyList()
+            return leg["steps"]?.jsonArray.orEmpty().mapNotNull { e ->
+                val s = e.jsonObject
+                val text = s["html_instructions"]?.jsonPrimitive?.content?.let(::plainText)?.takeIf { it.isNotBlank() }
+                    ?: return@mapNotNull null
+                val end = s["end_location"] as? JsonObject ?: return@mapNotNull null
+                val lat = end["lat"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: return@mapNotNull null
+                val lng = end["lng"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: return@mapNotNull null
+                val d = (s["distance"] as? JsonObject)?.get("value")?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0
+                StreetStep(text, StreetTurn.fromManeuver(s["maneuver"]?.jsonPrimitive?.content), LatLngPoint(lat, lng), d)
+            }
         }
 
         // "Head <b>west</b> on <b>Gilmer St</b><div>Destination</div>" -> "Head west on Gilmer St. Destination"
