@@ -26,6 +26,7 @@ class BarometerFloorEstimator(
     val minFloorFraction: Double = 0.6,
     val calibrationMs: Long = 2_000,
     val afterRideMs: Long = 20_000,
+    val targetSnapFloors: Double = 0.75,
     private val log: (String) -> Unit = {},
 ) {
     val hPaPerFloor: Double = hPaPerMetre * floorHeightM
@@ -93,15 +94,21 @@ class BarometerFloorEstimator(
         log("re-zero ($why): floor $knownFloor @ ${"%.2f".format(f)} hPa")
     }
 
-    fun rideStarted(nowMs: Long) {
-        if (!inRide) log("ride on")
+    /** The floor this ride goes to, when the route knows it; the estimate snaps to it once within [targetSnapFloors]. */
+    var rideTarget: Int? = null
+        private set
+
+    fun rideStarted(nowMs: Long, target: Int? = null) {
+        if (!inRide) log("ride on" + (target?.let { " to floor $it" } ?: ""))
         inRide = true
+        rideTarget = target
     }
 
     fun rideEnded(nowMs: Long) {
         if (inRide) log("ride over; floor changes allowed for ${afterRideMs / 1000} s more")
         if (inRide) rideEndMs = nowMs
         inRide = false
+        rideTarget = null
     }
 
     /** True while floor changes are acted on. */
@@ -134,8 +141,11 @@ class BarometerFloorEstimator(
         }
 
         val est = estimate ?: return null
-        val rounded = est.roundToInt()
-        val far = abs(est - floor) > minFloorFraction
+        // A ride with a known target: once the estimate is within [targetSnapFloors] of it, that floor wins over rounding
+        // (a 2-floor ride that reads 1.9 floors must not park one floor short; the barometer is re-zeroed on arrival).
+        val target = rideTarget?.takeIf { inRide && abs(est - it) <= targetSnapFloors }
+        val rounded = target ?: est.roundToInt()
+        val far = target != null || abs(est - floor) > minFloorFraction
         if (rounded == floor || !far) {
             candidate = null
             return null

@@ -36,9 +36,9 @@ class BarometerFloorTracker(
 
     fun rezero(knownFloor: Int, why: String) = estimator.rezero(knownFloor, why)
 
-    fun rideStarted() {
+    fun rideStarted(target: Int? = null) {
         if (rideStartHpa == null) rideStartHpa = estimator.filtered
-        estimator.rideStarted(now())
+        estimator.rideStarted(now(), target)
     }
 
     fun rideEnded() {

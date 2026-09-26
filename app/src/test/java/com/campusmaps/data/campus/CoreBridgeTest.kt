@@ -50,7 +50,7 @@ class CoreBridgeTest {
 
     @Test
     fun demoDestinationsSurvive() {
-        assertEquals(listOf("R-1116W"), TestBuildings.kl.demoDestinationIds)
+        assertEquals(listOf("R-1116W", "R-3361"), TestBuildings.kl.demoDestinationIds)
         assertEquals(listOf("R-150", "R-608"), TestBuildings.cs.demoDestinationIds)
         assertEquals(listOf("R-220"), TestBuildings.cse.demoDestinationIds)
     }

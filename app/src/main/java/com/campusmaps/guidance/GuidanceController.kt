@@ -256,7 +256,7 @@ class GuidanceController(
         val b = baro ?: return
         val step = route.steps.getOrNull(progress.stepIndex)
         val ride = step?.kind == StepKind.ELEVATOR || step?.kind == StepKind.STAIRS
-        if (ride) b.rideStarted() else b.rideEnded()
+        if (ride) b.rideStarted(step?.targetFloor) else b.rideEnded()
 
         // The pretend student waits in the car for the pressure; if it does not move for 10 s, the timer rides instead.
         if (progress.stepIndex != holdStep) { holdStep = progress.stepIndex; holdSinceMs = 0L; holdGaveUp = false }
