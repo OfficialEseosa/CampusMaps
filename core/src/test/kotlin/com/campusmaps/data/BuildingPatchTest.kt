@@ -90,6 +90,17 @@ class BuildingPatchTest {
         assertSame(edited, b); assertNotNull(why)
     }
 
+    @Test fun mergedFileKeepsTheAssetText() {
+        val text = TestData.buildingFile("CS").readText().replace("\r\n", "\n")
+        assertEquals(text.trimEnd(), BuildingPatch.applyToJson(text, BuildingPatch("CS")).trimEnd())
+        val (edited, _) = room612()
+        val patch = BuildingPatch.diff(BuildingEdits.update(cs, "R-608") { it }, BuildingEdits.update(edited, "R-608") { it.copy(name = "Room 608 (Lab)") })
+        val merged = BuildingLoader.fromJson(BuildingPatch.applyToJson(text, patch))
+        val expect = BuildingPatch.apply(cs, patch)
+        assertEquals(expect.nodes, merged.nodes); assertEquals(expect.edges, merged.edges)
+        assertEquals("Room 608 (Lab)", merged.node("R-608").name)
+    }
+
     @Test fun emptyPatchJsonIsTiny() {
         val p = BuildingPatch("CS")
         assertTrue(p.isEmpty); assertEquals(p, BuildingPatch.fromJson("""{"building":"CS"}"""))

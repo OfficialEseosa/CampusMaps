@@ -1,6 +1,12 @@
 package com.campusmaps.data
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 
@@ -75,6 +81,47 @@ data class BuildingPatch(
                 anchors = base.anchors.filter { it.node !in removed },
                 demoDestinations = base.demoDestinations.filter { it !in removed },
             )
+        }
+
+        private val fileJson = kotlinx.serialization.json.Json { prettyPrint = true; prettyPrintIndent = "  " }
+
+        /**
+         * The asset file text with [patch] on top, for pasting back into assets/buildings/<code>.json. Works on the JSON tree so
+         * untouched entries keep their exact keys and numbers (a small git diff). Throws [PatchException] like [apply].
+         */
+        @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+        fun applyToJson(assetJson: String, patch: BuildingPatch): String {
+            apply(BuildingLoader.fromJson(assetJson), patch) // same checks, same errors
+            val j = BuildingLoader.json
+            val root = j.parseToJsonElement(assetJson).jsonObject
+            val removed = patch.removedNodes.toSet()
+            val changes = patch.changedNodes.associateBy { it.id }
+            fun str(o: JsonObject, k: String) = (o[k] as? JsonPrimitive)?.content
+            val nodes = root.getValue("nodes").jsonArray.mapNotNull { el ->
+                val o = el.jsonObject
+                val id = str(o, "id")
+                if (id in removed) return@mapNotNull null
+                val c = changes[id] ?: return@mapNotNull o
+                JsonObject(LinkedHashMap(o).apply {
+                    c.x?.let { put("x", JsonPrimitive(it)) }
+                    c.y?.let { put("y", JsonPrimitive(it)) }
+                    c.name?.let { put("name", JsonPrimitive(it)) }
+                    c.floor?.let { put("floor", JsonPrimitive(it)) }
+                    c.kind?.let { put("type", j.encodeToJsonElement(NodeType.serializer(), it)) }
+                    c.doorFacing?.let { put("doorFacing", JsonPrimitive(it)) }
+                })
+            } + patch.addedNodes.map { j.encodeToJsonElement(Node.serializer(), it) }
+            val edges = root.getValue("edges").jsonArray.filter { el ->
+                val o = el.jsonObject
+                val from = str(o, "from")!!; val to = str(o, "to")!!
+                from !in removed && to !in removed && patch.removedEdges.none { (it.a == from && it.b == to) || (it.a == to && it.b == from) }
+            } + patch.addedEdges.map { j.encodeToJsonElement(Edge.serializer(), it) }
+            val out = LinkedHashMap(root)
+            out["nodes"] = JsonArray(nodes)
+            out["edges"] = JsonArray(edges)
+            root["anchors"]?.let { a -> out["anchors"] = JsonArray(a.jsonArray.filter { str(it.jsonObject, "node") !in removed }) }
+            root["demoDestinations"]?.let { d -> out["demoDestinations"] = JsonArray(d.jsonArray.filter { (it as JsonPrimitive).content !in removed }) }
+            return fileJson.encodeToString(JsonElement.serializer(), JsonObject(out)) + "\n"
         }
 
         /** [apply], or [base] unchanged plus the reason when the patch does not fit. Never throws. */
