@@ -156,3 +156,23 @@ Verified on the S25 and the Galaxy Watch 8 Classic (watch app installed over Wi-
 - **Small fixes** (`reports/w3-small.md`): Directions cached per entrance (re-asked after 25 m), S1 map icon in every mode, debug card stays folded and rows are 44 dp, reroute counted once, no S1 flash before Explore.
 - **Glasses polish** (`reports/w3-glasses.md`): no ghost text on arrival, unchanged step spoken at most once per 25 s, "Seen: nothing new" after two empty bursts.
 - **Building editor** (`reports/w3-editor.md`): Settings, "Edit this building" (demo mode off): add room / hallway point / door, connect, move, rename, delete, undo, save (validator counts shown, routing reloads at once), export the merged file via the share sheet. Patches live in filesDir/patches/<code>.json and are applied on top of the asset file at load; a patch that no longer fits is skipped. Not supported: stairs, elevators, entrances, cross-floor links, signs, access hours.
+
+## Wave 4 (2026-09-26, about 11:20): redesign merge, measured Klaus, voice, barometer
+
+- **Teammate's campus redesign** (S0 campus picker, S0b building picker, campus skins, new S1b with Phone AR / Glasses / Map and a 3D preview, S2 progress pill) merged; the design pass made Explore, the transition card, the editor, Settings and S3 follow the skins, fixed contrast and clipping (`reports/w4-design.md`). Mascot watermarks (Buzz, the panther) replace the letters on S0 and S0b (`reports/w4-mascot.md`).
+- **Klaus is measured** (`reports/w4-klaus.md`, docs/19): 14 nodes, 18 edges, 4 anchors from the survey export; Demo A S1 to 1116W 12 s / 17 m, S2 18 s / 24 m; verified on the S25 ("Head toward the glass staircase", "Turn right at the glass staircase", "Room 1116W is on your right"). Image database holds the Research Wing sign only (score 100 after an equalised crop); indoor signs stay text anchors. S1, S2 and the table are placed by hand in the atrium (flagged); door directions at 1116W and COEUS follow the videos.
+- **Voice**: ElevenLabs (teammate) with a per-sentence cache and phone TTS fallback; every route pre-warms its sentences at start so the demo path stays offline after the first run. Verified on the S25.
+- **Barometer floor** (`reports/w4-baro.md`): calibrates at the start node, re-zeroes on a sign fix, floor tap or hallway step; changes floor only during elevator and stair rides (and 20 s after) with 1.5 s hold and 0.6 floor hysteresis; the fake walker waits in the elevator for the pressure (10 s give-up). Emulator: F2 to F6 and F6 to F1 driven by pressure. Owner: one real elevator ride in Classroom South; tune `HPA_PER_METRE` (0.12; surveys measured 0.113) if a floor off.
+- **Flow QA** (`reports/w4-flow.md`): instrumented tests 8/8, Demos A, B, C through the new S1b pass, no crashes; fixed: S1 home in demo mode again, no picker flash before Explore, light status icons on the Georgia State picker, campus colours and label follow the building (including from Explore).
+- **Outdoor QA** (`reports/w4-gps.md`): the faked 300 m walk passes on the redesigned flow; "Head east. Take the stairs" punctuation fixed.
+
+### Still open after wave 4
+
+| # | Item | Severity |
+|---|---|---|
+| P1 | Klaus: S1, S2 and the table are guesses; re-survey the real table spot; a straight-on poster at the staircase scoring 75+ for an indoor image anchor; door directions at 1116W and COEUS | Data |
+| P2 | Real elevator ride with the barometer on the S25; real walk to Classroom South for street steps and the door hand-over | Hand test |
+| P3 | The S1b "Map" tile starts map-only guidance (camera off) and does not open Explore; decide | Design |
+| P4 | Outside start on the emulator stays on the first street step for the whole route when the fix is far from the building (fresh fix gate); real GPS is fine | Low |
+| P5 | Home can jump from the picker to Explore up to 3 s after launch while location resolves; "1 rooms" counts destination rooms only; Explore keeps "Turn on location" until restart after a grant; room lost on a relaunch restored from process death; stale sheet distance near the door | Low |
+| P6 | The watch shows "0 m" on the first "Head toward" step | Low |

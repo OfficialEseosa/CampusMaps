@@ -25,6 +25,10 @@ Written 2026-09-26, about 00:40 EDT, Hour 5 of HackGT 13 (hacking Fri 8 PM to Su
 
 Street steps in S2 and on the watch, glasses polish, Directions cache, S1 map icon, debug card fixes, and the in-app building editor (Settings, "Edit this building"). Details: docs/22 "Wave 3" and `reports/w3-*.md`. The glasses and the watch are verified end to end on the real devices; the watch app is installed on the Galaxy Watch (Wi-Fi ADB, port changes each time).
 
+## Wave 4 (2026-09-26 late morning)
+
+Teammate's campus redesign merged and made consistent; measured Klaus data (Demo A verified on the S25); ElevenLabs voice with cache pre-warm; barometer floor during rides; mascot watermarks; three QA passes. Details: docs/22 "Wave 4" and `reports/w4-*.md`. Keys in local.properties: MAPS_API_KEY, ARCORE_API_KEY, ELEVENLABS_API_KEY (the pre-commit hook blocks all three formats).
+
 ## Open, in priority order
 
 1. **Anchor photos**: both CS sign photos fail ARCore's quality check (`assets/anchors/SCORES.md`), so there is no image database. Photograph high-texture targets at Klaus (directory boards, posters), score with `C:\Users\rapha\tools\arcoreimg\arcoreimg.exe`, build `anchors.imgdb`.
