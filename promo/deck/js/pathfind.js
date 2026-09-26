@@ -1,4 +1,4 @@
-// pathfind.js — canvas-2D Dijkstra frontier player on a building-like grid.
+// pathfind.js, canvas-2D Dijkstra frontier player on a building-like grid.
 // Contract: mount(el, opts) -> { play(), pause(), destroy() }
 // Act 1: search from outside, trace route via Main entrance + elevator to 608.
 // Act 2: clock scrubs to Sat 21:00, Main goes card-only, search re-runs, route swings to West + stairs.
@@ -103,7 +103,7 @@ function dijkstra(blocked) {
   const openStep = new Int32Array(N).fill(-1);
   const closeStep = new Int32Array(N).fill(-1);
   const open = new Set([START]);
-  const iters = []; // {current, opened:[...]} — closed/open sets are derived from openStep/closeStep
+  const iters = []; // {current, opened:[...]}, closed/open sets are derived from openStep/closeStep
   dist[START] = 0; openStep[START] = 0;
   while (open.size) {
     let cur = -1, best = Infinity;

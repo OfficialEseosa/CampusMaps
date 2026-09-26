@@ -1,4 +1,4 @@
-// explainer.js — "How CampusMaps works" in five chapters, built for a transparent 1920x1080 video overlay.
+// explainer.js, "How CampusMaps works" in five chapters, built for a transparent 1920x1080 video overlay.
 // Pure SVG + global gsap. Everything runs on ONE finite, paused gsap timeline (virtual-clock safe:
 // no setTimeout, no Date, no CSS animation, no infinite repeats, no randomness).
 // Contract: mount(el, opts) -> { play(), pause(), destroy(), seek(s), duration }
@@ -286,7 +286,7 @@ export function mount(el, opts = {}) {
   }
 
   // ================================================================ CHAPTER 2: Dijkstra with time
-  CH[1] = chapter(1, 'Dijkstra picks the route — with time in it.',
+  CH[1] = chapter(1, 'Dijkstra picks the route, with time in it.',
     ['The router weighs every entrance, stairs versus elevator,', 'and which doors need a card right now.'],
     ['pure Kotlin core', 'entrance × stairs/elevator', 'PantherCard hours', 'now is a parameter', '45 tests']);
   const c2 = { rings: {}, lit: {} };
@@ -395,7 +395,7 @@ export function mount(el, opts = {}) {
 
   // ================================================================ CHAPTER 4: AR arrows
   CH[3] = chapter(3, 'Arrows on the floor.',
-    ['World-locked, metre-wide arrows through the phone camera.', 'Everything on-device — no network.'],
+    ['World-locked, metre-wide arrows through the phone camera.', 'Everything on-device, no network.'],
     ['ARCore 1.56', 'SceneView 4.38', 'Jetpack Compose', 'CameraX']);
   const c4 = { chevs: [] };
   const HZ = 430, NEARY = 700, VPX = 630;

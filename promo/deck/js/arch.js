@@ -1,4 +1,4 @@
-// arch.js — "How it works" in three beats: Pick a room -> Walk -> Hands-free.
+// arch.js, "How it works" in three beats: Pick a room -> Walk -> Hands-free.
 // Inline SVG, GSAP + MotionPathPlugin globals.
 // Contract: mount(el, opts) -> { play(), pause(), destroy(), seek(s) }
 

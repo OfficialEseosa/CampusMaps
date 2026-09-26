@@ -57,7 +57,7 @@ export function doorsModule(root) {
   // Naive line: straight to the nearest door (Main), then a dead end.
   const naive = el('path', { d: 'M150 330 L420 150', fill: 'none', stroke: 'rgba(255,255,255,.55)', 'stroke-width': 4, 'stroke-dasharray': '10 12', 'stroke-linecap': 'round' }, svg);
   const naiveX = el('text', { x: 300, y: 215, fill: 'rgba(255,255,255,.7)', 'font-size': 20, 'text-anchor': 'middle', opacity: 0 }, svg);
-  naiveX.textContent = '“closest door” — card-only after 8 PM';
+  naiveX.textContent = '“closest door”, card-only after 8 PM';
   // Real route: West door, corridor, elevator, up, 608.
   const real = el('path', { d: 'M150 330 C 250 330, 330 285, 420 280 L 500 280 L 870 280 L 870 300 L 870 380 L 1000 380 L 1080 380 L 1080 400', fill: 'none', stroke: '#c67c4e', 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
   const head = el('circle', { r: 9, fill: '#fff', opacity: 0 }, svg);
