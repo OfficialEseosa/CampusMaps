@@ -58,7 +58,7 @@
         }
       ],
       "estimated": true,
-      "notes": "Estimated, not surveyed. Hours from engagement.gsu.edu (research/hackgt-and-competitors.md section 5); outside them card-only (inferred)."
+      "notes": "Estimated, not surveyed. Hours from engagement.gsu.edu (research/hackgt-and-competitors.md section 5); outside them card-only (inferred). lat/lng estimated from the map (GSU downtown); headingDeg 180 = door faces out south (walk in heading 0)."
     },
     {
       "id": "E-WEST",
@@ -79,7 +79,7 @@
         }
       ],
       "estimated": true,
-      "notes": "Estimated, not surveyed. Assumed public until 23:00 (redirect target for Demo C); confirm the posted rule."
+      "notes": "Estimated, not surveyed. Assumed public until 23:00 (redirect target for Demo C); confirm the posted rule. lat/lng = its x/y from the estimated origin; headingDeg 270 = door faces out west (walk in heading 90)."
     },
     {
       "id": "H1",
