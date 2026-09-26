@@ -52,7 +52,7 @@ class KlausRefreshTest {
         val kl = log.copy(session = log.session.copy(building = "KL"), observations = log.observations.map {
             when {
                 it.kind == "node" && it.name == "Walters corner to main" -> it.copy(nodeType = "WAYPOINT", name = "S1")
-                it.kind == "node" && it.name == "Room 150" -> it.copy(name = "Room 1116")
+                it.kind == "node" && it.name == "Room 150" -> it.copy(name = "Room 1116W")
                 else -> it
             }
         })
@@ -62,7 +62,7 @@ class KlausRefreshTest {
         val r = HandTuned.keep(draft, TestData.load("KL"))
         val b = r.building
         assertEquals(NodeType.WAYPOINT, b.nodeOrNull("S1")?.type, r.log.joinToString("\n"))
-        assertEquals(listOf("R-1116"), b.demoDestinations)
+        assertEquals(listOf("R-1116W"), b.demoDestinations)
         assertTrue(r.log.any { "renamed" in it && "to S1" in it })
         assertTrue(r.log.any { "old node S2" in it }, "missing old ids are reported")
         assertEquals(emptyList(), BuildingValidator.validate(b).filter { it.rule in 0..2 })

@@ -20,7 +20,7 @@ class ValidatorReportTest {
         Router.route(b, start, to, daytime).first().nodes.filter { b.nodeOrNull(it) != null }
 
     private fun demoRoutes(b: Building): List<List<String>> = when (b.code) {
-        "KL" -> listOf(top(b, Start.AtNode("S1"), "R-1116"), top(b, Start.AtNode("S2"), "R-1116"))
+        "KL" -> listOf(top(b, Start.AtNode("S1"), "R-1116W"), top(b, Start.AtNode("S2"), "R-1116W"))
         "CS" -> b.startPoints.map { p -> top(b, Start.Outside(p.lat, p.lng), "R-608") }
         "CSE" -> listOf(top(b, Start.AtNode("E-MAIN"), "R-220"))
         else -> emptyList()
@@ -60,8 +60,11 @@ class ValidatorReportTest {
     @Test fun klPendingPhotosAreWarningsNotErrors() {
         val kl = TestData.load("KL")
         val r7 = BuildingValidator.validate(kl, imageExists = { false }).filter { it.rule == 7 }
-        assertEquals(setOf("KL-A01", "KL-A02", "KL-A05"), kl.anchors.filter { it.imagePending }.map { it.id }.toSet())
-        kotlin.test.assertTrue(r7.isNotEmpty() && r7.all { it.severity == Severity.WARN }, "$r7")
+        assertEquals(setOf("KL-A05"), kl.anchors.filter { it.imagePending }.map { it.id }.toSet())
+        val pending = r7.filter { "KL-A05" in it.message }
+        kotlin.test.assertTrue(pending.isNotEmpty() && pending.all { it.severity == Severity.WARN }, "$r7")
+        // KL-A01 has its photo now: a missing file is an ERROR again.
+        kotlin.test.assertTrue(r7.any { "KL-A01" in it.message && it.severity == Severity.ERROR }, "$r7")
     }
 
     @Test fun everyOutdoorEntranceHasGeoForTheOutdoorLeg() {
@@ -73,8 +76,8 @@ class ValidatorReportTest {
                 kotlin.test.assertTrue(walkIn >= 0.0 && walkIn < 360.0 && kotlin.math.abs(((walkIn - e.headingDeg!!) % 360 + 360) % 360 - 180) < 1e-9, "$code ${e.id}")
             }
         }
-        val noGeo = TestData.load("KL").let { k -> k.copy(nodes = k.nodes.map { if (it.id == "E-N") it.copy(headingDeg = null) else it }) }
+        val noGeo = TestData.load("KL").let { k -> k.copy(nodes = k.nodes.map { if (it.id == "E-RWD") it.copy(headingDeg = null) else it }) }
         val w = BuildingValidator.validate(noGeo).single { it.rule == 11 }
-        assertEquals(Severity.WARN, w.severity); kotlin.test.assertTrue("E-N" in w.message && "headingDeg" in w.message)
+        assertEquals(Severity.WARN, w.severity); kotlin.test.assertTrue("E-RWD" in w.message && "headingDeg" in w.message)
     }
 }

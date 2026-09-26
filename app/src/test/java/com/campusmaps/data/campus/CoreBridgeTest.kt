@@ -40,17 +40,17 @@ class CoreBridgeTest {
         val cs = TestBuildings.cs
         assertEquals("608", cs.node("R-608").signText)
         val kl = TestBuildings.kl
-        val room = kl.node("R-1116")
+        val room = kl.node("R-1116W")
         assertNotNull(room.roomInside)
         val inside = room.roomInside!!
-        // Door faces south (core -y), so the room lies north of the door: smaller y on the screen-style plan.
-        assertTrue(inside.y < room.position.y)
-        assertTrue(abs(inside.x - room.position.x) < 1e-6)
+        // Door faces west into the corridor (survey KL-20260926-0946, W03 video), so the room lies east of the door: larger x.
+        assertTrue(inside.x > room.position.x)
+        assertTrue(abs(inside.y - room.position.y) < 1e-6)
     }
 
     @Test
     fun demoDestinationsSurvive() {
-        assertEquals(listOf("R-1116"), TestBuildings.kl.demoDestinationIds)
+        assertEquals(listOf("R-1116W"), TestBuildings.kl.demoDestinationIds)
         assertEquals(listOf("R-150", "R-608"), TestBuildings.cs.demoDestinationIds)
         assertEquals(listOf("R-220"), TestBuildings.cse.demoDestinationIds)
     }

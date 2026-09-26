@@ -20,10 +20,15 @@ class BuildingDataTest {
     }
 
     @Test fun everyGuessIsFlagged() {
-        for (code in listOf("KL", "CSE")) {
+        for (code in listOf("CSE")) {
             val b = TestData.load(code)
             assertTrue((b.nodes.map { it.estimated } + b.edges.map { it.estimated } + b.anchors.map { it.estimated }).all { it }, "$code has unflagged values")
         }
+        // Survey KL-20260926-0946: the door fix and the walked nodes are unestimated; S1, S2, T, the stair nodes, floor 3 are placed.
+        val kl = TestData.load("KL")
+        assertEquals(setOf("E-RWD", "H1", "H2", "EL-1", "R-1116W"), kl.nodes.filter { !it.estimated }.map { it.id }.toSet())
+        assertTrue(kl.edges.filter { !it.estimated }.all { it.notes!!.startsWith("KL-20260926-0946") })
+        assertTrue(kl.nodes.filter { it.estimated }.all { !it.notes.isNullOrBlank() })
         val cs = TestData.load("CS")
         // Survey CS-20260925-1238: only the four outdoor GPS fixes are unestimated positions (E-WS's fix was rejected); measured edges
         // are walk #16 (H1-H2), walk #37 (E-LM2-E-CSM2) and the five vertical edges timed by rides and descents.
@@ -99,9 +104,10 @@ class BuildingDataTest {
 
     @Test fun anchorSpacingRule8() {
         val kl = TestData.load("KL")
-        assertEquals(emptyList(), BuildingValidator.checkAnchorSpacing(kl, listOf("S2", "H2", "H3", "H4", "W1", "R-1116")))
-        val sparse = kl.copy(anchors = kl.anchors.filter { it.node != "H3" && it.node != "H4" })
-        assertTrue(BuildingValidator.checkAnchorSpacing(sparse, listOf("S2", "H2", "H3", "H4", "W1", "R-1116")).any { it.rule == 8 })
+        val route = listOf("S2", "H1", "R-1116W")
+        assertEquals(emptyList(), BuildingValidator.checkAnchorSpacing(kl, route))
+        val sparse = kl.copy(anchors = kl.anchors.filter { it.node != "H1" })
+        assertTrue(BuildingValidator.checkAnchorSpacing(sparse, route).any { it.rule == 8 })
     }
 
     @Test fun dayGroups() {

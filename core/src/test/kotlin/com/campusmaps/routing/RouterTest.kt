@@ -40,21 +40,32 @@ class RouterTest {
     }
 
     @Test fun klausRoutesFromBothStartsMatchTheHandCheckedLists() {
-        val s1 = Router.route(kl, Start.AtNode("S1"), "R-1116", daytime)
-        val s2 = Router.route(kl, Start.AtNode("S2"), "R-1116", daytime)
+        // Survey KL-20260926-0946: both starts are in the atrium on the measured H1 -> elevator walk; 1116W is off the corridor
+        // that runs north from the Research Wing door past the foot of the glass staircase (H1).
+        val s1 = Router.route(kl, Start.AtNode("S1"), "R-1116W", daytime)
+        val s2 = Router.route(kl, Start.AtNode("S2"), "R-1116W", daytime)
         show("KL S1", s1); show("KL S2", s2)
-        assertEquals(listOf("S1", "H2", "H3", "H4", "W1", "R-1116"), s1.first().nodes)
-        assertEquals(listOf("S2", "H2", "H3", "H4", "W1", "R-1116"), s2.first().nodes)
+        for (o in listOf(s1.first(), s2.first())) o.instructions.forEach { println("  ${it.text}") }
+        assertEquals(listOf("S1", "H1", "R-1116W"), s1.first().nodes)
+        assertEquals(listOf("S2", "H1", "R-1116W"), s2.first().nodes)
+        for (o in listOf(s1.first(), s2.first())) {
+            assertEquals("Head toward the glass staircase", o.instructions.first().text)
+            assertEquals(listOf(Direction.RIGHT), o.instructions.filter { it.type == InstructionType.TURN }.map { it.direction })
+            assertEquals("Room 1116W is on your right", o.instructions.last().text)
+        }
         for (o in listOf(s1.first(), s2.first())) {
             assertTrue(o.distanceM < 60, "route ${o.distanceM} m")
             assertTrue(o.instructions.count { it.type == InstructionType.TURN } <= 2)
             assertEquals(VerticalMethod.NONE, o.verticalMethod)
             assertEquals(null, o.entrance)
+            assertFalse(o.instructions.any { it.distanceM == 0.0 && it.type != InstructionType.ARRIVE }, "no 0 m steps")
         }
-        assertEquals(listOf(Direction.RIGHT, Direction.LEFT), s2.first().instructions.filter { it.type == InstructionType.TURN }.map { it.direction })
-        assertEquals("Room 1116 is on your right", s2.first().instructions.last().text)
         // T and both starts are within 10 m of the table
         for (s in listOf("S1", "S2")) assertTrue(hypot(kl.node(s).x - kl.node("T").x, kl.node(s).y - kl.node("T").y) <= 10)
+        // The surveyed floor-3 room is reachable both ways (not a Demo A destination: over 60 m).
+        val coeus = Router.route(kl, Start.AtNode("S1"), "R-3361", daytime)
+        show("KL S1 to COEUS", coeus)
+        assertEquals(setOf(VerticalMethod.ELEVATOR, VerticalMethod.STAIRS), coeus.map { it.verticalMethod }.toSet())
     }
 
     // Decatur-side doors in CS.json from survey CS-20260925-1238: 95 Decatur (floor 1), Library South and Classroom South main (floor 2).
@@ -125,7 +136,7 @@ class RouterTest {
     }
 
     @Test fun instructionsAreShortAndEndWithArrival() {
-        val routes = listOf(Router.route(kl, Start.AtNode("S1"), "R-1116", daytime), Router.route(cs, p1, "R-608", daytime),
+        val routes = listOf(Router.route(kl, Start.AtNode("S1"), "R-1116W", daytime), Router.route(cs, p1, "R-608", daytime),
             Router.route(cs, p2, "R-150", daytime), Router.route(cse, Start.AtNode("E-MAIN"), "R-220", daytime)).flatten()
         for (o in routes) {
             assertEquals(InstructionType.ARRIVE, o.instructions.last().type)

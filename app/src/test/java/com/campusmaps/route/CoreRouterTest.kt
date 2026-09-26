@@ -26,11 +26,11 @@ class CoreRouterTest {
     fun demoA_klausFromBothExpoStartsArrives() {
         val kl = TestBuildings.kl
         for (start in listOf("S1", "S2")) {
-            val best = options(router.plan(kl, start, "R-1116", friNoon, avoidStairs = false)).first()
+            val best = options(router.plan(kl, start, "R-1116W", friNoon, avoidStairs = false)).first()
             assertNull(best.entrance) // inside start: "From here"
             assertEquals(StepKind.ARRIVE, best.route.steps.last().kind)
             assertEquals(start, best.route.points.first().node.id)
-            assertEquals("R-1116", best.route.points.last().node.id)
+            assertEquals("R-1116W", best.route.points.last().node.id)
         }
     }
 
@@ -110,7 +110,7 @@ class CoreRouterTest {
     @Test
     fun rerouteFromAnElevatorStartsWithTheRide() {
         val kl = TestBuildings.kl
-        val r = router.bestRoute(kl, "EL-2", "R-1116", friNoon, avoidStairs = false, preferMethod = FloorChange.ELEVATOR)!!
+        val r = router.bestRoute(kl, "EL-3", "R-1116W", friNoon, avoidStairs = false, preferMethod = FloorChange.ELEVATOR)!!
         assertEquals(StepKind.ELEVATOR, r.steps.first().kind)
         assertEquals("Take the elevator to floor 1", r.steps.first().text)
     }

@@ -43,8 +43,11 @@ class EntranceGeoTest {
             assertNotNull("${b.id} ${e.id}", geo)
             assertNotNull("${b.id} ${e.id}", geo!!.headingDeg)
         }
-        // Guesses stay flagged: every Klaus entrance is estimated until the survey.
-        assertEquals(true, TestBuildings.kl.entrances.all { CoreBridge.entranceGeo(TestBuildings.kl, it.id)!!.estimated })
+        // Survey KL-20260926-0946: the Research Wing door is a GPS fix (10 samples) facing out 171.6, so you walk in at 351.6.
+        val rwd = CoreBridge.entranceGeo(TestBuildings.kl, "E-RWD")!!
+        assertFalse(rwd.estimated)
+        assertEquals(171.6, rwd.facingOutDeg!!, 1e-9)
+        assertEquals(351.6, rwd.headingDeg!!, 1e-9)
     }
 
     @Test

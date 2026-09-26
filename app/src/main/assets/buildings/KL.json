@@ -2,305 +2,290 @@
   "code": "KL",
   "name": "Klaus Advanced Computing Building",
   "origin": {
-    "description": "Centre of the south main entrance doors (estimated)",
-    "lat": 33.77721,
-    "lng": -84.39585,
+    "description": "Research Wing door (south side), averaged GPS fix, x east, y north",
+    "lat": 33.77696276449632,
+    "lng": -84.39652602496396,
     "headingDeg": 0
   },
-  "floorHeightM": 4.0,
-  "walkingSpeedMps": 1.3,
-  "stairsSecondsPerFloor": 22,
-  "stairsDownSecondsPerFloor": 18,
+  "floorHeightM": 4.7,
+  "walkingSpeedMps": 1.36,
+  "stairsSecondsPerFloor": 21.6,
+  "stairsDownSecondsPerFloor": 17.9,
   "elevators": [
     {
-      "id": "ELEV-KL",
-      "avgWaitSec": 30,
-      "worstWaitSec": 60,
-      "secondsPerFloor": 6,
-      "estimated": true
+      "id": "ELEV-1",
+      "avgWaitSec": 3.1,
+      "worstWaitSec": 3.1,
+      "secondsPerFloor": 12.38,
+      "notes": "KL-20260926-0946 one ride 3 -> 1: wait 3.1 s, ride 24.8 s. n = 1 at a quiet hour: the wait is luck."
     }
   ],
   "nodes": [
     {
-      "id": "E-S",
+      "id": "E-RWD",
       "type": "entrance",
-      "name": "South main entrance",
+      "name": "Research Wing door",
       "floor": 1,
-      "x": 0,
-      "y": 0,
-      "lat": 33.77721,
-      "lng": -84.39585,
-      "headingDeg": 180,
-      "estimated": true,
-      "notes": "Estimated, not surveyed. Glass doors, south side. lat/lng = building origin guessed from the map (Klaus, Georgia Tech); headingDeg 180 = door faces out south, so you walk in heading 0 (north). Replace with the survey's ENTRANCE fix."
+      "x": 0.0,
+      "y": 0.0,
+      "lat": 33.77696276449632,
+      "lng": -84.39652602496396,
+      "headingDeg": 171.6,
+      "notes": "KL-20260926-0946 obs #1; GPS +-4 m (10 samples); facing out 171.6 deg (spread 0.4), so you walk in heading 351.6; south side of Klaus under the KLAUS ADVANCED COMPUTING BUILDING / RESEARCH WING sign (KL-A01); access hours not surveyed (missing means public); building origin"
     },
     {
       "id": "H1",
       "type": "intersection",
-      "name": "Atrium south",
+      "name": "the glass staircase",
       "floor": 1,
-      "x": 0,
-      "y": 8,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "S1",
-      "type": "waypoint",
-      "name": "Start 1, west of our table",
-      "floor": 1,
-      "x": 0,
-      "y": 14,
-      "estimated": true,
-      "notes": "Estimated, not surveyed. Rehearsed start."
-    },
-    {
-      "id": "T",
-      "type": "waypoint",
-      "name": "Expo table",
-      "floor": 1,
-      "x": 4,
-      "y": 14,
-      "estimated": true,
-      "notes": "Estimated, not surveyed. Our expo table; move when the table is assigned."
-    },
-    {
-      "id": "S2",
-      "type": "waypoint",
-      "name": "Start 2, east of our table",
-      "floor": 1,
-      "x": 8,
-      "y": 14,
-      "estimated": true,
-      "notes": "Estimated, not surveyed. Rehearsed start."
-    },
-    {
-      "id": "H2",
-      "type": "intersection",
-      "name": "Atrium centre",
-      "floor": 1,
-      "x": 0,
-      "y": 20,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "x": -0.87,
+      "y": 9.95,
+      "notes": "KL-20260926-0946: end of walk #6 (13 steps from E-RWD, 10.0 m) where walk #10 from the elevator also ends. The W01 video turns right here (step 12, heading 355 -> 45) with the glass staircase ahead; the corridor to 1116W carries straight on (W03). Heading 355 from W01 (walk #6's own mean, 17.8, has spread 33)."
     },
     {
       "id": "ST-1",
       "type": "stairs",
       "name": "Glass staircase, floor 1",
       "floor": 1,
-      "x": 6,
-      "y": 24,
+      "x": -1.13,
+      "y": 11.43,
       "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "notes": "KL-20260926-0946 obs #11 'Stairs floor 1'. Placed 1.5 m north of H1 (the stair foot, ahead-left in the W01 video; both walks that end here stop at it)."
     },
     {
-      "id": "ST-2",
-      "type": "stairs",
-      "name": "Glass staircase, floor 2",
-      "floor": 2,
-      "x": 6,
-      "y": 24,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "H3",
-      "type": "intersection",
-      "name": "Atrium north",
-      "floor": 1,
-      "x": 0,
-      "y": 30,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "H4",
-      "type": "intersection",
-      "name": "West hallway junction",
-      "floor": 1,
-      "x": -12,
-      "y": 30,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "W1",
+      "id": "S1",
       "type": "waypoint",
-      "name": "West hallway",
+      "name": "Start 1, atrium by the tables",
       "floor": 1,
-      "x": -24,
-      "y": 30,
+      "x": 5.5,
+      "y": 14.9,
       "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "notes": "Rehearsed start. Not named in the survey: placed 1 m beside walk #10 (H1 -> elevator), 8 m along it, where the W01 video shows the sponsor tables in the atrium (steps 20 to 40). 4 m from T."
     },
     {
-      "id": "R-1116",
-      "type": "room",
-      "name": "Room 1116",
+      "id": "T",
+      "type": "waypoint",
+      "name": "Expo table",
       "floor": 1,
-      "x": -28,
-      "y": 31,
-      "doorFacing": "south",
+      "x": 9.03,
+      "y": 17.03,
       "estimated": true,
-      "notes": "Estimated, not surveyed. Room number unverified; pick the real demo room on site."
+      "notes": "Our expo table: NOT in the survey (tables are assigned at the expo). Placed in the middle of the atrium 12 m along walk #10 and 2 m to its side. Move S1, S2 and T when the table is known."
+    },
+    {
+      "id": "S2",
+      "type": "waypoint",
+      "name": "Start 2, atrium toward the elevators",
+      "floor": 1,
+      "x": 9.73,
+      "y": 21.97,
+      "estimated": true,
+      "notes": "Rehearsed start. Not named in the survey: placed 1 m beside walk #10 (H1 -> elevator), 16 m along it. About 4 m from T."
+    },
+    {
+      "id": "H2",
+      "type": "intersection",
+      "name": "the elevator wing doorway",
+      "floor": 1,
+      "x": 15.39,
+      "y": 26.21,
+      "notes": "KL-20260926-0946: split of walk #10 at the doorway from the atrium into the carpeted elevator hallway (W01 video at 29 s, 30 steps after the turn at H1 = 23.0 m)."
     },
     {
       "id": "EL-1",
       "type": "elevator",
       "name": "Elevator, floor 1",
       "floor": 1,
-      "x": -12,
-      "y": 24,
-      "elevatorId": "ELEV-KL",
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "x": 28.47,
+      "y": 39.29,
+      "elevatorId": "ELEV-1",
+      "notes": "KL-20260926-0946 obs #4 'EL'; 41.5 m from H1 (walk #10, 54 steps) and 49.2 m from E-RWD (walk #5, 64 steps: the same path, 13 + 54 = 67 steps). Direction 45 deg from the W01 video; its indoor GPS (+-9 m) puts it 49 m at bearing 45 from the door, which agrees."
     },
     {
-      "id": "EL-2",
+      "id": "R-1116W",
+      "type": "room",
+      "name": "Room 1116W",
+      "floor": 1,
+      "x": -3.74,
+      "y": 18.06,
+      "doorFacing": "west",
+      "notes": "KL-20260926-0946 obs #24 'Room 1116W' (Seminar Room West, sign KL-A03). Dead-reckoned from E-RWD along walk #25 (24 steps, heading 168.3 back to the door, spread 9.6). doorFacing west from the W03 video (walks north at 347, turns right to face the door at about 108, so the door faces about 288 into the corridor); the node heading (148.4, door ahead, i.e. facing 328) roughly agrees; the sign photo's compass (148.4) says the opposite and is treated as a bad indoor reading."
+    },
+    {
+      "id": "ST-2",
+      "type": "stairs",
+      "name": "Glass staircase, floor 2",
+      "floor": 2,
+      "x": 11.32,
+      "y": 22.32,
+      "estimated": true,
+      "notes": "KL-20260926-0946 stairs obs #7 (1 -> 2). No walk on floor 2: placed half way between ST-1 and ST-3 (the flights run from the atrium towards the elevators). Not connected to a floor-2 hallway."
+    },
+    {
+      "id": "ST-3",
+      "type": "stairs",
+      "name": "Stairs, floor 3",
+      "floor": 3,
+      "x": 23.77,
+      "y": 33.21,
+      "estimated": true,
+      "notes": "KL-20260926-0946 obs #13 'Stairs floor 3'. 7.7 m from EL-3 at heading 218 (walk #20, 10 steps). Not above ST-1: the staircase climbs two floors in 54 steps (walk #12) towards the elevators."
+    },
+    {
+      "id": "EL-3",
       "type": "elevator",
-      "name": "Elevator, floor 2",
-      "floor": 2,
-      "x": -12,
-      "y": 24,
-      "elevatorId": "ELEV-KL",
+      "name": "Elevator, floor 3",
+      "floor": 3,
+      "x": 28.47,
+      "y": 39.29,
+      "elevatorId": "ELEV-1",
       "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "notes": "KL-20260926-0946 obs #21 'EL-3'. Placed above EL-1 (same shaft)."
     },
     {
-      "id": "H5",
+      "id": "H3",
       "type": "intersection",
-      "name": "East hallway junction",
-      "floor": 1,
-      "x": 12,
-      "y": 30,
+      "name": "the corner to COEUS",
+      "floor": 3,
+      "x": 36.82,
+      "y": 8.12,
       "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "notes": "KL-20260926-0946 obs #17 'Corner to COEUS'. 32.3 m from EL-3 (W02 video: 42 steps from this corner to the elevator, heading about 350 then 310 at the end); its indoor GPS (+-5 m) is 3 m away."
     },
     {
-      "id": "E-N",
-      "type": "entrance",
-      "name": "North entrance",
-      "floor": 1,
-      "x": 12,
-      "y": 40,
-      "lat": 33.7775697,
-      "lng": -84.3957202,
-      "headingDeg": 0,
+      "id": "R-3361",
+      "type": "room",
+      "name": "COEUS lab, room 3361",
+      "floor": 3,
+      "x": 45.64,
+      "y": 12.81,
+      "doorFacing": "southwest",
       "estimated": true,
-      "notes": "Estimated, not surveyed. lat/lng = its x/y from the guessed origin; headingDeg 0 = door faces out north, so you walk in heading 180 (south). Replace with the survey's ENTRANCE fix."
-    },
-    {
-      "id": "H7",
-      "type": "intersection",
-      "name": "Atrium bridge, floor 2",
-      "floor": 2,
-      "x": 0,
-      "y": 26,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "notes": "KL-20260926-0946 obs #15 'COEUS'. Room number 3361 read from the door plaque photo (OCR '3361' and '336)'). 10.0 m from H3 (walk #18, 13 steps). Direction and doorFacing from the W02 video (leaves the door at heading 242) and the plaque photo (facing 246); the node heading (223, door ahead) disagrees and is not used."
     }
   ],
   "edges": [
     {
-      "from": "E-S",
+      "from": "E-RWD",
       "to": "H1",
-      "lengthM": 8.0,
+      "lengthM": 9.99,
       "kind": "hallway",
-      "hint": "through the glass doors",
-      "estimated": true
+      "hint": "through the Research Wing doors",
+      "notes": "KL-20260926-0946 walk #6, 13 steps (heading spread 33; GPS disagrees, not used)"
+    },
+    {
+      "from": "H1",
+      "to": "ST-1",
+      "lengthM": 1.5,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "to the stair foot, not walked"
+    },
+    {
+      "from": "H1",
+      "to": "R-1116W",
+      "lengthM": 8.45,
+      "kind": "hallway",
+      "notes": "KL-20260926-0946 walk #25 (R-1116W -> E-RWD, 24 steps, 18.4 m, straight) minus walk #6 (13 steps): 11 steps"
+    },
+    {
+      "from": "H1",
+      "to": "H2",
+      "lengthM": 23.0,
+      "kind": "hallway",
+      "notes": "KL-20260926-0946 walk #10 across the atrium, split at H2 from the W01 video (30 steps after the turn at H1)"
     },
     {
       "from": "H1",
       "to": "S1",
-      "lengthM": 6.0,
+      "lengthM": 8.07,
       "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "S1",
-      "to": "T",
-      "lengthM": 4.0,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "T",
-      "to": "S2",
-      "lengthM": 4.0,
-      "kind": "hallway",
-      "estimated": true
+      "estimated": true,
+      "notes": "start 1 stands 1 m beside the atrium walk, 8 m along it; not walked"
     },
     {
       "from": "S1",
       "to": "H2",
-      "lengthM": 6.0,
+      "lengthM": 15.02,
       "kind": "hallway",
-      "estimated": true
+      "estimated": true,
+      "notes": "start 1 to the elevator wing doorway along the atrium walk; not walked"
+    },
+    {
+      "from": "H1",
+      "to": "S2",
+      "lengthM": 16.03,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "start 2 stands 1 m beside the atrium walk, 16 m along it; not walked"
     },
     {
       "from": "S2",
       "to": "H2",
-      "lengthM": 10.0,
+      "lengthM": 7.07,
       "kind": "hallway",
-      "estimated": true
+      "estimated": true,
+      "notes": "start 2 to the elevator wing doorway along the atrium walk; not walked"
     },
     {
       "from": "H2",
-      "to": "ST-1",
-      "lengthM": 7.21,
+      "to": "EL-1",
+      "lengthM": 18.49,
       "kind": "hallway",
-      "estimated": true
+      "notes": "KL-20260926-0946 walk #10 (41.49 m) minus H1 -> H2 (23.0 m)"
     },
     {
-      "from": "H2",
-      "to": "H3",
-      "lengthM": 10.0,
-      "kind": "hallway",
-      "hint": "past the glass staircase",
-      "estimated": true
-    },
-    {
-      "from": "H3",
-      "to": "H4",
-      "lengthM": 12.0,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "H4",
-      "to": "W1",
-      "lengthM": 12.0,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "W1",
-      "to": "R-1116",
+      "from": "T",
+      "to": "S1",
       "lengthM": 4.12,
       "kind": "hallway",
-      "estimated": true
+      "estimated": true,
+      "notes": "table to start 1, not walked"
     },
     {
-      "from": "H4",
-      "to": "EL-1",
-      "lengthM": 6.0,
+      "from": "T",
+      "to": "S2",
+      "lengthM": 4.99,
       "kind": "hallway",
-      "estimated": true
+      "estimated": true,
+      "notes": "table to start 2, not walked"
+    },
+    {
+      "from": "EL-3",
+      "to": "ST-3",
+      "lengthM": 6.92,
+      "kind": "hallway",
+      "notes": "KL-20260926-0946 walks #20 (10 steps) and #22 (8 steps, wandered +-57 over 6 m: kept straight), mean"
+    },
+    {
+      "from": "EL-3",
+      "to": "H3",
+      "lengthM": 32.27,
+      "kind": "hallway",
+      "notes": "KL-20260926-0946 W02 video 'Coeus to elevator floor 3': 42 steps from the corner to the elevator (52 in all, the first 10 are H3 -> COEUS)"
+    },
+    {
+      "from": "ST-3",
+      "to": "H3",
+      "lengthM": 35.35,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "KL-20260926-0946 walk #14 (ST-3 -> COEUS, 59 steps, wandered +-48: the turn is at H3) minus walk #18 (13 steps). Split at H3 by hand"
     },
     {
       "from": "H3",
-      "to": "H5",
-      "lengthM": 12.0,
+      "to": "R-3361",
+      "lengthM": 9.99,
       "kind": "hallway",
-      "estimated": true
+      "notes": "KL-20260926-0946 walk #18, 13 steps (heading wandered +-65 while the plaque was photographed; straight in the W02 video)"
     },
     {
-      "from": "H5",
-      "to": "E-N",
-      "lengthM": 10.0,
-      "kind": "hallway",
-      "estimated": true
+      "from": "EL-1",
+      "to": "EL-3",
+      "lengthM": 0,
+      "kind": "elevator",
+      "floors": 2,
+      "notes": "KL-20260926-0946 elevator obs #9 (3 -> 1)"
     },
     {
       "from": "ST-1",
@@ -308,138 +293,98 @@
       "lengthM": 0,
       "kind": "stairs",
       "floors": 1,
-      "estimated": true
-    },
-    {
-      "from": "EL-1",
-      "to": "EL-2",
-      "lengthM": 0,
-      "kind": "elevator",
-      "floors": 1,
-      "estimated": true
+      "notes": "KL-20260926-0946 stairs obs #7 (1 -> 2, 25.3 s)"
     },
     {
       "from": "ST-2",
-      "to": "H7",
-      "lengthM": 6.32,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "EL-2",
-      "to": "H7",
-      "lengthM": 12.17,
-      "kind": "hallway",
-      "estimated": true
+      "to": "ST-3",
+      "lengthM": 0,
+      "kind": "stairs",
+      "floors": 1,
+      "notes": "KL-20260926-0946 stairs obs #8 (2 -> 3, 20.0 s)"
     }
   ],
   "anchors": [
     {
       "id": "KL-A01",
-      "node": "H2",
+      "node": "E-RWD",
       "kind": "image",
       "image": "anchors/KL/KL-A01.jpg",
-      "widthM": 0.9,
-      "x": -1.5,
-      "y": 20.5,
+      "widthM": 4.8,
+      "x": -0.05,
+      "y": 1.0,
       "floor": 1,
-      "heightM": 1.6,
-      "facing": "east",
-      "text": "KLAUS ADVANCED COMPUTING BUILDING",
-      "description": "Building directory board, atrium centre",
+      "heightM": 4.0,
+      "facing": "south",
+      "text": "RESEARCH WING",
+      "aliases": [
+        "KLAUS ADVANCED COMPUTING BUILDING",
+        "KLAUS ADVANCED COMPUTING BUILDING RESEARCH WING",
+        "RESE ARCH WING"
+      ],
+      "description": "KLAUS ADVANCED COMPUTING BUILDING / RESEARCH WING sign and glass facade over the Research Wing doors (outdoors)",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; photo pending (imagePending: rule 7 is a warning until anchors/KL/KL-A01.jpg exists). Photograph straight-on and measure the width at the Klaus survey.",
-      "imagePending": true
+      "notes": "KL-20260926-0946 obs #2, facingDeg 177.4, offset 1.0 m, widthCm 300 (estimated, not taped). Image = straight shot cropped to the facade above the brick paving (sign, canopy, curtain wall, four doors), greyscale, histogram-equalised, 1600x1280; the sign is 999 of 1600 px, so widthM = 3.0 x 1600/999 = 4.80. arcoreimg 100. Outdoors: confirms the entrance, cannot localize indoors. Tree shadows move during the day (photo taken 09:47)."
     },
     {
       "id": "KL-A02",
-      "node": "H3",
-      "kind": "image",
-      "image": "anchors/KL/KL-A02.jpg",
-      "widthM": 0.6,
-      "x": 0,
-      "y": 31.5,
-      "floor": 1,
+      "node": "R-3361",
+      "kind": "text",
+      "x": 45.64,
+      "y": 12.81,
+      "floor": 3,
       "heightM": 1.5,
-      "facing": "south",
-      "description": "Event poster on the north atrium wall",
+      "facing": "southwest",
+      "text": "COEUS",
+      "aliases": [
+        "3361",
+        "COEUS LAB",
+        "C0EUS"
+      ],
+      "description": "COEUS lettering on the door glass and the 3361 LAB plaque beside it",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; photo pending (imagePending: rule 7 is a warning until anchors/KL/KL-A02.jpg exists). Photograph straight-on and measure the width at the Klaus survey.",
-      "imagePending": true
+      "notes": "KL-20260926-0946 obs #16, facingDeg 246.2, widthCm 30 (estimated), no offset (placed at the room node). OCR: 'COEUS 3361 LAB ... CYBER OPERATIONS ... SENSING'. Photo anchors/KL/KL-A02.jpg is the straight shot (hint only; arcoreimg 0)."
     },
     {
       "id": "KL-A03",
-      "node": "H4",
+      "node": "R-1116W",
       "kind": "text",
-      "x": -12,
-      "y": 31.5,
+      "x": -3.74,
+      "y": 18.06,
       "floor": 1,
-      "heightM": 2.1,
-      "facing": "south",
-      "text": "ELEVATOR",
+      "heightM": 1.2,
+      "facing": "west",
+      "text": "1116W",
       "aliases": [
-        "ELEVAT0R",
-        "ELEVATORS"
+        "SEMINAR ROOM WEST",
+        "1116W SEMINAR ROOM WEST",
+        "1116 W",
+        "III6W",
+        "1II6W"
       ],
-      "description": "Elevator sign at the west hallway",
+      "description": "Room sign 1116W SEMINAR ROOM WEST beside the double doors (EXIT and SPONSOR CHECK-IN papers on the doors)",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
-    },
-    {
-      "id": "KL-A04",
-      "node": "R-1116",
-      "kind": "text",
-      "x": -27,
-      "y": 32,
-      "floor": 1,
-      "heightM": 1.5,
-      "facing": "south",
-      "text": "1116",
-      "aliases": [
-        "III6",
-        "1II6",
-        "11I6"
-      ],
-      "description": "Room plaque beside the door",
-      "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
+      "notes": "KL-20260926-0946 obs #27, facingDeg 148.4 (180 deg from the room node heading and the W03 video; facing set to the door's), widthCm 30 (estimated), no offset. OCR reads '1116W SEMINAR ROOM WEST' in both shots. Text is small (4 px per character at 896 px): read from 1 to 2 m. Photo anchors/KL/KL-A03.jpg is the straight shot (hint only; arcoreimg fails)."
     },
     {
       "id": "KL-A05",
-      "node": "ST-1",
+      "node": "H1",
       "kind": "image",
       "image": "anchors/KL/KL-A05.jpg",
       "widthM": 0.5,
-      "x": 6.5,
-      "y": 23,
+      "x": 0.13,
+      "y": 10.95,
       "floor": 1,
       "heightM": 1.4,
-      "facing": "west",
-      "description": "Sign at the foot of the glass staircase",
+      "facing": "southwest",
+      "description": "Sign or poster at the foot of the glass staircase",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; photo pending (imagePending: rule 7 is a warning until anchors/KL/KL-A05.jpg exists). Photograph straight-on and measure the width at the Klaus survey.",
-      "imagePending": true
-    },
-    {
-      "id": "KL-A06",
-      "node": "E-S",
-      "kind": "text",
-      "x": 0,
-      "y": 1,
-      "floor": 1,
-      "heightM": 2.4,
-      "facing": "north",
-      "text": "EXIT",
-      "aliases": [
-        "EXlT"
-      ],
-      "description": "Exit sign over the south doors",
-      "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
+      "imagePending": true,
+      "notes": "PLACEHOLDER, not in the survey export (A05 was not photographed). Needed for rule 8 on the S2 route (16 m from S2). Photograph a poster or board near the stair foot straight on, measure its width, score it with arcoreimg (>= 75)."
     }
   ],
   "demoDestinations": [
-    "R-1116"
+    "R-1116W"
   ],
-  "notes": "Klaus has NOT been surveyed. The whole file is a plausible placeholder for Demo A (Atrium, floor 1). Replace from the Hour 0 survey."
+  "notes": "Measured 2026-09-26 (survey export KL-20260926-0946, stride 0.768 m by gps-walk, 3 walk videos). floorHeightM 4.7 from the barometer (1.06 hPa over 2 floors on the elevator ride, 0.112 hPa/m). walkingSpeedMps 1.36 from the three walk videos (111 m in 82 s). Stairs up 21.6 s/floor (obs #7 + #8 and walk #12, 86.3 s over 4 floors), down 17.9 s/floor (walk #23, 35.8 s over 2 floors); walks #12 and #23 were stair climbs logged as walks and are not hallway edges. Start points S1, S2 and the table T were not named in the survey: placed in the atrium on the measured H1 -> elevator walk. Anything marked estimated is a guess; see docs/19."
 }
