@@ -1,10 +1,13 @@
 // explainer.js, "How CampusMaps works" in five chapters, built for a transparent 1920x1080 video overlay.
 // Pure SVG + global gsap. Everything runs on ONE finite, paused gsap timeline (virtual-clock safe:
 // no setTimeout, no Date, no CSS animation, no infinite repeats, no randomness).
-// Contract: mount(el, opts) -> { play(), pause(), destroy(), seek(s), duration }
+// Contract: mount(el, opts) -> { play(), pause(), destroy(), seek(s), duration, chapters }
 //   play()   restarts the timeline from 0
 //   seek(s)  jumps to s seconds and holds (paused)
-// Chapter starts (s): 0, 7, 14, 21, 28. Everything fades out 34.5 -> 35.0 (fully transparent at 35).
+// opts.aspect: '16:9' (1920x1080, default), '3:2' (2160x1440) or '3:4' (1620x2160, portrait reflow).
+// opts.chapter: 0..4 renders that chapter alone: 0.4 s fade-in, build, hold, 0.5 s fade-out, 7.5 s total,
+//   no progress dots, eyebrow "HOW CAMPUSMAPS WORKS". Without it: the full run, chapter starts
+//   0, 7, 14, 21, 28 s, everything fades out 34.5 -> 35.0 (fully transparent at 35).
 
 const NS = 'http://www.w3.org/2000/svg';
 const C = {
@@ -19,7 +22,22 @@ const PANEL = 'rgba(20,16,14,0.55)';
 const SX = 96, SR = 1824, SAFE_W = SR - SX;
 const Y_KICK = 112, Y_TITLE = 186, Y_CHIPS_BOTTOM = 832, Y_CAP = 898, CAP_LH = 46, Y_DOTS = 998;
 
-const CH_LEN = 7, N_CH = 5, END_FADE = 34.5, DURATION = 35;
+const CH_LEN = 7, N_CH = 5, END_FADE = 34.5, DURATION = 35, SINGLE_LEN = 7.5;
+
+// Frame layouts. k scales spacing; the 16:9 numbers reproduce the constants above exactly.
+const LAYOUTS = {
+  '16:9': { W: 1920, H: 1080, mx: 96, my: 54, k: 1, kickSize: 22, kickGap: 74, titleSize: 64, titleLH: 1.15, titleMaxLines: 1,
+    chipSize: 24, capSize: 34, capLH: 46, maxScale: 1, identity: true },
+  '3:2': { W: 2160, H: 1440, mx: 108, my: 72, k: 1.125, kickSize: 25, kickGap: 83, titleSize: 72, titleLH: 1.15, titleMaxLines: 1,
+    chipSize: 27, capSize: 38, capLH: 52, maxScale: 1.35 },
+  '3:4': { W: 1620, H: 2160, mx: 81, my: 108, k: 1.35, kickSize: 30, kickGap: 108, titleSize: 88, titleLH: 1.14, titleMaxLines: 2,
+    chipSize: 32, capSize: 40, capLH: 54, maxScale: 1.7, portrait: true },
+};
+// Art regions (in the 1920x1080 authoring space) that get scaled into each chapter's free box.
+const REGIONS = {
+  land: [[250, 222, 1800, 745], [250, 222, 1800, 745], [96, 276, 1824, 728], [466, 232, 1512, 760], [150, 238, 1625, 705]],
+  port: [[250, 222, 1432, 752], [250, 222, 1432, 752], [0, 0, 1430, 1030], [466, 232, 1512, 760], [150, 238, 1275, 1078]],
+};
 
 function E(tag, attrs, parent) {
   const n = document.createElementNS(NS, tag);
@@ -97,7 +115,14 @@ function dijkstra(blocked) {
 }
 
 export function mount(el, opts = {}) {
-  const svg = E('svg', { viewBox: '0 0 1920 1080', width: '100%', height: '100%',
+  const ASPECT = LAYOUTS[opts.aspect] ? opts.aspect : '16:9';
+  const LY = LAYOUTS[ASPECT];
+  const PORT = !!LY.portrait;
+  const chOpt = opts.chapter === undefined || opts.chapter === null ? NaN : Number(opts.chapter);
+  const SINGLE = Number.isInteger(chOpt) && chOpt >= 0 && chOpt < N_CH ? chOpt : null;
+  const LX = LY.mx, LR = LY.W - LY.mx, LW = LR - LX;
+  const GF = PORT ? 1.35 : 1;   // graph label boost: the portrait graph is scaled less, so its labels need more size
+  const svg = E('svg', { viewBox: `0 0 ${LY.W} ${LY.H}`, width: '100%', height: '100%',
     preserveAspectRatio: 'xMidYMid meet', role: 'img',
     'aria-label': 'How CampusMaps works: building graph, time-aware routing, localisation, AR arrows, glasses and watch' });
   svg.style.display = 'block';
@@ -106,7 +131,7 @@ export function mount(el, opts = {}) {
 
   // ---- defs ----
   const defs = E('defs', null, svg);
-  const sh = E('filter', { id: 'ex-shadow', filterUnits: 'userSpaceOnUse', x: -100, y: -100, width: 2120, height: 1280 }, defs);
+  const sh = E('filter', { id: 'ex-shadow', filterUnits: 'userSpaceOnUse', x: -100, y: -100, width: LY.W + 200, height: LY.H + 200 }, defs);
   E('feDropShadow', { dx: 0, dy: 2, stdDeviation: 4, 'flood-color': '#000', 'flood-opacity': 0.45 }, sh);
   const glow = E('filter', { id: 'ex-glow', x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
   E('feGaussianBlur', { stdDeviation: 6, result: 'b' }, glow);
@@ -137,60 +162,127 @@ export function mount(el, opts = {}) {
   const hidden = [];     // [el, vars] set at build time
   const hide = (elx, vars) => { hidden.push([elx, vars || { opacity: 0 }]); return elx; };
 
+  // hidden text used to measure strings for wrapping
+  const meas = E('text', { x: 0, y: -1000, opacity: 0, 'font-family': 'Sora, sans-serif' }, svg);
+  function measure(str, size, weight) {
+    meas.setAttribute('font-size', size); meas.setAttribute('font-weight', weight); meas.textContent = str;
+    return textLen(meas, str.length * size * 0.58);
+  }
+  // Keep the authored line breaks when they fit; otherwise wrap greedily; shrink if it needs more than maxLines.
+  function wrapLines(pref, size, weight, maxW, maxLines) {
+    for (let tries = 0; tries < 14; tries++) {
+      if (pref.length <= maxLines && pref.every(l => measure(l, size, weight) <= maxW)) return { lines: pref, size };
+      const words = pref.join(' ').split(' ');
+      const out = [];
+      let cur = '';
+      for (const w of words) {
+        const t = cur ? cur + ' ' + w : w;
+        if (cur && measure(t, size, weight) > maxW) { out.push(cur); cur = w; } else cur = t;
+      }
+      if (cur) out.push(cur);
+      if (out.length <= maxLines && out.every(l => measure(l, size, weight) <= maxW)) return { lines: out, size };
+      size *= 0.94;
+    }
+    return { lines: pref, size };
+  }
+  function setLines(t, lines, x, y0, lh) {
+    while (t.firstChild) t.removeChild(t.firstChild);
+    lines.forEach((l, i) => { const ts = E('tspan', { x, y: (y0 + i * lh).toFixed(1) }, t); ts.textContent = l; });
+  }
+
   function chipRow(parent, list) {
-    const items = [];
-    for (const s of list) {
+    const c = LY.chipSize / 24;
+    return list.map(s => {
       const outer = E('g', null, parent);
       const g = E('g', null, outer);
-      const r = E('rect', { x: 0, y: 0, height: 48, rx: 24, fill: PANEL, stroke: 'rgba(255,182,140,0.55)', 'stroke-width': 1.8 }, g);
-      E('circle', { cx: 24, cy: 24, r: 5, fill: C.clay }, g);
-      const t = T(g, 40, 33, s, { 'font-size': 24, 'font-weight': 500 });
-      items.push({ g, outer, r, t, s, w: 0 });
-    }
-    L(() => {
-    for (const it of items) { it.w = textLen(it.t, it.s.length * 14.5) + 62; it.r.setAttribute('width', it.w); }
-    // wrap into rows, bottom row ending at Y_CHIPS_BOTTOM
-    const rows = [[]]; let x = 0;
-    for (const it of items) {
-      if (x > 0 && x + it.w > SAFE_W) { rows.push([]); x = 0; }
-      rows[rows.length - 1].push(it); x += it.w + 14;
-    }
-    rows.forEach((row, ri) => {
-      const y = Y_CHIPS_BOTTOM - 48 - (rows.length - 1 - ri) * 60;
-      let cx = SX;
-      for (const it of row) { it.outer.setAttribute('transform', `translate(${cx},${y})`); cx += it.w + 14; }
+      const r = E('rect', { x: 0, y: 0, height: 48 * c, rx: 24 * c, fill: PANEL, stroke: 'rgba(255,182,140,0.55)', 'stroke-width': 1.8 * c }, g);
+      E('circle', { cx: 24 * c, cy: 24 * c, r: 5 * c, fill: C.clay }, g);
+      const t = T(g, 40 * c, 33 * c, s, { 'font-size': LY.chipSize, 'font-weight': 500 });
+      hide(g, { opacity: 0, y: 14 * LY.k });
+      return { g, outer, r, t, s, w: 0 };
     });
-    });
-    const gs = items.map(i => i.g);
-    gs.forEach(g => hide(g, { opacity: 0, y: 14 }));
-    return gs;
   }
 
   function chapter(i, title, capLines, chips) {
     const g = hide(E('g', null, Lchap));
-    const kick = T(g, SX, Y_KICK, `${i + 1} / 5 · HOW CAMPUSMAPS WORKS`,
-      { 'font-size': 22, 'font-weight': 600, fill: C.warm, 'letter-spacing': 3 });
-    const ttl = T(g, SX, Y_TITLE, title, { 'font-size': 64, 'font-weight': 700 });
-    fitL(ttl, SAFE_W);
-    hide(kick, { opacity: 0, y: 20 }); hide(ttl, { opacity: 0, y: 44 });
-    const art = E('g', null, g);
+    const kick = T(g, LX, 0, SINGLE === null ? `${i + 1} / 5 · HOW CAMPUSMAPS WORKS` : 'HOW CAMPUSMAPS WORKS',
+      { 'font-size': LY.kickSize, 'font-weight': 600, fill: C.warm, 'letter-spacing': 3 * LY.k });
+    const ttl = T(g, LX, 0, '', { 'font-size': LY.titleSize, 'font-weight': 700 });
+    hide(kick, { opacity: 0, y: 20 * LY.k }); hide(ttl, { opacity: 0, y: 44 * LY.k });
+    const artWrap = E('g', null, g);
+    const art = E('g', null, artWrap);
     const cg = E('g', null, g);
-    const chipEls = chips ? chipRow(cg, chips) : [];
-    const cap = hide(E('g', null, g), { opacity: 0, y: 16 });
-    capLines.forEach((s, k) => {
-      const t = T(cap, SX, Y_CAP + k * CAP_LH, s, { 'font-size': 34, 'font-weight': 500, fill: 'rgba(255,255,255,0.94)' });
-      fitL(t, SAFE_W);
+    const chipItems = chips ? chipRow(cg, chips) : [];
+    const cap = hide(E('g', null, g), { opacity: 0, y: 16 * LY.k });
+    const capT = T(cap, LX, 0, '', { 'font-size': LY.capSize, 'font-weight': 500, fill: 'rgba(255,255,255,0.94)' });
+    return { i, g, kick, ttl, title, art, artWrap, chipItems, chips: chipItems.map(c => c.g), cap, capT, capLines, box: null };
+  }
+
+  // Places eyebrow, title, chips and caption for one chapter and records the free box for its art.
+  function layoutChapter(ch) {
+    const k = LY.k;
+    const kickY = LY.my + 58 * k, titleY = kickY + LY.kickGap;
+    ch.kick.setAttribute('y', kickY);
+    const tw = wrapLines([ch.title], LY.titleSize, 700, LW, LY.titleMaxLines);
+    ch.ttl.setAttribute('font-size', tw.size.toFixed(1));
+    const tlh = tw.size * LY.titleLH;
+    setLines(ch.ttl, tw.lines, LX, titleY, tlh);
+    const titleBottom = titleY + (tw.lines.length - 1) * tlh + tw.size * 0.28;
+
+    const dotsY = LY.H - LY.my - 28 * k;
+    const capLast = SINGLE === null ? dotsY - 54 * k : LY.H - LY.my - 12 * k;
+    const cw = wrapLines(ch.capLines, LY.capSize, 500, LW, 4);
+    ch.capT.setAttribute('font-size', cw.size.toFixed(1));
+    const capFirst = capLast - (cw.lines.length - 1) * LY.capLH;
+    setLines(ch.capT, cw.lines, LX, capFirst, LY.capLH);
+
+    const c = LY.chipSize / 24, chH = 48 * c, rowStep = 60 * c, gap = 14 * c;
+    let chipsTop = capFirst - LY.capSize * 1.4;
+    if (ch.chipItems.length) {
+      for (const it of ch.chipItems) { it.w = textLen(it.t, it.s.length * LY.chipSize * 0.6) + 62 * c; it.r.setAttribute('width', it.w); }
+      const rows = [[]]; let x = 0;
+      for (const it of ch.chipItems) {
+        if (x > 0 && x + it.w > LW) { rows.push([]); x = 0; }
+        rows[rows.length - 1].push(it); x += it.w + gap;
+      }
+      const chipsBottom = capFirst - 66 * k;
+      rows.forEach((row, ri) => {
+        const y = chipsBottom - chH - (rows.length - 1 - ri) * rowStep;
+        let cx = LX;
+        for (const it of row) { it.outer.setAttribute('transform', `translate(${cx.toFixed(1)},${y.toFixed(1)})`); cx += it.w + gap; }
+      });
+      chipsTop = chipsBottom - chH - (rows.length - 1) * rowStep;
+    }
+    ch.box = [LX, titleBottom + 36 * k, LR, chipsTop - 36 * k];
+  }
+  function fitRegion(reg, box) {
+    const rw = reg[2] - reg[0], rh = reg[3] - reg[1], bw = box[2] - box[0], bh = box[3] - box[1];
+    const sc = Math.min(bw / rw, bh / rh, LY.maxScale);
+    const tx = box[0] + (bw - rw * sc) / 2 - reg[0] * sc, ty = box[1] + (bh - rh * sc) / 2 - reg[1] * sc;
+    return `translate(${tx.toFixed(2)},${ty.toFixed(2)}) scale(${sc.toFixed(4)})`;
+  }
+  function layoutFrame() {
+    CH.forEach(layoutChapter);
+    if (LY.identity) return;
+    const regs = PORT ? REGIONS.port : REGIONS.land;
+    // chapters 1 and 2 share the graph layer, so they share one box and one transform
+    const b0 = CH[0].box, b1 = CH[1].box;
+    const shared = [b0[0], Math.max(b0[1], b1[1]), b0[2], Math.min(b0[3], b1[3])];
+    CH.forEach((ch, i) => {
+      const tf = fitRegion(regs[i], i < 2 ? shared : ch.box);
+      ch.artWrap.setAttribute('transform', tf);
+      if (i === 0) Lgraph.setAttribute('transform', tf);
     });
-    return { g, kick, ttl, art, chips: chipEls, cap };
   }
 
   // ---- progress dots ----
   const dotOn = [];
   for (let i = 0; i < N_CH; i++) {
-    const cx = SX + 10 + i * 34;
-    E('circle', { cx, cy: Y_DOTS, r: 7, fill: C.white, opacity: 0.4 }, Ldots);
-    dotOn.push(hide(E('circle', { cx, cy: Y_DOTS, r: 10, fill: C.clay, stroke: C.warm, 'stroke-width': 1.5 }, Ldots), { opacity: 0, scale: 0.4, transformOrigin: '50% 50%' }));
+    const cx = LX + (10 + i * 34) * LY.k, cy = LY.H - LY.my - 28 * LY.k;
+    E('circle', { cx, cy, r: 7 * LY.k, fill: C.white, opacity: 0.4 }, Ldots);
+    dotOn.push(hide(E('circle', { cx, cy, r: 10 * LY.k, fill: C.clay, stroke: C.warm, 'stroke-width': 1.5 }, Ldots), { opacity: 0, scale: 0.4, transformOrigin: '50% 50%' }));
   }
+  if (SINGLE !== null) Ldots.setAttribute('display', 'none');
   hide(Ldots, { opacity: 0 });
 
   // ================================================================ GRAPH (shared by 1 and 2)
@@ -241,8 +333,8 @@ export function mount(el, opts = {}) {
     hide(s, { opacity: 0, scale: 0.2, transformOrigin: '50% 50%' });
     nodeEls[n.id] = s;
     if (n.lab) {
-      const o = { left: [-26, 8, 'end'], right: [26, 8, 'start'], up: [0, -28, 'middle'], down: [0, 42, 'middle'] }[n.la];
-      T(gNodeLab, x + o[0], y + o[1], n.lab, { 'font-size': 22, 'font-weight': 600, fill: DIM, 'text-anchor': o[2] });
+      const o = { left: [-26, 8 * GF, 'end'], right: [26, 8 * GF, 'start'], up: [0, -28 * GF, 'middle'], down: [0, 22 + 20 * GF, 'middle'] }[n.la];
+      T(gNodeLab, x + o[0], y + o[1], n.lab, { 'font-size': 22 * GF, 'font-weight': 600, fill: DIM, 'text-anchor': o[2] });
     }
   }
 
@@ -259,14 +351,14 @@ export function mount(el, opts = {}) {
     c1.nodeLine = E('line', { x1: n1[0], y1: 272, x2: n1[0], y2: n1[1] - 18, stroke: C.warm, 'stroke-width': 2.5, 'stroke-linecap': 'round' }, a);
     c1.nodeLine.style.strokeDasharray = '60 60';
     hide(c1.nodeLine, { strokeDashoffset: 60 });
-    c1.nodeTx = hide(T(a, n1[0], 260, 'node', { 'font-size': 28, 'font-weight': 700, fill: C.warm, 'text-anchor': 'middle' }), { opacity: 0, y: 10 });
+    c1.nodeTx = hide(T(a, n1[0], 260, 'node', { 'font-size': 28 * GF, 'font-weight': 700, fill: C.warm, 'text-anchor': 'middle' }), { opacity: 0, y: 10 });
     // "edge · 18.4 m" on H3 -> R-608
     const A = byId.H3.p, B = byId['R-608'].p;
     c1.edgeHi = E('line', { x1: A[0] + 16, y1: A[1], x2: B[0] - 16, y2: B[1], stroke: C.warm, 'stroke-width': 7, 'stroke-linecap': 'round' }, a);
     const el = B[0] - A[0] - 32;
     c1.edgeHi.style.strokeDasharray = `${el} ${el}`;
     hide(c1.edgeHi, { strokeDashoffset: el });
-    c1.edgeTx = hide(T(a, (A[0] + B[0]) / 2, A[1] - 22, 'edge · 18.4 m', { 'font-size': 26, 'font-weight': 700, fill: C.warm, 'text-anchor': 'middle' }), { opacity: 0, y: 10 });
+    c1.edgeTx = hide(T(a, (A[0] + B[0]) / 2 + (GF - 1) * 60, A[1] - 22, 'edge · 18.4 m', { 'font-size': 26 * GF, 'font-weight': 700, fill: C.warm, 'text-anchor': 'middle' }), { opacity: 0, y: 10 });
     // legend
     const lgOuter = E('g', null, a);
     const lg = hide(E('g', null, lgOuter), { opacity: 0, y: 12 });
@@ -275,7 +367,7 @@ export function mount(el, opts = {}) {
       const g = E('g', null, lg);
       if (k === 'room') E('rect', { x: 0, y: -11, width: 22, height: 22, rx: 5, fill: C.warm }, g);
       else E('circle', { cx: 11, cy: 0, r: k === 'hall' ? 9 : 11, fill: k === 'ent' ? C.white : k === 'vert' ? C.teal : C.grey }, g);
-      return { g, s, t: T(g, 32, 9, s, { 'font-size': 24, fill: DIM }) };
+      return { g, s, t: T(g, 32, 9 * GF, s, { 'font-size': 24 * GF, fill: DIM }) };
     });
     L(() => {
       let x = 0;
@@ -323,10 +415,12 @@ export function mount(el, opts = {}) {
     E('path', { d: 'M-9,-4 L-9,-12 A9,9 0 0 1 9,-12 L9,-4', fill: 'none', stroke: C.err, 'stroke-width': 4, 'stroke-linecap': 'round' }, c2.lock);
     E('rect', { x: -15, y: -5, width: 30, height: 24, rx: 5, fill: C.err }, c2.lock);
     E('circle', { cx: 0, cy: 6, r: 3.5, fill: C.ink }, c2.lock);
-    c2.lockTx = hide(T(a, doorMid[0], doorMid[1] + 50, 'card only', { 'font-size': 24, 'font-weight': 700, fill: C.err, 'text-anchor': 'middle' }), { opacity: 0, y: 8 });
+    c2.lockTx = hide(T(a, doorMid[0], doorMid[1] + 50, 'card only', { 'font-size': 24 * GF, 'font-weight': 700, fill: C.err, 'text-anchor': 'middle' }), { opacity: 0, y: 8 });
 
     // clock chip (Fri 14:00 -> Sat 21:00)
-    const cx0 = 1486, cy0 = 300;
+    // landscape: clock + readout right of the graph; portrait: in a row under it
+    const cx0 = PORT ? 300 : 1486, cy0 = PORT ? 660 : 300;
+    const rx0 = PORT ? 640 : cx0 + 6, ry0 = PORT ? 686 : 420;
     c2.clock = hide(E('g', null, E('g', { transform: `translate(${cx0},${cy0})` }, a)), { opacity: 0, y: 12 });
     E('rect', { x: 0, y: 0, width: 300, height: 68, rx: 34, fill: PANEL, stroke: C.gold, 'stroke-width': 2.2 }, c2.clock);
     E('circle', { cx: 38, cy: 34, r: 16, fill: 'none', stroke: C.gold, 'stroke-width': 3 }, c2.clock);
@@ -335,7 +429,7 @@ export function mount(el, opts = {}) {
     c2.t2 = T(c2.clock, 72, 45, 'Sat 21:00', { 'font-size': 32, 'font-weight': 700, fill: C.gold });
     hide(c2.t2, { scaleY: 0, transformOrigin: '50% 50%' });
     // readout
-    c2.read = hide(E('g', null, E('g', { transform: `translate(${cx0 + 6},420)` }, a)), { opacity: 0, y: 12 });
+    c2.read = hide(E('g', null, E('g', { transform: `translate(${rx0},${ry0})` }, a)), { opacity: 0, y: 12 });
     c2.rl1 = T(c2.read, 0, 0, 'shortest route', { 'font-size': 26, fill: DIM });
     c2.rv1 = T(c2.read, 0, 56, (firstRun.len / 10).toFixed(1) + ' m', { 'font-size': 48, 'font-weight': 700, fill: C.warm });
     c2.rl2 = hide(T(c2.read, 0, 0, 're-routed', { 'font-size': 26, 'font-weight': 600, fill: C.err }));
@@ -348,7 +442,6 @@ export function mount(el, opts = {}) {
   const c3 = { cards: [] };
   {
     const a = CH[2].art;
-    const cw = 312, gap = 42, cy = 280, chh = 340;
     const stages = [
       { icon: 'sat', head: ['GPS'], sub: ['outdoors'] },
       { icon: 'globe', head: ['ARCore', 'Geospatial API'], sub: ['VPS ~1 m'] },
@@ -356,41 +449,80 @@ export function mount(el, opts = {}) {
       { icon: 'sign', head: ['ML Kit OCR'], sub: ['ARCore', 'Augmented Images'] },
       { icon: 'baro', head: ['Barometer'], sub: ['→ floor'] },
     ];
-    stages.forEach((st, i) => {
-      const x = SX + i * (cw + gap), mx = x + cw / 2;
-      const g = hide(E('g', null, a), { opacity: 0, y: 24 });
-      E('rect', { x, y: cy, width: cw, height: chh, rx: 24, fill: PANEL, stroke: 'rgba(255,255,255,0.28)', 'stroke-width': 2 }, g);
-      const lit = hide(E('rect', { x, y: cy, width: cw, height: chh, rx: 24, fill: 'rgba(198,124,78,0.16)', stroke: C.clay, 'stroke-width': 3.5 }, g));
-      E('circle', { cx: x + 36, cy: cy + 36, r: 18, fill: 'none', stroke: 'rgba(255,255,255,0.5)', 'stroke-width': 2 }, g);
-      const numOn = hide(E('circle', { cx: x + 36, cy: cy + 36, r: 18, fill: C.clay }, g));
-      T(g, x + 36, cy + 43, String(i + 1), { 'font-size': 20, 'font-weight': 700, 'text-anchor': 'middle' });
-      const ic = E('g', { transform: `translate(${mx},${cy + 104})` }, g);
-      const icon = hide(E('g', null, ic), { opacity: 0.4 });
-      drawIcon(icon, st.icon);
-      let ty = cy + 206;
-      st.head.forEach(s => { const t = T(g, mx, ty, s, { 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle' }); fitL(t, cw - 28); ty += 36; });
-      ty += 2;
-      st.sub.forEach(s => { const t = T(g, mx, ty, s, { 'font-size': 24, 'font-weight': 500, fill: C.warm, 'text-anchor': 'middle' }); fitL(t, cw - 28); ty += 30; });
-      c3.cards.push({ g, lit, numOn, icon, mx });
-      if (i < stages.length - 1) {
-        const ax = x + cw + gap / 2;
-        const arr = hide(E('path', { d: `M${ax - 7},${cy + chh / 2 - 14} L${ax + 7},${cy + chh / 2} L${ax - 7},${cy + chh / 2 + 14}`,
-          fill: 'none', stroke: C.warm, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, a));
-        c3.cards[i].arrow = arr;
-      }
-    });
-    // brackets: outdoors (1-2), door (3), room (4-5)
-    const by = 672;
-    const span = (i0, i1) => [SX + i0 * (cw + gap) + 10, SX + i1 * (cw + gap) + cw - 10];
-    const groups = [[0, 1, 'outdoors', C.gold], [2, 2, 'door', C.warm], [3, 4, 'room', C.clay]];
-    c3.brackets = groups.map(([i0, i1, s, col]) => {
-      const [x0, x1] = span(i0, i1);
-      const g = hide(E('g', null, a), { opacity: 0, y: 10 });
-      E('path', { d: `M${x0},${by - 14} L${x0},${by} L${x1},${by} L${x1},${by - 14}`, fill: 'none', stroke: col, 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
-      T(g, (x0 + x1) / 2, by + 42, s, { 'font-size': 30, 'font-weight': 700, fill: col, 'text-anchor': 'middle' });
-      return g;
-    });
-    c3.you = hide(E('circle', { cx: 0, cy: by, r: 11, fill: C.white, stroke: C.clay, 'stroke-width': 4, filter: 'url(#ex-glow)' }, a), { opacity: 0, x: c3.cards[0].mx });
+    if (PORT) {
+      // portrait: a vertical column of wide cards, brackets on the right
+      const cw = 1150, chh = 180, gap = 32, x = 0;
+      stages.forEach((st, i) => {
+        const y = i * (chh + gap), my = y + chh / 2;
+        const g = hide(E('g', null, a), { opacity: 0, x: -24 });
+        E('rect', { x, y, width: cw, height: chh, rx: 26, fill: PANEL, stroke: 'rgba(255,255,255,0.28)', 'stroke-width': 2 }, g);
+        const lit = hide(E('rect', { x, y, width: cw, height: chh, rx: 26, fill: 'rgba(198,124,78,0.16)', stroke: C.clay, 'stroke-width': 3.5 }, g));
+        E('circle', { cx: x + 42, cy: y + 42, r: 22, fill: 'none', stroke: 'rgba(255,255,255,0.5)', 'stroke-width': 2 }, g);
+        const numOn = hide(E('circle', { cx: x + 42, cy: y + 42, r: 22, fill: C.clay }, g));
+        T(g, x + 42, y + 51, String(i + 1), { 'font-size': 24, 'font-weight': 700, 'text-anchor': 'middle' });
+        const ic = E('g', { transform: `translate(${x + 180},${my}) scale(1.25)` }, g);
+        const icon = hide(E('g', null, ic), { opacity: 0.4 });
+        drawIcon(icon, st.icon);
+        fitL(T(g, x + 310, my - 6, st.head.join(' '), { 'font-size': 46, 'font-weight': 700 }), cw - 340);
+        fitL(T(g, x + 310, my + 46, st.sub.join(' '), { 'font-size': 34, 'font-weight': 500, fill: C.warm }), cw - 340);
+        c3.cards.push({ g, lit, numOn, icon, pos: my });
+        if (i < stages.length - 1) {
+          const ay = y + chh + gap / 2;
+          c3.cards[i].arrow = hide(E('path', { d: `M${x + 166},${ay - 7} L${x + 180},${ay + 7} L${x + 194},${ay - 7}`,
+            fill: 'none', stroke: C.warm, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, a));
+        }
+      });
+      const bx = cw + 36;
+      const span = (i0, i1) => [i0 * (chh + gap) + 12, i1 * (chh + gap) + chh - 12];
+      const groups = [[0, 1, 'outdoors', C.gold], [2, 2, 'door', C.warm], [3, 4, 'room', C.clay]];
+      c3.brackets = groups.map(([i0, i1, s, col]) => {
+        const [y0, y1] = span(i0, i1);
+        const g = hide(E('g', null, a), { opacity: 0, x: 10 });
+        E('path', { d: `M${bx - 16},${y0} L${bx},${y0} L${bx},${y1} L${bx - 16},${y1}`, fill: 'none', stroke: col, 'stroke-width': 3.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+        T(g, bx + 26, (y0 + y1) / 2 + 14, s, { 'font-size': 40, 'font-weight': 700, fill: col });
+        return g;
+      });
+      c3.you = hide(E('circle', { cx: bx, cy: 0, r: 13, fill: C.white, stroke: C.clay, 'stroke-width': 4, filter: 'url(#ex-glow)' }, a), { opacity: 0, y: c3.cards[0].pos });
+      c3.axis = 'y';
+    } else {
+      const cw = 312, gap = 42, cy = 280, chh = 340;
+      stages.forEach((st, i) => {
+        const x = SX + i * (cw + gap), mx = x + cw / 2;
+        const g = hide(E('g', null, a), { opacity: 0, y: 24 });
+        E('rect', { x, y: cy, width: cw, height: chh, rx: 24, fill: PANEL, stroke: 'rgba(255,255,255,0.28)', 'stroke-width': 2 }, g);
+        const lit = hide(E('rect', { x, y: cy, width: cw, height: chh, rx: 24, fill: 'rgba(198,124,78,0.16)', stroke: C.clay, 'stroke-width': 3.5 }, g));
+        E('circle', { cx: x + 36, cy: cy + 36, r: 18, fill: 'none', stroke: 'rgba(255,255,255,0.5)', 'stroke-width': 2 }, g);
+        const numOn = hide(E('circle', { cx: x + 36, cy: cy + 36, r: 18, fill: C.clay }, g));
+        T(g, x + 36, cy + 43, String(i + 1), { 'font-size': 20, 'font-weight': 700, 'text-anchor': 'middle' });
+        const ic = E('g', { transform: `translate(${mx},${cy + 104})` }, g);
+        const icon = hide(E('g', null, ic), { opacity: 0.4 });
+        drawIcon(icon, st.icon);
+        let ty = cy + 206;
+        st.head.forEach(s => { const t = T(g, mx, ty, s, { 'font-size': 30, 'font-weight': 700, 'text-anchor': 'middle' }); fitL(t, cw - 28); ty += 36; });
+        ty += 2;
+        st.sub.forEach(s => { const t = T(g, mx, ty, s, { 'font-size': 24, 'font-weight': 500, fill: C.warm, 'text-anchor': 'middle' }); fitL(t, cw - 28); ty += 30; });
+        c3.cards.push({ g, lit, numOn, icon, pos: mx });
+        if (i < stages.length - 1) {
+          const ax = x + cw + gap / 2;
+          const arr = hide(E('path', { d: `M${ax - 7},${cy + chh / 2 - 14} L${ax + 7},${cy + chh / 2} L${ax - 7},${cy + chh / 2 + 14}`,
+            fill: 'none', stroke: C.warm, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, a));
+          c3.cards[i].arrow = arr;
+        }
+      });
+      // brackets: outdoors (1-2), door (3), room (4-5)
+      const by = 672;
+      const span = (i0, i1) => [SX + i0 * (cw + gap) + 10, SX + i1 * (cw + gap) + cw - 10];
+      const groups = [[0, 1, 'outdoors', C.gold], [2, 2, 'door', C.warm], [3, 4, 'room', C.clay]];
+      c3.brackets = groups.map(([i0, i1, s, col]) => {
+        const [x0, x1] = span(i0, i1);
+        const g = hide(E('g', null, a), { opacity: 0, y: 10 });
+        E('path', { d: `M${x0},${by - 14} L${x0},${by} L${x1},${by} L${x1},${by - 14}`, fill: 'none', stroke: col, 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+        T(g, (x0 + x1) / 2, by + 42, s, { 'font-size': 30, 'font-weight': 700, fill: col, 'text-anchor': 'middle' });
+        return g;
+      });
+      c3.you = hide(E('circle', { cx: 0, cy: by, r: 11, fill: C.white, stroke: C.clay, 'stroke-width': 4, filter: 'url(#ex-glow)' }, a), { opacity: 0, x: c3.cards[0].pos });
+      c3.axis = 'x';
+    }
   }
 
   // ================================================================ CHAPTER 4: AR arrows
@@ -482,7 +614,7 @@ export function mount(el, opts = {}) {
     ['The glasses look, the phone recognises, the glasses speak.', 'The watch buzzes every turn.'],
     ['Meta Wearables Device Access Toolkit', 'burst 2–3 stills · then speak', 'Wear OS Data Layer', 'RouteStep < 1 s', '8 haptic patterns']);
   const c5 = {};
-  const G5 = [430, 470], PH5 = [960, 470], W5 = [1480, 470];
+  const G5 = [430, 470], PH5 = [960, 470], W5 = PORT ? [960, 905] : [1480, 470];
   const ARC_UP = [[575, 448], [712, 360], [872, 430]];
   const ARC_DN = [[872, 520], [712, 610], [575, 500]];
   {
@@ -498,7 +630,8 @@ export function mount(el, opts = {}) {
     const [pcx, pcy] = PH5;
     E('rect', { x: pcx - 90, y: pcy - 160, width: 180, height: 320, rx: 30, fill: 'url(#ex-phone)', stroke: C.clay, 'stroke-width': 3.5 }, c5.phone);
     E('rect', { x: pcx - 20, y: pcy - 152, width: 40, height: 5, rx: 2.5, fill: 'rgba(255,255,255,0.3)' }, c5.phone);
-    T(c5.phone, pcx, 690, 'Galaxy S25 Ultra', { 'font-size': 24, fill: DIM, 'text-anchor': 'middle' });
+    if (PORT) T(c5.phone, pcx + 108, pcy + 8, 'Galaxy S25 Ultra', { 'font-size': 24, fill: DIM });
+    else T(c5.phone, pcx, 690, 'Galaxy S25 Ultra', { 'font-size': 24, fill: DIM, 'text-anchor': 'middle' });
     // phone recognition: sign + scan brackets + result chip
     c5.sign = hide(E('g', null, a), { opacity: 0, scale: 0.85, transformOrigin: '50% 50%' });
     E('rect', { x: pcx - 66, y: pcy - 80, width: 132, height: 50, rx: 8, fill: 'rgba(122,208,224,0.12)', stroke: 'rgba(255,255,255,0.7)', 'stroke-width': 2 }, c5.sign);
@@ -527,7 +660,7 @@ export function mount(el, opts = {}) {
     E('circle', { cx: wx, cy: wy, r: wr - 15, fill: C.ink, stroke: 'rgba(255,255,255,0.85)', 'stroke-width': 2.5 }, c5.watch);
     c5.wchev = hide(E('path', { d: `M${wx + 10},${wy - 24} L${wx - 16},${wy} L${wx + 10},${wy + 24}`, fill: 'none', stroke: C.gold,
       'stroke-width': 11, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, c5.watch), { opacity: 0, x: 14 });
-    T(c5.watch, wx, 690, 'Galaxy Watch 8 Classic', { 'font-size': 24, fill: DIM, 'text-anchor': 'middle' });
+    T(c5.watch, wx, PORT ? wy + wr + 44 + 48 : 690, 'Galaxy Watch 8 Classic', { 'font-size': 24, fill: DIM, 'text-anchor': 'middle' });
 
     // look arc (glasses -> phone), speak arc (phone -> glasses)
     const arcD = (A) => `M${A[0][0]},${A[0][1]} Q${A[1][0]},${A[1][1]} ${A[2][0]},${A[2][1]}`;
@@ -558,14 +691,17 @@ export function mount(el, opts = {}) {
     c5.waves = [0, 1].map(k => hide(E('path', { d: `M${G5[0] - 140 - k * 16},${G5[1] - 34 - k * 10} Q${G5[0] - 158 - k * 22},${G5[1] - 8} ${G5[0] - 140 - k * 16},${G5[1] + 18 + k * 10}`,
       fill: 'none', stroke: C.teal, 'stroke-width': 3.5, 'stroke-linecap': 'round' }, a)));
     // phone -> watch link
-    const lx0 = pcx + 106, lx1 = wx - wr - 20;
-    c5.link = E('line', { x1: lx0, y1: wy, x2: lx1, y2: wy, stroke: C.gold, 'stroke-width': 3, 'stroke-linecap': 'round' }, a);
-    c5.link.style.strokeDasharray = `${lx1 - lx0} ${lx1 - lx0}`;
-    hide(c5.link, { strokeDashoffset: lx1 - lx0 });
-    c5.linkLen = lx1 - lx0;
-    c5.linkTx = hide(T(a, (lx0 + lx1) / 2, wy - 20, 'RouteStep', { 'font-size': 24, 'font-weight': 700, fill: C.gold, 'text-anchor': 'middle' }), { opacity: 0, y: 8 });
-    c5.pk = hide(E('circle', { cx: lx0, cy: wy, r: 9, fill: C.gold, filter: 'url(#ex-glow)' }, a), { opacity: 0, x: 0 });
-    c5.lx0 = lx0; c5.lx1 = lx1;
+    const L0 = PORT ? [pcx, pcy + 178] : [pcx + 106, wy];
+    const L1 = PORT ? [wx, wy - wr - 44 - 16] : [wx - wr - 20, wy];
+    const llen = Math.hypot(L1[0] - L0[0], L1[1] - L0[1]);
+    c5.link = E('line', { x1: L0[0], y1: L0[1], x2: L1[0], y2: L1[1], stroke: C.gold, 'stroke-width': 3, 'stroke-linecap': 'round' }, a);
+    c5.link.style.strokeDasharray = `${llen} ${llen}`;
+    hide(c5.link, { strokeDashoffset: llen });
+    c5.linkTx = hide(PORT
+      ? T(a, pcx + 24, (L0[1] + L1[1]) / 2 + 9, 'RouteStep', { 'font-size': 24, 'font-weight': 700, fill: C.gold })
+      : T(a, (L0[0] + L1[0]) / 2, wy - 20, 'RouteStep', { 'font-size': 24, 'font-weight': 700, fill: C.gold, 'text-anchor': 'middle' }), { opacity: 0, y: 8 });
+    c5.pk = hide(E('circle', { cx: L0[0], cy: L0[1], r: 9, fill: C.gold, filter: 'url(#ex-glow)' }, a), { opacity: 0, x: 0, y: 0 });
+    c5.pkd = [L1[0] - L0[0], L1[1] - L0[1]];
   }
 
   // ================================================================ icons
@@ -641,17 +777,9 @@ export function mount(el, opts = {}) {
     tl.to(dotOn[i], { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, T0 + 0.3);
   }
 
-  function build() {
-    for (const [elx, vars] of hidden) gsap.set(elx, vars);
-    placeChevrons(0);
-    master = gsap.timeline({ paused: true });
-    const tl = master;
-    tl.to(Ldots, { opacity: 1, duration: 0.5 }, 0.1);
-
-    // ---- 1: graph (0-7) ----
-    let T0 = 0;
-    enter(tl, CH[0], T0 - 0.1);
-    dot(tl, 0, T0);
+  // Each chapter's build, relative to its start T0 (title and chips are handled by enter()).
+  const BUILD = [
+    (tl, T0) => {
     tl.to(gSlab, { opacity: 1, duration: 0.6, ease: 'power1.out' }, T0 + 0.7);
     for (const e of edgeEls) {
       tl.to(e.ln, { strokeDashoffset: 0, duration: 0.45, ease: 'power1.inOut' }, T0 + 1.0 + (e.d0 / maxD) * 1.7);
@@ -667,11 +795,8 @@ export function mount(el, opts = {}) {
     tl.to(c1.edgeTx, { opacity: 1, y: 0, duration: 0.4 }, T0 + 3.55);
     tl.to(c1.legend, { opacity: 1, y: 0, duration: 0.5 }, T0 + 3.8);
 
-    // ---- 2: Dijkstra with time (7-14) ----
-    T0 = 7;
-    tl.to(CH[0].g, { opacity: 0, duration: 0.4 }, T0);
-    enter(tl, CH[1], T0);
-    dot(tl, 1, T0);
+    },
+    (tl, T0) => {
     tl.to(c2.clock, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, T0 + 0.8);
     firstRun.order.forEach(id => {
       const at = T0 + 1.0 + (firstRun.dist[id] / maxD) * 1.4;
@@ -693,43 +818,35 @@ export function mount(el, opts = {}) {
     tl.to([c2.rl1, c2.rv1], { opacity: 0, duration: 0.2 }, T0 + 4.9);
     tl.to([c2.rl2, c2.rv2], { opacity: 1, duration: 0.3 }, T0 + 5.05);
 
-    // ---- 3: localisation (14-21) ----
-    T0 = 14;
-    tl.to([CH[1].g, Lgraph], { opacity: 0, duration: 0.4 }, T0);
-    enter(tl, CH[2], T0);
-    dot(tl, 2, T0);
+    },
+    (tl, T0) => {
     tl.to(c3.cards.map(c => c.g), { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out' }, T0 + 0.75);
     tl.to(c3.brackets, { opacity: 1, y: 0, duration: 0.4, stagger: 0.12 }, T0 + 1.1);
     tl.to(c3.you, { opacity: 1, duration: 0.3 }, T0 + 1.3);
     c3.cards.forEach((c, i) => {
       const at = T0 + 1.4 + i * 0.55;
-      if (i > 0) tl.to(c3.you, { x: c.mx, duration: 0.45, ease: 'power2.inOut' }, at - 0.3);
+      if (i > 0) tl.to(c3.you, { [c3.axis]: c.pos, duration: 0.45, ease: 'power2.inOut' }, at - 0.3);
       tl.to(c.lit, { opacity: 1, duration: 0.3 }, at);
       tl.to(c.numOn, { opacity: 1, duration: 0.3 }, at);
       tl.to(c.icon, { opacity: 1, duration: 0.3 }, at);
       if (c.arrow) tl.to(c.arrow, { opacity: 1, duration: 0.3 }, at + 0.25);
     });
 
-    // ---- 4: AR arrows (21-28) ----
-    T0 = 21;
-    tl.to(CH[2].g, { opacity: 0, duration: 0.4 }, T0);
-    enter(tl, CH[3], T0);
-    dot(tl, 3, T0);
+    },
+    (tl, T0) => {
     tl.to(c4.phone, { opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }, T0 + 0.7);
     tl.to(c4.walls, { opacity: 1, duration: 0.5 }, T0 + 1.0);
     tl.to(c4.grid, { opacity: 1, duration: 0.5 }, T0 + 1.2);
     const flow = { t: 0 };
-    tl.to(flow, { t: 3.5, duration: 5.6, ease: 'none', onUpdate: () => placeChevrons(flow.t) }, T0 + 1.4);
+    const flowDur = SINGLE === null ? 5.6 : SINGLE_LEN - 1.4;
+    tl.to(flow, { t: 3.5 * flowDur / 5.6, duration: flowDur, ease: 'none', onUpdate: () => placeChevrons(flow.t) }, T0 + 1.4);
     tl.to(c4.turn, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2)' }, T0 + 2.2);
     tl.to(c4.banner, { opacity: 1, y: 0, duration: 0.4 }, T0 + 2.4);
     tl.to(c4.card, { opacity: 1, y: 0, duration: 0.4 }, T0 + 2.6);
     tl.to(c4.callouts, { opacity: 1, x: 0, duration: 0.5, stagger: 0.3, ease: 'power2.out' }, T0 + 1.6);
 
-    // ---- 5: glasses + watch (28-35) ----
-    T0 = 28;
-    tl.to(CH[3].g, { opacity: 0, duration: 0.4 }, T0);
-    enter(tl, CH[4], T0);
-    dot(tl, 4, T0);
+    },
+    (tl, T0) => {
     tl.to([c5.glasses, c5.phone, c5.watch], { opacity: 1, y: 0, duration: 0.5, stagger: 0.15, ease: 'power2.out' }, T0 + 0.65);
     // look: burst of three stills
     tl.to(c5.camOn, { opacity: 1, duration: 0.15 }, T0 + 1.2);
@@ -764,7 +881,7 @@ export function mount(el, opts = {}) {
     tl.to(c5.link, { strokeDashoffset: 0, duration: 0.4, ease: 'power2.out' }, T0 + 3.3);
     tl.to(c5.linkTx, { opacity: 1, y: 0, duration: 0.3 }, T0 + 3.4);
     tl.to(c5.pk, { opacity: 1, duration: 0.1 }, T0 + 3.5);
-    tl.to(c5.pk, { x: c5.lx1 - c5.lx0, duration: 0.45, ease: 'power1.inOut' }, T0 + 3.5);
+    tl.to(c5.pk, { x: c5.pkd[0], y: c5.pkd[1], duration: 0.45, ease: 'power1.inOut' }, T0 + 3.5);
     tl.to(c5.pk, { opacity: 0, duration: 0.1 }, T0 + 3.9);
     tl.to(c5.wchev, { opacity: 1, x: 0, duration: 0.35, ease: 'back.out(2)' }, T0 + 3.95);
     [T0 + 4.0, T0 + 4.22, T0 + 5.3, T0 + 5.52].forEach((at, i) => {
@@ -772,11 +889,48 @@ export function mount(el, opts = {}) {
     });
     tl.to(c5.wchev, { x: -6, duration: 0.15, yoyo: true, repeat: 1, ease: 'sine.inOut' }, T0 + 4.4);
 
-    // ---- end ----
+    },
+  ];
+  // Graph fully drawn (used when chapter 2 plays on its own).
+  function showGraph() {
+    gsap.set(gSlab, { opacity: 1 });
+    for (const e of edgeEls) gsap.set(e.ln, { strokeDashoffset: 0 });
+    gsap.set(Object.values(nodeEls), { opacity: 1, scale: 1 });
+    gsap.set([door, gNodeLab], { opacity: 1 });
+  }
+
+  function build() {
+    for (const [elx, vars] of hidden) gsap.set(elx, vars);
+    placeChevrons(0);
+    master = gsap.timeline({ paused: true });
+    const tl = master;
+
+    if (SINGLE !== null) {
+      gsap.set(root, { opacity: 0 });
+      tl.to(root, { opacity: 1, duration: 0.4, ease: 'power1.out' }, 0);
+      if (SINGLE === 1) showGraph();
+      if (SINGLE >= 2) gsap.set(Lgraph, { opacity: 0 });
+      enter(tl, CH[SINGLE], 0);
+      BUILD[SINGLE](tl, 0);
+      tl.to(root, { opacity: 0, duration: 0.5, ease: 'power1.in' }, SINGLE_LEN - 0.5);
+      tl.set({}, {}, SINGLE_LEN);
+      return;
+    }
+
+    tl.to(Ldots, { opacity: 1, duration: 0.5 }, 0.1);
+    for (let i = 0; i < N_CH; i++) {
+      const T0 = i * CH_LEN;
+      if (i === 2) tl.to([CH[1].g, Lgraph], { opacity: 0, duration: 0.4 }, T0);
+      else if (i > 0) tl.to(CH[i - 1].g, { opacity: 0, duration: 0.4 }, T0);
+      enter(tl, CH[i], i === 0 ? T0 - 0.1 : T0);
+      dot(tl, i, T0);
+      BUILD[i](tl, T0);
+    }
     tl.to(root, { opacity: 0, duration: DURATION - END_FADE, ease: 'power1.in' }, END_FADE);
     tl.set({}, {}, DURATION);
   }
 
+  L(layoutFrame);
   ctx = gsap.context(build, svg);
   if (document.fonts && document.fonts.load) {
     Promise.all(['400', '500', '600', '700'].map(w => document.fonts.load(`${w} 30px Sora`)))
@@ -792,5 +946,6 @@ export function mount(el, opts = {}) {
   }
   function seek(s) { if (!master) return; master.pause(); master.seek(s); }
   if (opts.autoplay) play();
-  return { play, pause, destroy, seek, duration: DURATION, chapters: [0, 7, 14, 21, 28] };
+  const total = SINGLE === null ? DURATION : SINGLE_LEN;
+  return { play, pause, destroy, seek, duration: total, chapters: SINGLE === null ? [0, 7, 14, 21, 28] : [0], aspect: ASPECT, chapter: SINGLE };
 }
