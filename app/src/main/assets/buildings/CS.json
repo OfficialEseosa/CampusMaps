@@ -38,13 +38,13 @@
       "type": "entrance",
       "name": "Walters side entrance",
       "floor": 1,
-      "x": 7.79,
+      "x": 10.79,
       "y": -5.26,
       "lat": 33.7528343,
       "lng": -84.38760369,
       "headingDeg": 33.5,
       "estimated": true,
-      "notes": "CS-20260925-1238 obs #7; POSITION ESTIMATED: its GPS fix (+-3 m, 10 samples) lands 42 m north of Walters main, but every walk (edge #6 23 steps to R-150, W02 34 steps to R-150, 20 steps from this node to the A01 photo spot, W04 15 steps to H1) puts it within about 12 m of Walters main. Placed 9.4 m from Walters main at bearing 124, the spacing of the two 2026-09-24 fixes (session CS-20260924-1614). lat/lng are that placement, not a fix. Glass double door with a ramp (W02, W04). Facing out 33.5 deg (spread 2.4). Access hours not surveyed."
+      "notes": "CS-20260925-1238 obs #7; POSITION ESTIMATED: its GPS fix (+-3 m, 10 samples) lands 42 m north of Walters main, but every walk (edge #6 23 steps to R-150, W02 34 steps to R-150, 20 steps from this node to the A01 photo spot, W04 15 steps to H1) puts it within about 12 m of Walters main. Placed 9.4 m from Walters main at bearing 124, the spacing of the two 2026-09-24 fixes (session CS-20260924-1614). lat/lng are that placement, not a fix. Glass double door with a ramp (W02, W04). Facing out 33.5 deg (spread 2.4). Access hours not surveyed. Moved 3 m east by the owner in the phone editor on site (2026-09-26)."
     },
     {
       "id": "E-95DS",
@@ -61,23 +61,23 @@
     {
       "id": "H7",
       "type": "intersection",
-      "name": "Walters lobby",
+      "name": "bottom of the short steps",
       "floor": 1,
-      "x": -1.5,
-      "y": -4.4,
+      "x": 7.23,
+      "y": -10.09,
       "estimated": true,
-      "notes": "Estimated (not a survey node): lobby junction where the Walters doors, the hallway door H1 and the 150 corridor meet (W01, W02, W03 frames: blue wall with stairs and railing). 4.65 m in from Walters main so that E-WM>H7>R-150 equals walk #2 (30 steps, 23.05 m)."
+      "notes": "Estimated: the junction at the bottom of the short steps down from the Walters main lobby, on the straight corridor from the Walters side door to Room 150 (owner, on site 2026-09-26). From the main door: ahead about 3 steps, then down the short steps turning left."
     },
     {
       "id": "R-150",
       "type": "room",
       "name": "Room 150",
       "floor": 1,
-      "x": -9.28,
-      "y": -21.08,
+      "x": -5.28,
+      "y": -27.08,
       "doorFacing": "northeast",
       "estimated": true,
-      "notes": "CS-20260925-1238 obs #4 (no doorSide recorded). Position estimated: 18.4 m from H7 at bearing 205 (W01/W02/W03 all approach the 150 doors along the glazed corridor, compass 228 to 250 indoors). Indoor GPS of the node and of the video ends (about (-5, -13)) is 9 m away; within its error. doorFacing northeast = back along the approach; the 09-24 plaque said east."
+      "notes": "CS-20260925-1238 obs #4 (no doorSide recorded). Position estimated: 18.4 m from H7 at bearing 205 (W01/W02/W03 all approach the 150 doors along the glazed corridor, compass 228 to 250 indoors). Indoor GPS of the node and of the video ends (about (-5, -13)) is 9 m away; within its error. doorFacing northeast = back along the approach; the 09-24 plaque said east. Moved by the owner in the phone editor on site (2026-09-26): the 150 double doors are straight down the corridor from the Walters side door."
     },
     {
       "id": "H1",
@@ -304,32 +304,33 @@
     {
       "from": "E-WM",
       "to": "H7",
-      "lengthM": 4.65,
+      "lengthM": 12.4,
       "kind": "hallway",
       "estimated": true,
-      "notes": "Estimated split of walk #2 (E-WM>R-150, 30 steps, 23.05 m, heading wandered +-62: a turn at the lobby)."
+      "notes": "Owner on site 2026-09-26: from the revolving door walk ahead about 3 steps, then down the short steps turning left onto the 150 corridor. Length is the straight-line distance.",
+      "hint": "ahead, then down the short steps on your left"
     },
     {
       "from": "H7",
       "to": "R-150",
-      "lengthM": 18.4,
+      "lengthM": 21.1,
       "kind": "hallway",
       "hint": "along the windows",
       "estimated": true,
-      "notes": "Estimated split of walk #2; the rest (4.65 m) is E-WM>H7. W01 walks this corridor in about 20 steps."
+      "notes": "Straight corridor from the bottom of the short steps to the 150 double doors (owner on site 2026-09-26). Length is the straight-line distance."
     },
     {
       "from": "E-WS",
       "to": "H7",
-      "lengthM": 7.73,
+      "lengthM": 6.0,
       "kind": "hallway",
       "estimated": true,
-      "notes": "Estimated: W02 (Walters side to 150) is 34 steps (26.1 m); minus H7>R-150. Walk #6 (R-150>E-WS) counted only 23 steps in 67 s; the step counter undercounts, so the larger count is used."
+      "notes": "Straight from the Walters side door onto the 150 corridor (owner on site 2026-09-26). Length is the straight-line distance."
     },
     {
       "from": "E-WS",
       "to": "H1",
-      "lengthM": 11.53,
+      "lengthM": 7.6,
       "kind": "hallway",
       "estimated": true,
       "notes": "Estimated from W04: 15 steps from the Walters side door to the hallway glass doors."
@@ -337,7 +338,7 @@
     {
       "from": "H7",
       "to": "H1",
-      "lengthM": 7.73,
+      "lengthM": 1.6,
       "kind": "hallway",
       "estimated": true,
       "notes": "Estimated from W03: glass doors (step 84) to Room 150 (step 118) is 34 steps (26.1 m); minus H7>R-150."

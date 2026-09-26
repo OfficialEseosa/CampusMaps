@@ -40,7 +40,7 @@ class ValidatorReportTest {
      * Known and documented (docs/19): P2's 608 route walks the 30 m main hallway H1-H2 with no sign logged on it. Not papered over
      * with an invented anchor; the next CS visit adds one (a room plaque half way along).
      */
-    private val known = setOf("CS rule 8: route E-WM->R-608: 45.4 m without an anchor between E-WM and H2")
+    private val known = setOf("CS rule 8: route E-WM->R-608: 44.0 m without an anchor between E-WM and H2") // the main hallway H1-H2 has no sign (owner's on-site geometry 2026-09-26)
 
     @Test fun noErrorsOnTheRealFilesWithImagesAndDemoRoutes() {
         val errors = listOf("KL", "CS", "CSE").flatMap { code -> report(code).filter { it.severity == Severity.ERROR }.map { "$code $it" } }
