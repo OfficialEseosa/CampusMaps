@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,6 +79,20 @@ fun ARSceneScope.OutdoorArrowNodes(arrows: List<WorldArrow>, groundY: Float, mat
         }
     }
 }
+
+/** The outdoor chain from [provider], already gated (TRACKING and accuracy under 10 m) by the provider. Clay chevrons. */
+@Composable
+fun ARSceneScope.OutdoorArrowLayer(provider: com.campusmaps.geo.ArCoreGeospatialProvider) {
+    val frame by provider.arrows.collectAsState()
+    if (frame.arrows.isEmpty()) return
+    val clay = remember(materialLoader) { materialLoader.createUnlitColorInstance(Clay) }
+    OutdoorArrowNodes(frame.arrows, frame.groundY, clay)
+}
+
+/** Indoor chip text after the entrance hand-over: the name of the route node nearest the user on their floor. */
+fun nearestRouteNodeName(state: com.campusmaps.guidance.GuidanceState): String =
+    state.route.points.filter { it.floor == state.floor && !it.node.isOutdoor }
+        .minByOrNull { it.position.distanceTo(state.pose.position) }?.node?.name ?: "Floor ${state.floor}"
 
 // Board 04 colours.
 private val Clay = Color(0xFFC67C4E)
