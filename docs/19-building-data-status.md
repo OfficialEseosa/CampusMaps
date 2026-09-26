@@ -4,7 +4,7 @@
 
 **Validator counts (2026-09-25 late, `ValidatorReportTest`: rule 7 against the real asset folder, rule 8 on the router's top demo routes):** KL 0 errors, 3 warnings (photos pending), 2 info; CS 1 error (known, rule 8 on the P2 route, see below), 0 warnings, 5 info; CSE 0, 0, 0. Before this pass: KL 3 errors, CS 3 errors.
 
-All three files load, pass the validator with no ERROR or WARN (rules 1 to 6, 9 and 11; rule 7 file check is a hook the app wires to its assets, and a test checks CS's two image files) and pass the routing tests. Rule 10 reports every entrance without posted hours as INFO (5 in CS, both of KL's, none in CSE); that is expected until the hours are photographed. Rule 8 (anchor spacing on demo routes) is not wired to a test and fails on the CS routes (see below). **Measured so far: CS** (survey CS-20260925-1238: 4 entrance fixes, 7 edges, elevator, stairs-down, walking speed, floor height, 2 image anchors) **and KL** (survey export KL-20260926-0946, see the Klaus section; KL is now 0 errors, 1 warning, 1 info). CSE is entirely estimated. Everything else carries `"estimated": true` and a `notes` string. Search the files for `estimated` before trusting a number.
+All three files load, pass the validator with no ERROR or WARN (rules 1 to 6, 9 and 11; rule 7 file check is a hook the app wires to its assets, and a test checks CS's two image files) and pass the routing tests. Rule 10 reports every entrance without posted hours as INFO (5 in CS, both of KL's, none in CSE); that is expected until the hours are photographed. Rule 8 (anchor spacing on demo routes) is not wired to a test and fails on the CS routes (see below). **Measured so far: CS** (survey CS-20260925-1238: 4 entrance fixes, 7 edges, elevator, stairs-down, walking speed, floor height, 2 image anchors) **and KL** (survey export KL-20260926-0946, see the Klaus section; KL is now 0 errors, 1 warning, 1 info). **CSE** is measured since 2026-09-26 (survey export CSE-20260926-1530, one floor-1 route, see its section). Everything else carries `"estimated": true` and a `notes` string. Search the files for `estimated` before trusting a number.
 
 ## Conventions used in the files
 
@@ -13,7 +13,7 @@ All three files load, pass the validator with no ERROR or WARN (rules 1 to 6, 9 
 - Access: windows are matched on the day they open; a window whose close is not after its open runs into the next morning. If any `public` window covers `now` the door is public, otherwise card-only. No `access` at all means always public.
 - Extensions to the docs/02 schema (ignored by anything that does not know them): `estimated`, `notes` on nodes, edges, anchors, elevators; `demoDestinations` (rule 6 input); `startPoints` (P1, P2 as lat/lng); `stairsDownSecondsPerFloor` (default 18); `stairsId` on stairs nodes (family for rule 4, defaults to the id minus its trailing `-<floor>`).
 - Placeholder anchors use ids `<code>-A9x` so they never collide with survey anchors (`A01` upward).
-- **Entrance geo (outdoor leg):** every outdoor entrance carries `lat`, `lng` and `headingDeg`. In the files `headingDeg` is the bearing the door **faces out** (0 = north, clockwise), because that is what the survey tool records (standing on the threshold facing out). The heading you face when **walking in** is that plus 180: core `Node.walkInHeadingDeg`, app `GraphNode.headingDeg`, and `CoreBridge.entranceGeo(...)` (`headingDeg` = walk in, `facingOutDeg` = file value). Rule 11 (WARN) fires for an outdoor entrance missing any of the three. CS entrances and the KL Research Wing door are survey fixes (Walters side placed by hand); CSE entrances are map guesses flagged `estimated`.
+- **Entrance geo (outdoor leg):** every outdoor entrance carries `lat`, `lng` and `headingDeg`. In the files `headingDeg` is the bearing the door **faces out** (0 = north, clockwise), because that is what the survey tool records (standing on the threshold facing out). The heading you face when **walking in** is that plus 180: core `Node.walkInHeadingDeg`, app `GraphNode.headingDeg`, and `CoreBridge.entranceGeo(...)` (`headingDeg` = walk in, `facingOutDeg` = file value). Rule 11 (WARN) fires for an outdoor entrance missing any of the three. CS entrances and the KL Research Wing door are survey fixes (Walters side placed by hand); the CSE Main entrance is a survey fix (2026-09-26).
 - `imagePending: true` on an image anchor = the photo is not taken yet; its missing file is a rule 7 WARN instead of an ERROR. Remove the flag when the photo lands in `assets/anchors/<code>/`.
 
 ## Classroom South (CS.json), Demo B
@@ -170,15 +170,30 @@ Both are well under 60 m (docs/01). Rule 8 passes with the A05 placeholder at `H
 
 ## Student Center East (CSE.json), Demo C
 
-**Nothing measured.** A 12-node placeholder: `E-MAIN` (access Mon to Thu 08:00 to 22:00, Fri 08:00 to 20:00, Sat 12:00 to 20:00, Sun 14:00 to 20:00 public, from engagement.gsu.edu, card-only otherwise, inferred), `E-WEST` (public 07:30 to 23:00, assumed, the redirect target), lobby `H1`, elevator lobby `H3`, west corridor `H2`, elevators and stairs floors 1 to 2, floor-2 corridor `H4`–`H5`, `R-220`. Five text anchors (`STUDENT CENTER EAST`, `ELEVATORS`, `FLOOR 2`, `210-230`, `220`). On Saturday at 21:00 the router gives "Heads up: Main entrance is card-only now. Using West entrance instead."; at 14:00 no notice.
+**Measured 2026-09-26** from the survey export `CSE-20260926-1530` (15:30, stride 0.768 m calibrated by a GPS walk) and its video "Passio Go sign to Speaker Auditorium". Floor 1 only. The placeholder (West entrance, elevators, stairs, floor 2, Room 220, five text anchors) is gone: the survey never saw it.
 
-### What the CSE survey must capture (Saturday trip, before 20:00)
+**Layout in plain words.** From the Passio Go stop you walk about 7 m south-east to the STUDENT CENTER EAST doors (a glass vestibule, two sets of double doors). Inside is the main lobby (elevators on the left, information desk, a SEPTEMBER MOVIES poster tower). Turn right there and walk about 11 m toward the SPEAKER'S AUDITORIUM lettering on the end wall; the auditorium's double doors are in the recess on the right.
 
-1. Every entrance: ENTRANCE node with GPS and facing, and a **Note photo of the posted hours and card reader** for each. Find the one that stays open latest; that is the redirect target.
-2. The route to the demo room: ENTRANCE → junctions → elevator or stairs → floor 2 → room, with a node at every turn and an edge walk per segment (2 to 3 turns).
-3. The redirect leg: GPS at the closed entrance and the open one, and the outdoor walk between them (an edge with the step count).
-4. Text anchors on the route, large text preferred: the elevator sign, the floor number, room range signs, the room plaque. Take the 2 to 3 m shot for the glasses OCR check.
-5. One elevator ride 1 → 2 and one stair climb 1 → 2.
+| Id | What | Source |
+|---|---|---|
+| `E-MAIN` Main entrance | GPS 3 m (11 samples), headingDeg 307.8 facing out (spread 57; the walk in says 303) | obs #3 "Door 1" |
+| `H1` the main lobby | 5.38 m from the door at 150 deg (walk #4, 7 steps) | obs #5 |
+| `R-AUD` Speaker Auditorium | 10.76 m from the lobby at 230 deg (walk #6, 14 steps), doors on the right, `doorFacing` southeast | obs #7, video |
+| `P1` Passio Go stop (start point) | GPS 3 m; the walk to the door is 9 steps = 6.9 m, GPS says 3.5 m | obs #1 |
+| `CSE-A01` text anchor, SPEAKER'S AUDITORIUM | facing 46.5, centre 2.5 m, width 5 m estimated; arcoreimg 0, OCR only | obs #8 |
+| `CSE-A02` image anchor, poster tower in the lobby | facing 332.2, arcoreimg 80, widthM 1.02 (from the estimated 50 cm) | obs #9 |
+
+Walk #4 (door to lobby) wandered ±42 deg: the owner turned round after the facing-out reading and began the right turn at the lobby. The video shows a single turn, at the lobby (about 150 to 230 deg), so no extra node was added. Walk #6's GPS says 5 m against 11 m walked; indoor GPS was 7 m, so the steps win.
+
+**Access (owner facts, not estimated).** One entrance. Public Mon to Thu 08:00 to 22:00 and Fri 08:00 to 20:00 (weekday hours from engagement.gsu.edu); PantherCard-only at every other time, all weekend included (`Mon-Sun 00:00-24:00 card`, public wins over card).
+
+**Demo route** (outdoor start P1, Saturday 21:00):
+- With the PantherCard: Main entrance, tag "PantherCard", 19.6 m, under a minute. "Walk to Main entrance" (3.5 m; near the door "Tap your PantherCard at the Main entrance") / "Turn right at the main lobby, toward the Speaker's Auditorium sign" (8.9 m) / "Speaker Auditorium is on your right" (19.6 m). S1b card: "Main entrance needs a PantherCard right now" (Saturday has no public window, so no "after 8 pm"; on a Friday at 21:00 it says "after 8 pm").
+- Without the card: **no route**. "No route to Speaker Auditorium: every entrance is card-only at Sat 21:00." There is no public door, so "Route me around" has nothing to route to; the S1b card only shows over route options, so on the no-route screen there is no "I have my card" button (turn the setting on in Settings).
+- Weekday daytime (Tue 14:00): Main entrance, no card, no notice.
+- The expo is Sunday 09:30: card-only. Turn the PantherCard setting on for the demo.
+
+**Still estimated:** both anchor widths (not taped), CSE-A01's position (placed at the room node; the wall is a few metres further), CSE-A02's height (recorded 50 cm; set to 1.0 m, the tower's centre), the door heading (5 deg between the facing-out reading and the walk in), the outdoor leg (GPS 3.5 m against 6.9 m walked). Validator: 0 errors, 0 warnings, 0 info.
 
 ## Regenerating a draft from a survey
 
