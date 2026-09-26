@@ -11,7 +11,8 @@ import com.campusmaps.data.shortcuts.FakeShortcutBackend
 import com.campusmaps.data.shortcuts.PhotoStore
 import com.campusmaps.data.shortcuts.ShortcutNotifier
 import com.campusmaps.data.shortcuts.ShortcutRepository
-import com.campusmaps.guidance.SimulatedGlassesLink
+import com.campusmaps.glasses.GlassesMode
+import com.campusmaps.guidance.GlassesLink
 import com.campusmaps.platform.NetworkMonitor
 import com.campusmaps.platform.Speaker
 import com.campusmaps.platform.WatchBridge
@@ -57,7 +58,7 @@ class AppContainer(context: Context) {
         scope = appScope,
         buildingIds = buildings.map { it.id },
     )
-    val glasses by lazy { SimulatedGlassesLink(appScope, speaker) }
+    val glasses: GlassesLink by lazy { GlassesMode.create(appContext, appScope, speaker) }
 
     fun building(id: String): Building =
         buildings.firstOrNull { it.id == id } ?: buildings.firstOrNull { it.id == CoreBridge.DEFAULT_BUILDING_ID } ?: buildings.first()

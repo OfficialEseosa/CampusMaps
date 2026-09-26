@@ -20,8 +20,10 @@ enum class GlassesPhase(val label: String) {
     SPEAKING("Speaking"),
 }
 
-// The seam for the smart glasses. The real glasses SDK implements this later.
+// The seam for the smart glasses. Real glasses: glasses/RealGlassesLink.kt (picked by glasses/GlassesMode.kt).
 interface GlassesLink {
+    // Debug card switch: false "unplugs" the glasses (the real link drops its session and reconnects on true).
+    val connectedFlag: MutableStateFlow<Boolean>
     val connected: StateFlow<Boolean>
     val phase: StateFlow<GlassesPhase>
     val seen: StateFlow<String?>          // Last sign text read, e.g. "ELEVATORS"
@@ -39,7 +41,7 @@ class SimulatedGlassesLink(
     private val speaker: Speaker,
 ) : GlassesLink {
 
-    val connectedFlag = MutableStateFlow(true)
+    override val connectedFlag = MutableStateFlow(true)
     override val connected: StateFlow<Boolean> = connectedFlag.asStateFlow()
 
     private val _phase = MutableStateFlow(GlassesPhase.LOOKING)
