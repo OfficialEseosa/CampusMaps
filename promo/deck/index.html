@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>CampusMaps — HackGT 13</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="vendor/reveal.css">
@@ -87,6 +88,16 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 .closing-mark video{width:300px;display:block;margin:-40px -20px}
 .closing-line{font-size:56px;font-weight:800;letter-spacing:-.02em;line-height:1}
 .closing-sub{font-size:26px;color:var(--mute);margin-top:12px;max-width:1100px}
+.tech{display:grid;grid-template-columns:1fr 1fr 1fr;gap:26px;margin-top:30px}
+.tech .card{padding:26px 28px}
+.tech .card h3{font-size:27px;color:var(--fg);margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.tech .card h3 span{font-size:16px;color:var(--clay);font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.tech .card p{font-size:20px;line-height:1.38;color:var(--mute)}
+.tech .card p b{color:var(--fg);font-weight:600}
+.tech .card p em{color:var(--warm);font-style:normal}
+.tech .card code{font-family:Consolas,monospace;color:var(--teal);font-size:19px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tags i{font-style:normal;font-size:16px;padding:4px 12px;border-radius:999px;border:1px solid rgba(122,208,224,.4);color:var(--teal)}
 .ok::marker{color:var(--teal)}
 .todo::marker{color:var(--gold)}
 
@@ -177,6 +188,33 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
   <div class="stage" data-module="anchors"></div>
 </section>
 
+<!-- 6b Under the hood -->
+<section data-transition="convex">
+  <p class="eyebrow">Under the hood</p>
+  <h2>Native Android, one pure-Kotlin core, three device APIs.</h2>
+  <div class="tech">
+    <div class="card t"><h3>Route engine <span>core/</span></h3>
+      <p><b>Dijkstra</b> over the building graph, pure Kotlin, no Android. Weighs every entrance × stairs or elevator, elevator wait, door hours and PantherCard windows. <em>now</em> is a parameter, never the clock.</p>
+      <div class="tags"><i>45 unit tests</i><i>reroute</i><i>avoid stairs</i><i>student shortcuts</i></div></div>
+    <div class="card t"><h3>Localisation <span>outdoors → door → room</span></h3>
+      <p><b>ARCore Geospatial API</b> (VPS, ~1 m) to the door, the door's measured heading + compass for the first indoor fix, <b>ML Kit text recognition</b> on room signs and <b>ARCore Augmented Images</b> on posters for exact fixes, the <b>barometer</b> for floors.</p>
+      <div class="tags"><i>GPS</i><i>VPS</i><i>OCR</i><i>image anchors</i><i>barometer</i></div></div>
+    <div class="card t"><h3>Phone AR <span>Galaxy S25 Ultra</span></h3>
+      <p><b>ARCore 1.56 + SceneView 4.38</b> in Jetpack Compose. World-locked metre-wide arrows, an amber turn arrow, a floating post on the room. <b>Maps Compose</b> for the outdoor leg.</p>
+      <div class="tags"><i>Kotlin</i><i>Compose</i><i>CameraX</i></div></div>
+    <div class="card t"><h3>Glasses <span>Ray-Ban Meta Gen 2</span></h3>
+      <p><b>Meta Wearables Device Access Toolkit</b>. The glasses capture a burst of 2–3 stills, the phone recognises the sign, the glasses speak the turn. Camera and audio never overlap.</p>
+      <div class="tags"><i>burst ~2 s</i><i>speak</i><i>hands-free</i></div></div>
+    <div class="card t"><h3>Watch <span>Galaxy Watch 8 Classic</span></h3>
+      <p><b>Wear OS</b> app, <b>Data Layer API</b> from the phone. Each <code>RouteStep</code> lands in under a second: arrow, distance, and a haptic pattern per step type. Ambient mode keeps the arrow up.</p>
+      <div class="tags"><i>Wear Compose</i><i>8 haptic patterns</i></div></div>
+    <div class="card t"><h3>Voice + data <span>offline first</span></h3>
+      <p><b>ElevenLabs</b> voice per campus, every sentence cached on the phone, Android TTS as fallback. Buildings are <b>JSON graphs</b> made by walking them with the survey tool, checked by a validator.</p>
+      <div class="tags"><i>3 buildings</i><i>survey converter</i><i>validator</i></div></div>
+  </div>
+  <aside class="notes">No network in the demo path except the outdoor Geospatial leg. core/ is JVM-only and tested with ./gradlew :core:test.</aside>
+</section>
+
 <!-- 7 Phone AR -->
 <section data-transition="convex">
   <p class="eyebrow">On the phone</p>
@@ -260,15 +298,16 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 import { doorsModule } from './js/doors.js';
 gsap.registerPlugin(MotionPathPlugin);
 
+const V = '?v=' + Date.now();
 const loaders = {
-  building3d: () => import('./js/building3d.js'),
-  arch: () => import('./js/arch.js'),
-  pathfind: () => import('./js/pathfind.js'),
-  anchors: () => import('./js/anchors.js'),
-  armock: () => import('./js/armock.js'),
-  haptics: () => import('./js/haptics.js'),
+  building3d: () => import('./js/building3d.js' + V),
+  arch: () => import('./js/arch.js' + V),
+  pathfind: () => import('./js/pathfind.js' + V),
+  anchors: () => import('./js/anchors.js' + V),
+  armock: () => import('./js/armock.js' + V),
+  haptics: () => import('./js/haptics.js' + V),
   doors: async () => ({ mount: doorsModule }),
-  lost: () => import('./js/lost.js'),
+  lost: () => import('./js/lost.js' + V),
 };
 const live = new Map(); // el -> handle
 
@@ -281,7 +320,11 @@ async function activate(section) {
       live.set(el, loaders[name]().then(m => m.mount(el, el.dataset.opts ? JSON.parse(el.dataset.opts) : {})));
     }
     let h;
-    try { h = await live.get(el); } catch (e) { console.error('module', name, e); live.delete(el); continue; }
+    try { h = await live.get(el); } catch (e) {
+      console.error('module', name, e); live.delete(el);
+      el.innerHTML = `<div style="padding:40px;font-size:24px;color:#e05a4e">Module "${name}" failed to load: ${e.message}<br><span style="font-size:18px;color:#bbb">Hard-reload (Ctrl+Shift+R). For the 3D slides, WebGL must be on: chrome://gpu → "WebGL: Hardware accelerated".</span></div>`;
+      continue;
+    }
     if (section.classList.contains('present')) h.play?.();
   }
   // Staggered entrance for the slide's copy and cards.
