@@ -63,6 +63,7 @@ class ExploreViewModel(private val app: AppContainer, context: Context) : ViewMo
 
     private var computedFrom: LatLngPoint? = null
     private var directionsJob: Job? = null
+    private val directionsCache = DirectionsCache()
 
     init {
         viewModelScope.launch {
@@ -123,7 +124,12 @@ class ExploreViewModel(private val app: AppContainer, context: Context) : ViewMo
             val straight = fix?.let { OutdoorRoutes.straight(it.point, plan.entrance) }
             _state.update { it.copy(plan = plan, route = straight, steps = OutdoorRoutes.sheetSteps(straight, plan), noRoute = null) }
             if (fix == null || !directions.enabled || !app.network.online.value) return@launch
-            val walked = directions.walking(fix.point, plan.entrance) ?: return@launch
+            val key = "${plan.buildingId}/${plan.entranceId}" // entrance ids like E-N repeat across buildings
+            val walked = if (directionsCache.shouldRequest(key, fix.point)) {
+                android.util.Log.i("Directions", "request for $key")
+                directions.walking(fix.point, plan.entrance).also { directionsCache.store(key, fix.point, it) }
+            } else directionsCache.cached()
+            walked ?: return@launch
             _state.update { if (it.plan == plan) it.copy(route = walked, steps = OutdoorRoutes.sheetSteps(walked, plan)) else it }
         }
     }
