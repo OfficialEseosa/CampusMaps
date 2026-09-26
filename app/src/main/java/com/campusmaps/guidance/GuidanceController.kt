@@ -256,7 +256,10 @@ class GuidanceController(
         // The pretend student waits in the car for the pressure; if it does not move for 10 s, the timer rides instead.
         if (progress.stepIndex != holdStep) { holdStep = progress.stepIndex; holdSinceMs = 0L; holdGaveUp = false }
         if (ride && b.ready && simulator.riding) {
-            if (holdSinceMs == 0L) holdSinceMs = nowMs
+            if (holdSinceMs == 0L) {
+                holdSinceMs = nowMs
+                runCatching { android.util.Log.i("Baro", "simulated student in the car at floor ${pose.floor}: waiting for the pressure") }
+            }
             if (!holdGaveUp && nowMs - holdSinceMs > HOLD_GIVE_UP_MS && b.movedSinceRideStart() < 0.15) {
                 holdGaveUp = true
                 runCatching { android.util.Log.i("Baro", "pressure still after ${HOLD_GIVE_UP_MS / 1000} s in the ride: simulator's timer rides instead") }
@@ -275,6 +278,12 @@ class GuidanceController(
                 b.rezero(pose.floor, "step done on foot")
             }
         }
+        // During a held ride the barometer is the authority: a floor it found before the pretend student reached the car
+        // is applied once the student stands in it.
+        if (hold) {
+            if (!positionSource.usingAr && simulator.riding && pose.floor != b.floor && nowMs - baroCommitAtMs > 1_000) onBarometerFloor(b.floor)
+            return
+        }
         // Something else set the floor (debug jump, timed ride, camera height): believe it and re-zero there.
         if (pose.floor != b.floor && nowMs - baroCommitAtMs > 1_000) {
             b.rezero(pose.floor, "floor ${pose.floor} set by the position source")
@@ -283,6 +292,11 @@ class GuidanceController(
     }
 
     private fun onBarometerFloor(floor: Int) {
+        if (!positionSource.usingAr && !simulator.riding) {
+            // The pretend student is still walking to the elevator: apply the floor when they stand in the car.
+            runCatching { android.util.Log.i("Baro", "floor $floor noted; applied when the simulated student reaches the elevator") }
+            return
+        }
         baroCommitAtMs = System.currentTimeMillis()
         // The ride's node on that floor, nearest to where we are on the route.
         val pts = route.points
