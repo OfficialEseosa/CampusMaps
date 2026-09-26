@@ -16,6 +16,7 @@ fun GuidanceState.toArRouteInput(): ArRouteInput? {
     } else null
     val dest = ArDestination(destination.name, destination.position.x, -destination.position.y, destination.floor)
     val here = route.points.getOrNull(progress.segmentIndex)?.node?.id ?: "here"
-    val placement = RouteArrows.placementAt(pts, progress.segmentIndex.coerceIn(0, pts.lastIndex), here)
+    val i = progress.segmentIndex.coerceIn(0, pts.lastIndex)
+    val placement = RouteArrows.placementAt(pts, i, here)?.copy(walkInDeg = route.points.getOrNull(i)?.node?.headingDeg)
     return ArRouteInput(pts, floor, turn, dest, placement, building.core.floorHeightM)
 }

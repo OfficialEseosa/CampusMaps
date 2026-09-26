@@ -12,7 +12,7 @@ class RouteArrowsTest {
     )
 
     @Test fun chainSpacingCarriesAcrossTheCorner() {
-        val a = RouteArrows.chain(pts, 1)
+        val a = RouteArrows.chain(pts, 1, spacing = 1.5)
         // 9 m of floor-1 path, first arrow at 0.75 m, every 1.5 m: 0.75, 2.25, ..., 8.25 -> 6 arrows.
         assertEquals(6, a.size)
         assertEquals(0.75, a[0].y, 1e-9)
@@ -21,6 +21,15 @@ class RouteArrowsTest {
         assertEquals(2.25, east.x, 1e-9); assertEquals(6.0, east.y, 1e-9)
         assertEquals(-90.0, east.yawDeg, 1e-9)
         assertTrue(RouteArrows.chain(pts, 2).all { it.x == 3.0 })
+    }
+
+    @Test fun defaultSpacingIsLiveViewSize() {
+        // 2.5 m: 1.25, 3.75, then 6.25 (0.25 m past the corner) and 8.75 -> 4 arrows on the 9 m of floor 1.
+        val a = RouteArrows.chain(pts, 1)
+        assertEquals(2.5, RouteArrows.SPACING_M, 1e-9)
+        assertEquals(4, a.size)
+        assertEquals(1.25, a[0].y, 1e-9)
+        assertEquals(0.25, a[2].x, 1e-9); assertEquals(6.0, a[2].y, 1e-9)
     }
 
     @Test fun clearRadiusDropsArrowsAtTheTurn() {

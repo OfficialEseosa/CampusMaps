@@ -35,6 +35,10 @@ import androidx.compose.ui.unit.dp
 import com.campusmaps.loc.AnchorImages
 import com.campusmaps.loc.ArFeed
 import com.campusmaps.loc.ArTracking
+import com.campusmaps.loc.AutoPlace
+import com.campusmaps.loc.AutoPlaceGate
+import com.campusmaps.loc.CompassHeading
+import com.campusmaps.loc.CompassOffset
 import com.campusmaps.loc.BuildingToWorld
 import com.campusmaps.loc.CameraSample
 import com.campusmaps.loc.ImageFix
@@ -45,30 +49,56 @@ import com.google.ar.core.AugmentedImage
 import com.google.ar.core.Config
 import com.google.ar.core.Frame
 import com.google.ar.core.Plane
+import com.google.ar.core.Pose
+import com.google.ar.core.Session
 import com.google.ar.core.TrackingFailureReason
 import com.google.ar.core.TrackingState
 import dev.romainguy.kotlin.math.Float2
 import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.ar.ARScene
 import kotlin.math.hypot
+import kotlinx.coroutines.delay
 
 private const val TAG = "ArGuidance"
+/** Automatic placement logs under this tag ("auto-placed at S1, compass 212 deg, building yaw 37 deg"). */
+private const val AUTO_TAG = "ArGuidanceView"
 
+// ---- Arrow look (Google Maps Live View size). Spacing along the route is RouteArrows.SPACING_M (2.5 m). ----
+/** Floor chevron width across the walking direction, metres. */
+private const val ARROW_WIDTH_M = 0.9f
+/** Floor chevron length along the walking direction, metres. */
+private const val ARROW_LENGTH_M = 0.6f
+/** Thickness of each chevron arm, measured along the walking direction, metres (was 0.2 on the old 0.3 m arrow). */
+private const val ARROW_ARM_M = 0.28f
+/** Height of the floor chevrons above the floor: flat on it, 2 cm up so the camera image does not swallow them. */
+private const val ARROW_LIFT_M = 0.02
+/** The amber next-turn chevron is this wide (same shape, scaled). */
+private const val TURN_ARROW_WIDTH_M = 1.6f
+private const val TURN_ARROW_LIFT_M = 0.03
+/** Floor chevrons this close to the next-turn arrow are dropped so the two do not overlap. */
+private const val TURN_CLEAR_RADIUS_M = 1.6
 /** Arrows beyond this are hidden (docs/05: the ribbon must not visibly cross walls). */
-private const val HIDE_BEYOND_M = 15.0
+private const val HIDE_BEYOND_M = 20.0
 /** Arrows between this and [HIDE_BEYOND_M] use the dim material. */
-private const val DIM_BEYOND_M = 10.0
+private const val DIM_BEYOND_M = 12.0
 private const val DEST_LABEL_MAX_M = 40.0
+/** How long the "Route placed from your compass" hint stays. */
+private const val AUTO_HINT_MS = 2_000L
+private const val AUTO_HINT = "Route placed from your compass. Tap the floor to re-place if it looks off."
 
 /**
- * Flat chevron, 0.3 m wide and 0.5 m long, drawn in ShapeNode's XY plane pointing +Y. The ShapeNode is rotated -90 degrees
- * about X, which lays it on the floor pointing local -Z with its face up; the parent node's yaw ([FloorArrow.yawDeg])
- * turns it along the route. Counter-clockwise order.
+ * Flat chevron, [ARROW_WIDTH_M] wide and [ARROW_LENGTH_M] long, drawn in ShapeNode's XY plane pointing +Y. The ShapeNode is
+ * rotated -90 degrees about X, which lays it on the floor pointing local -Z with its face up; the parent node's yaw
+ * ([FloorArrow.yawDeg]) turns it along the route. Counter-clockwise order: tip, left outer, left back, notch, right back,
+ * right outer.
  */
-private val CHEVRON = listOf(
-    Float2(0f, 0.25f), Float2(-0.15f, -0.05f), Float2(-0.15f, -0.25f),
-    Float2(0f, -0.05f), Float2(0.15f, -0.25f), Float2(0.15f, -0.05f),
-)
+private val CHEVRON = run {
+    val w = ARROW_WIDTH_M / 2; val l = ARROW_LENGTH_M / 2
+    val outer = -l + ARROW_ARM_M   // y of the outer corners
+    val notch = -l + (l - outer)   // inner edge parallel to the outer edge, so both arms are ARROW_ARM_M thick
+    listOf(Float2(0f, l), Float2(-w, outer), Float2(-w, -l), Float2(0f, notch), Float2(w, -l), Float2(w, outer))
+}
+private const val TURN_ARROW_SCALE = TURN_ARROW_WIDTH_M / ARROW_WIDTH_M
 
 /** Mutable per-frame data that must not trigger recomposition. */
 private class FrameBox {
@@ -81,6 +111,12 @@ private class FrameBox {
     var lastAnchorCheckMs = 0L
     /** Last sign fix per anchor id (ms), to re-snap at most every [IMAGE_FIX_EVERY_MS]. */
     val lastImageFix = HashMap<String, Long>()
+    /** Automatic placement: the once-per-route rule, the compass-to-ARCore offset, and when TRACKING began. */
+    val gate = AutoPlaceGate()
+    val compassOffset = CompassOffset()
+    var trackingSinceMs: Long? = null
+    /** True once this view drew an outdoor leg: the next placement is at the entrance snap (door heading). */
+    var sawOutdoor = false
 }
 
 private const val IMAGE_FIX_EVERY_MS = 1500L
@@ -117,6 +153,18 @@ fun ArGuidanceView(
     var message by remember { mutableStateOf<String?>(null) }
     /** Camera position for distance culling, updated only when it moves 0.3 m (limits recomposition). */
     var camForCull by remember { mutableStateOf<Vec3?>(null) }
+    /** The transform came from automatic placement: any floor tap re-places (no need to press "Re-place route" first). */
+    var autoPlaced by remember { mutableStateOf(false) }
+
+    // Compass for automatic placement. Null sensor (no magnetometer): today's behaviour, the user taps to place.
+    val compass = remember { CompassHeading(context, ArFeed.originLat, ArFeed.originLng) }
+    DisposableEffect(compass) {
+        if (!compass.start()) Log.i(AUTO_TAG, "no compass: auto-placement off, tap the floor to place")
+        onDispose { compass.stop() }
+    }
+    LaunchedEffect(message) {
+        if (message == AUTO_HINT) { delay(AUTO_HINT_MS); if (message == AUTO_HINT) message = null }
+    }
 
     // The world frame belongs to this ARCore session: forget the alignment when the AR view leaves.
     DisposableEffect(Unit) {
@@ -142,14 +190,16 @@ fun ArGuidanceView(
     val latestT by rememberUpdatedState(buildingToWorld)
     val setT by rememberUpdatedState(onBuildingToWorld)
 
-    fun onFrame(frame: Frame) {
+    fun onFrame(session: Session, frame: Frame) {
         val cam = frame.camera
         if (cam.trackingState != tracking) {
             tracking = cam.trackingState
             Log.i(TAG, "tracking $tracking ${cam.trackingFailureReason}")
         }
         sendSample(frame)
-        if (cam.trackingState != TrackingState.TRACKING) return
+        if (cam.trackingState != TrackingState.TRACKING) { box.trackingSinceMs = null; return }
+        val nowMs = System.currentTimeMillis()
+        if (box.trackingSinceMs == null) box.trackingSinceMs = nowMs
         val p = cam.pose
         box.camWorld = Float3(p.tx(), p.ty(), p.tz())
         val c = camForCull
@@ -163,7 +213,14 @@ fun ArGuidanceView(
 
         box.pendingTap?.let { tap ->
             box.pendingTap = null
-            placeAt(frame, tap, latestInput, setT, box)?.let { msg -> message = msg; armed = msg.startsWith("No floor") }
+            placeAt(frame, tap, latestInput, setT, box)?.let { msg -> message = msg; armed = armed && msg.startsWith("No floor") }
+            if (box.gate.overridden) autoPlaced = false
+        }
+
+        // Automatic placement at the route's current node (docs/05, w6): no tap needed.
+        if (latestOutdoor != null) box.sawOutdoor = true
+        autoPlace(session, frame, nowMs, latestInput, latestT != null, latestOutdoor != null, floorSeen, compass, box, setT)?.let {
+            message = AUTO_HINT; autoPlaced = true
         }
 
         // Sign snap: a tracked anchor image fixes the whole transform (docs/03 section 1).
@@ -182,6 +239,7 @@ fun ArGuidanceView(
             box.anchor = img.createAnchor(cp)
             box.anchorRef = Vec3(cp.tx().toDouble(), cp.ty().toDouble(), cp.tz().toDouble())
             setT(t)
+            box.gate.override(); autoPlaced = false
             message = "Located from sign ${anchor.id}"
             Log.i(TAG, "sign fix ${anchor.id} floor ${anchor.floor}: centre=(%.2f, %.2f, %.2f) yaw=%.1f deg".format(cp.tx(), cp.ty(), cp.tz(), t.yawDeg))
         }
@@ -213,7 +271,7 @@ fun ArGuidanceView(
                 config.depthMode = Config.DepthMode.DISABLED
                 latestOutdoor?.configure(session, config)
             },
-            onSessionUpdated = { session, frame -> onFrame(frame); latestOutdoor?.onFrame(session, frame) },
+            onSessionUpdated = { session, frame -> onFrame(session, frame); latestOutdoor?.onFrame(session, frame) },
             onTrackingFailureChanged = { failure = it },
             onSessionFailed = { e -> Log.e(TAG, "AR session failed", e); onFail(e.message ?: e.javaClass.simpleName) },
         ) {
@@ -228,7 +286,9 @@ fun ArGuidanceView(
             if (t != null && input != null && tracking == TrackingState.TRACKING) {
                 val floor = input.floor
                 val turn = input.nextTurn
-                val arrows = remember(input.points, floor, turn) { RouteArrows.chain(input.points, floor, clearAround = turn?.let { it.x to it.y }) }
+                val arrows = remember(input.points, floor, turn) {
+                    RouteArrows.chain(input.points, floor, clearAround = turn?.let { it.x to it.y }, clearRadius = TURN_CLEAR_RADIUS_M)
+                }
                 val camB = camForCull?.let { t.toBuilding(it) }
                 fun dist(x: Double, y: Double) = camB?.let { hypot(x - it.first, y - it.second) } ?: 0.0
                 val dy = (floor - t.refFloor) * t.floorHeightM
@@ -238,13 +298,13 @@ fun ArGuidanceView(
                     arrows.forEachIndexed { i, a ->
                         val d = dist(a.x, a.y)
                         if (d <= HIDE_BEYOND_M) key(i) {
-                            Node(position = Float3(a.x.toFloat(), (dy + 0.02).toFloat(), (-a.y).toFloat()), rotation = Float3(0f, a.yawDeg.toFloat(), 0f)) {
+                            Node(position = Float3(a.x.toFloat(), (dy + ARROW_LIFT_M).toFloat(), (-a.y).toFloat()), rotation = Float3(0f, a.yawDeg.toFloat(), 0f)) {
                                 ShapeNode(polygonPath = CHEVRON, materialInstance = if (d > DIM_BEYOND_M) dim else cyan, rotation = Float3(-90f, 0f, 0f))
                             }
                         }
                     }
                     if (turn != null && dist(turn.x, turn.y) <= HIDE_BEYOND_M) {
-                        Node(position = Float3(turn.x.toFloat(), (dy + 0.04).toFloat(), (-turn.y).toFloat()), rotation = Float3(0f, turn.yawDeg.toFloat(), 0f), scale = Float3(2.2f)) {
+                        Node(position = Float3(turn.x.toFloat(), (dy + TURN_ARROW_LIFT_M).toFloat(), (-turn.y).toFloat()), rotation = Float3(0f, turn.yawDeg.toFloat(), 0f), scale = Float3(TURN_ARROW_SCALE)) {
                             ShapeNode(polygonPath = CHEVRON, materialInstance = amber, rotation = Float3(-90f, 0f, 0f))
                         }
                     }
@@ -267,7 +327,7 @@ fun ArGuidanceView(
         }
 
         // Debug place flow: while armed, a transparent layer catches the floor tap (overlays above it still get theirs).
-        if (armed) {
+        if (armed || autoPlaced) {
             Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { box.pendingTap = it } })
         }
 
@@ -302,10 +362,62 @@ private fun sendSample(frame: Frame) {
         else -> ArTracking.STOPPED
     }
     val cp = cam.displayOrientedPose
+    val (fx, fz) = headingOf(frame)
+    ArFeed.sample(CameraSample(tr, cp.tx().toDouble(), cp.ty().toDouble(), cp.tz().toDouble(), fx, fz, System.currentTimeMillis()))
+}
+
+/** Horizontal forward direction of the phone in ARCore world: camera forward, or screen-up when looking at the floor. */
+private fun headingOf(frame: Frame): Pair<Double, Double> {
+    val cp = frame.camera.displayOrientedPose
     val z = cp.zAxis; val y = cp.yAxis
     var fx = -z[0].toDouble(); var fz = -z[2].toDouble()
     if (hypot(fx, fz) < 0.3) { fx = y[0].toDouble(); fz = y[2].toDouble() }
-    ArFeed.sample(CameraSample(tr, cp.tx().toDouble(), cp.ty().toDouble(), cp.tz().toDouble(), fx, fz, System.currentTimeMillis()))
+    return fx to fz
+}
+
+/**
+ * Automatic placement (w6). Every TRACKING frame it pairs the compass bearing with ARCore's bearing of the same camera
+ * direction ([CompassOffset]); once [AutoPlaceGate] allows it (floor plane seen, or 3 s of tracking; compass steady for 1 s;
+ * no transform yet; not on the outdoor leg; not placed for this route yet; no tap or sign fix), it puts the placement node on
+ * the floor under the camera, turned by the compass. At the entrance snap after an outdoor leg the door's walk-in heading
+ * replaces the compass. Returns the transform it set, or null.
+ */
+private fun autoPlace(
+    session: Session, frame: Frame, nowMs: Long, input: ArRouteInput?, hasTransform: Boolean, outdoorLeg: Boolean,
+    floorSeen: Boolean, compass: CompassHeading, box: FrameBox, setT: (BuildingToWorld?) -> Unit,
+): BuildingToWorld? {
+    val pl = input?.placement ?: return null
+    val (fx, fz) = headingOf(frame)
+    val cb = compass.bearingDeg
+    if (cb != null && nowMs - compass.timeMs < 250) box.compassOffset.add(nowMs, cb, AutoPlace.arBearingDeg(fx, fz))
+    val offset = box.compassOffset.offsetDeg()
+    val atEntrance = box.sawOutdoor && pl.walkInDeg != null
+    val headingReady = offset != null || atEntrance
+    if (!compass.available && !atEntrance) return null // no compass: the user taps, as before
+    val routeKey = input.points.hashCode()
+    val since = box.trackingSinceMs?.let { nowMs - it }
+    if (!box.gate.shouldPlace(routeKey, hasTransform, outdoorLeg, since, floorSeen, headingReady)) return null
+
+    val cameraCompass = offset?.let { AutoPlace.wrap360(AutoPlace.arBearingDeg(fx, fz) + it) }
+    val bearing = if (atEntrance) AutoPlace.entranceBearingDeg(cameraCompass, pl.walkInDeg!!) else cameraCompass ?: return null
+    val cp = frame.camera.pose
+    val planes = session.getAllTrackables(Plane::class.java).filter {
+        it.trackingState == TrackingState.TRACKING && it.type == Plane.Type.HORIZONTAL_UPWARD_FACING && it.subsumedBy == null
+    }
+    val (floorY, onPlane) = AutoPlace.floorY(cp.ty().toDouble(), planes.map { it.centerPose.ty().toDouble() })
+    val t = AutoPlace.transform(cp.tx().toDouble(), floorY, cp.tz().toDouble(), fx, fz, bearing, ArFeed.originHeadingDeg,
+        pl.x, pl.y, pl.floor, input.floorHeightM) ?: return null
+    box.gate.placed(routeKey)
+    val floorPose = Pose.makeTranslation(cp.tx(), floorY.toFloat(), cp.tz())
+    box.anchor?.detach()
+    box.anchor = try { session.createAnchor(floorPose) } catch (e: Exception) { Log.w(AUTO_TAG, "no anchor for auto-place", e); null }
+    box.anchorRef = Vec3(cp.tx().toDouble(), floorY, cp.tz().toDouble())
+    setT(t)
+    val buildingYaw = AutoPlace.buildingBearingDeg(bearing, ArFeed.originHeadingDeg)
+    Log.i(AUTO_TAG, "auto-placed at ${pl.label}, ${if (atEntrance) "door %.0f deg (compass %s)".format(pl.walkInDeg, cameraCompass?.let { "%.0f deg".format(it) } ?: "none") else "compass %.0f deg".format(bearing)}, " +
+        "building yaw %.0f deg; floor %s %.2f m below camera, after %d ms of tracking".format(
+            buildingYaw, if (onPlane) "plane" else "assumed", cp.ty() - floorY, since ?: 0L))
+    return t
 }
 
 /** Hit-tests the tap on an upward floor plane and sets the transform. Returns a user message. */
@@ -317,10 +429,7 @@ private fun placeAt(frame: Frame, tap: Offset, input: ArRouteInput?, setT: (Buil
     } ?: return "No floor there yet. Move the phone slowly over the floor, then tap again."
 
     // Phone heading: camera forward (-Z of the display-oriented pose), flattened. Looking straight down, use screen-up.
-    val cp = frame.camera.displayOrientedPose
-    val z = cp.zAxis; val y = cp.yAxis
-    var fx = -z[0].toDouble(); var fz = -z[2].toDouble()
-    if (hypot(fx, fz) < 0.3) { fx = y[0].toDouble(); fz = y[2].toDouble() }
+    val (fx, fz) = headingOf(frame)
 
     val hp = hit.hitPose
     val world = Vec3(hp.tx().toDouble(), hp.ty().toDouble(), hp.tz().toDouble())
@@ -330,6 +439,7 @@ private fun placeAt(frame: Frame, tap: Offset, input: ArRouteInput?, setT: (Buil
     box.anchor = hit.createAnchor()
     box.anchorRef = world
     setT(t)
+    box.gate.override()
     Log.i(TAG, "placed at ${pl.label} floor ${pl.floor}: hit=$world heading=(%.2f, %.2f) yaw=%.1f deg".format(fx, fz, t.yawDeg))
     return "Route placed at ${pl.label}"
 }
