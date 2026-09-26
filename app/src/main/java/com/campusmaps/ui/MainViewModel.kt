@@ -54,6 +54,8 @@ data class Selection(
     val destinationId: String? = null,
     val startId: String? = null, // Null = the building's default start
     val query: String = "",
+    // The phone's fix when the trip was started from the Explore map: adds the "Your location" start node (CoreBridge.withGpsStart).
+    val gps: com.campusmaps.data.model.OutdoorStart? = null,
 )
 
 // Everything S1 and S1b draw.
@@ -129,7 +131,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         app.clock.mode,
         app.shortcuts.approvedEdges,
     ) { settings, sel, recentIds, _, approved ->
-        val building = app.building(settings.buildingId)
+        val building = ExploreStart.building(app.building(settings.buildingId), sel.gps)
         val start = sel.startId?.let { building.nodes[it] } ?: building.node(building.defaultStartId)
         val destination = sel.destinationId?.let { building.nodes[it] }
         val plan = destination?.let {
@@ -315,17 +317,18 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
           try {
             if (settings.value.buildingId != buildingId) app.settings.setBuilding(buildingId)
             val building = app.building(buildingId)
-            val startId = building.outdoorStarts.minByOrNull { (_, p) ->
-                if (lat == null || lng == null) 0.0 else com.campusmaps.data.Geo.haversineM(lat, lng, p.lat, p.lng)
-            }?.key ?: building.defaultStartId
-            updateSelection { Selection(destinationId = destinationId, startId = startId) }
+            val (startId, gps) = ExploreStart.start(building, lat, lng) // "Your location" at the fix (ui/ExploreStart.kt)
+            updateSelection { Selection(destinationId = destinationId, startId = startId, gps = gps) }
             val t = kotlinx.coroutines.withTimeoutOrNull(3_000L) {
-                trip.first { it.building.id == buildingId && it.destination?.id == destinationId && it.start.id == startId && it.plan != null }
+                trip.first { it.building.id == buildingId && it.destination?.id == destinationId && it.start.id == startId &&
+                    (gps == null || it.building.outdoorStarts[startId] == gps) && it.plan != null }
             } ?: return@launch
             when (val plan = t.plan) {
                 is RoutePlan.Options -> {
                     _fromExplore.value = true
-                    startSession((plan.options.firstOrNull { it.entrance?.id == entranceId } ?: plan.options.first()).route, glasses = false)
+                    val option = com.campusmaps.route.CoreRouter.optionForEntrance(t.building, plan.options, entranceId)
+                    android.util.Log.i("Explore", "S2 from ${t.start.id}: map entrance $entranceId, S2 entrance ${option.entrance?.id}")
+                    startSession(option.route, glasses = false)
                     handoff.startHandoff() // plays the 900 ms map-to-AR transition (no jump cut)
                 }
                 is RoutePlan.AlreadyHere -> startSession(plan.route, glasses = false)

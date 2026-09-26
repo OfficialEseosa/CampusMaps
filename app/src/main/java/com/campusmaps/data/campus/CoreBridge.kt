@@ -175,6 +175,48 @@ object CoreBridge {
         )
     }
 
+    /** Id and name of the synthetic start node for the phone's real position (Explore "Start AR navigation"). */
+    const val GPS_START_ID = "GPS"
+    const val GPS_START_NAME = "Your location"
+
+    /** How far outside its nearest entrance the "Your location" node is drawn (P1 and P2 are also about 30 m out). */
+    private const val GPS_DRAW_MAX_M = 30.0
+
+    /**
+     * [b] plus an OUTDOOR start node [GPS_START_ID] at the phone's fix, so CoreRouter routes it with core
+     * Start.Outside(lat, lng) exactly like P1 / P2, and S2 goes to the same entrance the Explore map picked.
+     *
+     * Routing and the outdoor distance use the real lat / lng (outdoorStarts). The node's x / y (what the floor-plan map and
+     * the simulated walker use) is the fix projected into building metres, pulled in along the line to the nearest outdoor
+     * entrance so it is at most [GPS_DRAW_MAX_M] outside that door: a fix 500 m away would otherwise shrink the S2 minimap
+     * to a dot. The walker starts there. "Your location" is listed first in "Where are you?".
+     */
+    fun withGpsStart(b: Building, lat: Double, lng: Double): Building {
+        val core = b.core
+        val entrances = core.nodes.filter { it.isOutdoorEntrance }
+        val groundFloor = entrances.minOfOrNull { it.floor } ?: core.nodes.minOf { it.floor }
+        val (fx, fy) = Geo.toBuilding(core.origin, lat, lng)
+        val real = Point(fx, -fy)
+        val nearest = entrances.filter { it.lat != null && it.lng != null }
+            .minByOrNull { Geo.haversineM(lat, lng, it.lat!!, it.lng!!) }
+            ?.let { b.nodes[it.id] }
+        val position = if (nearest == null) real else {
+            val d = nearest.position.distanceTo(real)
+            if (d <= GPS_DRAW_MAX_M) real else nearest.position + (real - nearest.position) * (GPS_DRAW_MAX_M / d)
+        }
+        val node = GraphNode(GPS_START_ID, GPS_START_NAME, NodeKind.OUTDOOR, groundFloor, position)
+        val nodes = LinkedHashMap(b.nodes).apply { put(GPS_START_ID, node) }
+        val drawEdges = entrances.map { ent ->
+            GraphEdge(GPS_START_ID, ent.id, EdgeKind.WALK, position.distanceTo(nodes.getValue(ent.id).position))
+        }
+        return b.copy(
+            nodes = nodes,
+            edges = b.edges.filter { it.from != GPS_START_ID } + drawEdges,
+            startIds = listOf(GPS_START_ID) + b.startIds.filter { it != GPS_START_ID },
+            outdoorStarts = LinkedHashMap<String, OutdoorStart>().apply { put(GPS_START_ID, OutdoorStart(lat, lng)); putAll(b.outdoorStarts - GPS_START_ID) },
+        )
+    }
+
     /**
      * Where the outdoor leg ends: the entrance of a route option, for the map and the Geospatial arrow.
      * [headingDeg] is the compass bearing (0 = north, clockwise) you face when walking IN through the door; [facingOutDeg] is the

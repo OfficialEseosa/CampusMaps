@@ -20,6 +20,19 @@ class WatchBridge(context: Context, private val scope: CoroutineScope) {
     // Connected watch count seen on the last send (-1 = not asked yet). Shown in the debug overlay.
     val connectedCount = kotlinx.coroutines.flow.MutableStateFlow(-1)
 
+    // "Watch not reachable" at most once per 30 s: without a watch every step send failed and logged about once a second.
+    private var lastUnreachableLogMs = 0L
+    private var unreachableSkipped = 0
+
+    private fun logUnreachable(e: Exception) {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (lastUnreachableLogMs != 0L && now - lastUnreachableLogMs < UNREACHABLE_LOG_MS) { unreachableSkipped++; return }
+        val more = if (unreachableSkipped > 0) " ($unreachableSkipped more since the last line)" else ""
+        Log.i(TAG, "Watch not reachable: ${e.message}$more")
+        lastUnreachableLogMs = now
+        unreachableSkipped = 0
+    }
+
     fun send(step: WatchStep) {
         if (step == lastSent) return // Same step, no need to buzz the watch again
         lastSent = step
@@ -34,7 +47,7 @@ class WatchBridge(context: Context, private val scope: CoroutineScope) {
             } catch (e: Exception) {
                 // No Play services or no watch: the phone works fine without it.
                 connectedCount.value = 0
-                Log.i(TAG, "Watch not reachable: ${e.message}")
+                logUnreachable(e)
             }
         }
     }
@@ -55,13 +68,14 @@ class WatchBridge(context: Context, private val scope: CoroutineScope) {
                 }
                 Log.i(TAG, "Watch clear sent to ${nodes.size} watch(es)")
             } catch (e: Exception) {
-                Log.i(TAG, "Watch not reachable: ${e.message}")
+                logUnreachable(e)
             }
         }
     }
 
     private companion object {
         const val TAG = "WatchBridge"
+        const val UNREACHABLE_LOG_MS = 30_000L
     }
 }
 

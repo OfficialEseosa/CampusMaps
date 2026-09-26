@@ -63,6 +63,9 @@ class GuidanceController(
     private var lastRerouteAt = 0L
     private var chipUntil = 0L
     private var lastSpokenStep = -1
+    // "Locate me" shows after 2 s of low confidence and hides after 1 s of good confidence, so it does not blink (qa-phone N5).
+    private val locate = LocateHysteresis()
+    private var rawLocating = false
     private var loopJob: Job? = null
     private val startedAt = System.currentTimeMillis()
 
@@ -241,11 +244,23 @@ class GuidanceController(
             distanceToStepM = distance,
             pose = pose,
             progress = progress,
-            locating = pose.confidence < LOCATE_CONFIDENCE && !progress.arrived,
+            locating = locatingNow(pose) && !progress.arrived,
             arrived = progress.arrived,
             rerouteCount = rerouteCount,
             showRerouteChip = System.currentTimeMillis() < chipUntil,
         )
+    }
+
+    private fun locatingNow(pose: Pose): Boolean {
+        val raw = pose.confidence < LOCATE_CONFIDENCE && !progress.arrived
+        if (raw != rawLocating) {
+            rawLocating = raw
+            runCatching {
+                android.util.Log.d("Position", "confidence ${"%.2f".format(pose.confidence)} ${if (raw) "below" else "above"} $LOCATE_CONFIDENCE " +
+                    "(source ${if (positionSource.usingAr) "AR" else "simulator"})")
+            }
+        }
+        return locate.update(raw, System.currentTimeMillis())
     }
 
     // The closest walkable node on the student's floor (same inside / outside as now).
