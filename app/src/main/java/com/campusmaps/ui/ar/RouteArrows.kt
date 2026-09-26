@@ -18,7 +18,11 @@ data class FloorArrow(val x: Double, val y: Double, val dirX: Double, val dirY: 
 }
 
 /** Where "Place route here" pins the route: the user's point, its floor, and the direction they should face. */
-data class Placement(val label: String, val floor: Int, val x: Double, val y: Double, val dirX: Double, val dirY: Double)
+data class Placement(
+    val label: String, val floor: Int, val x: Double, val y: Double, val dirX: Double, val dirY: Double,
+    /** Compass bearing you face walking in, when this node is an outdoor entrance (auto-placement at the entrance snap). */
+    val walkInDeg: Double? = null,
+)
 
 /** Destination marker: a post and a floating label [heightM] above the floor. */
 data class ArDestination(val label: String, val x: Double, val y: Double, val floor: Int)
@@ -41,7 +45,8 @@ data class ArRouteInput(
 )
 
 object RouteArrows {
-    const val SPACING_M = 1.5
+    /** Distance between floor chevrons along the route (Live View size arrows need more room than the old 1.5 m). */
+    const val SPACING_M = 2.5
 
     /**
      * Chevrons every [spacing] m along the whole route on [floor] (world-locked: they do not depend on progress, so
