@@ -35,6 +35,13 @@ object GuidanceEngine {
     const val APPROACH_M = 8.0
     // Further than this from the route line means the student went another way.
     const val OFF_ROUTE_M = 6.0
+    // While the route was placed from the compass and its heading is not refined yet (loc/YawRefiner), a 15 to 30 degree
+    // compass error puts the camera 5 to 10 m beside the line after 20 m: reroute only past this.
+    const val OFF_ROUTE_UNREFINED_M = 12.0
+
+    // Off-route tolerance for the reroute trigger: wide until a compass placement has been refined by walking.
+    fun offRouteLimitM(compassPlaced: Boolean, refined: Boolean): Double =
+        if (compassPlaced && !refined) OFF_ROUTE_UNREFINED_M else OFF_ROUTE_M
     // An "Exit toward" step is usually 3 m before a turn (docs/21 open issue 6, docs/22 #16). It stays up until the
     // student is past its end point, and for at least this long, so it is read instead of flashing.
     const val EXIT_MIN_SHOW_MS = 2_500L
@@ -63,11 +70,12 @@ object GuidanceEngine {
                 val (d, t) = projectOntoSegment(pose.position, a.position, b.position)
                 d to (a.cumulativeM + t * (b.cumulativeM - a.cumulativeM))
             } else {
-                // Elevator / stairs hop: counts if we are in the shaft between those floors.
+                // Elevator / stairs hop: counts if we are between those floors. Distance to the flight seen from above
+                // (a stair run like Klaus's glass staircase climbs 30 m sideways; an elevator's two ends coincide).
                 val low = min(a.floor, b.floor)
                 val high = max(a.floor, b.floor)
                 if (pose.floor !in low..high) continue
-                pose.position.distanceTo(a.position) to a.cumulativeM
+                projectOntoSegment(pose.position, a.position, b.position).first to a.cumulativeM
             }
             // "<=" prefers later segments on ties, so we move forward at corners and shafts.
             if (distance <= bestDistance + 1e-6) {

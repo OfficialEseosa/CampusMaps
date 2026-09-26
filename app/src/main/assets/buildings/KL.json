@@ -108,18 +108,8 @@
       "floor": 1,
       "x": -3.74,
       "y": 18.06,
-      "doorFacing": "west",
-      "notes": "KL-20260926-0946 obs #24 'Room 1116W' (Seminar Room West, sign KL-A03). Dead-reckoned from E-RWD along walk #25 (24 steps, heading 168.3 back to the door, spread 9.6). doorFacing west from the W03 video (walks north at 347, turns right to face the door at about 108, so the door faces about 288 into the corridor); the node heading (148.4, door ahead, i.e. facing 328) roughly agrees; the sign photo's compass (148.4) says the opposite and is treated as a bad indoor reading."
-    },
-    {
-      "id": "ST-2",
-      "type": "stairs",
-      "name": "Glass staircase, floor 2",
-      "floor": 2,
-      "x": 11.32,
-      "y": 22.32,
-      "estimated": true,
-      "notes": "KL-20260926-0946 stairs obs #7 (1 -> 2). No walk on floor 2: placed half way between ST-1 and ST-3 (the flights run from the atrium towards the elevators). Not connected to a floor-2 hallway."
+      "doorFacing": "south",
+      "notes": "2026-09-26 owner at Klaus: walking from the glass staircase (H1) along the route, the door is straight ahead, so doorFacing is south (the door faces the walker coming north from H1; the arrival reads 'Room 1116W is ahead'). Was west (from the W03 video, read as 'on your right'). KL-20260926-0946 obs #24 'Room 1116W' (Seminar Room West, sign KL-A03). Dead-reckoned from E-RWD along walk #25 (24 steps, heading 168.3 back to the door, spread 9.6). doorFacing west from the W03 video (walks north at 347, turns right to face the door at about 108, so the door faces about 288 into the corridor); the node heading (148.4, door ahead, i.e. facing 328) roughly agrees; the sign photo's compass (148.4) says the opposite and is treated as a bad indoor reading."
     },
     {
       "id": "ST-3",
@@ -289,19 +279,11 @@
     },
     {
       "from": "ST-1",
-      "to": "ST-2",
-      "lengthM": 0,
-      "kind": "stairs",
-      "floors": 1,
-      "notes": "KL-20260926-0946 stairs obs #7 (1 -> 2, 25.3 s)"
-    },
-    {
-      "from": "ST-2",
       "to": "ST-3",
       "lengthM": 0,
       "kind": "stairs",
-      "floors": 1,
-      "notes": "KL-20260926-0946 stairs obs #8 (2 -> 3, 20.0 s)"
+      "floors": 2,
+      "notes": "KL-20260926-0946 stairs obs #7 (1 -> 2, 25.3 s) and #8 (2 -> 3, 20.0 s): one glass staircase from the atrium to floor 3, timed at 2 x 21.6 = 43.2 s. The floor-2 landing (was ST-2, placed half way, no floor-2 hallway) is not a node: a reroute from it read 'Take the stairs up one floor' while the route said 'up two floors'. Guidance matches a climber anywhere along the flight (ST-1 to ST-3, floors 1 to 3)."
     }
   ],
   "anchors": [

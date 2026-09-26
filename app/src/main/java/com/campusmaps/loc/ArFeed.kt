@@ -1,6 +1,9 @@
 package com.campusmaps.loc
 
 import com.campusmaps.data.Anchor
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import com.campusmaps.data.Building as CoreBuilding
 
 /**
@@ -28,6 +31,21 @@ object ArFeed {
 
     @Volatile private var sink: ArPositionProvider? = null
 
+    private val _yaw = MutableStateFlow(YawStatus())
+    /** Where the route's heading came from and whether walking has refined it (YawRefiner). Read by the reroute rule. */
+    val yaw: StateFlow<YawStatus> = _yaw.asStateFlow()
+
+    private val _placements = MutableStateFlow(0)
+    /**
+     * Counts placements (compass, door, floor tap, sign fix). Heading refinements and anchor drift change the transform
+     * without counting here, so the barometer re-zeroes only when the user really stands on a known floor.
+     */
+    val placements: StateFlow<Int> = _placements.asStateFlow()
+
+    fun setYaw(s: YawStatus) { _yaw.value = s }
+
+    fun placed() { _placements.value++ }
+
     fun setBuilding(core: CoreBuilding) {
         anchors = core.anchors.associateBy { it.id }
         floorHeightM = core.floorHeightM
@@ -43,5 +61,5 @@ object ArFeed {
     fun sample(s: CameraSample) { sink?.onSample(s) }
 
     /** The AR view left the screen. */
-    fun viewGone() { sink?.markGone() }
+    fun viewGone() { sink?.markGone(); _yaw.value = YawStatus() }
 }
