@@ -36,8 +36,8 @@ phone at the demo hour.
 `anchors.imgdb` (5 KB) holds one image, `KL-A01`, width 4.80 m, built with:
 
 ```powershell
-# image_list.txt:  KL-A01|app\src\mainssetsnchors\KL\KL-A01.jpg|4.80
-& $exe build-db --input_image_list_path=image_list.txt --output_db_path=app\src\mainssetsnchorsnchors.imgdb
+# image_list.txt:  KL-A01|app\src\main\assets\anchors\KL\KL-A01.jpg|4.80
+& $exe build-db --input_image_list_path=image_list.txt --output_db_path=app\src\main\assets\anchors\anchors.imgdb
 ```
 
 Now that the file exists, the app loads it and no longer builds a run-time database from the jpg files (`loc/AnchorImages.kt`); the
