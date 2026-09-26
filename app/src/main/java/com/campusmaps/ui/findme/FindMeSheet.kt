@@ -117,7 +117,7 @@ fun FindMeSheet(building: Building, onResult: (FindMeMatch) -> Unit, onCancel: (
         try {
             while (isActive && match == null) {
                 val bitmap = frames.receive()
-                val text = runCatching { withContext(Dispatchers.Default) { reader.read(bitmap) } }
+                val text = runCatching { withContext(Dispatchers.Default) { FindMeOcr.read(reader, bitmap) } }
                     .onFailure { Log.w(TAG, "OCR failed: $it") }.getOrDefault("")
                 if (text.isNotBlank()) seen = text.lines().filter { it.isNotBlank() }.joinToString("  ")
                 val m = withContext(Dispatchers.Default) { voter.onFrame(text) }
