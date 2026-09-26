@@ -44,6 +44,7 @@ class WatchBridge(context: Context, private val scope: CoroutineScope) {
                 for (node in nodes) {
                     messageClient.sendMessage(node.id, WatchProtocol.STEP_PATH, bytes).await()
                 }
+                Log.i(TAG, "Step sent to ${nodes.size} watch(es): ${step.type} ${step.bigText}")
             } catch (e: Exception) {
                 // No Play services or no watch: the phone works fine without it.
                 connectedCount.value = 0
