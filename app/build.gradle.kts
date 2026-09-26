@@ -42,6 +42,9 @@ android {
         // Explore map: empty key = map tiles stay blank and the route is a straight line (no Directions call).
         buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        // Spoken directions: ElevenLabs key from local.properties `ELEVENLABS_API_KEY=...` (never committed).
+        // Empty = the phone's own text to speech, as before.
+        buildConfigField("String", "ELEVENLABS_API_KEY", "\"${localProps.getProperty("ELEVENLABS_API_KEY", "")}\"")
     }
 
     buildTypes {
