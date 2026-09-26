@@ -27,6 +27,15 @@ data class Placement(
 /** Destination marker: a post and a floating label [heightM] above the floor. */
 data class ArDestination(val label: String, val x: Double, val y: Double, val floor: Int)
 
+/** Colour of the card door sign: amber when the user carries the card, red when the door will not open for them. */
+enum class DoorSignTone { ATTENTION, BLOCKED }
+
+/**
+ * Floating sign at an entrance that is card-only right now ("Tap your PantherCard" or "PantherCard required"),
+ * drawn like [ArDestination]: a post and a label above the door, in building coordinates.
+ */
+data class ArDoorSign(val label: String, val x: Double, val y: Double, val floor: Int, val tone: DoorSignTone)
+
 /**
  * Everything the AR layer needs, in building coordinates. Build it from whatever the host app uses for routes
  * (our UiState: [fromUiState] in ArInputs.kt; the teammate's GuidanceEngine: see docs/05 "Porting").
@@ -42,6 +51,8 @@ data class ArRouteInput(
     /** The user's current point and facing direction, for the debug place flow. Null hides the button. */
     val placement: Placement? = null,
     val floorHeightM: Double = 3.8,
+    /** The card-only entrance on this route, if any. */
+    val cardDoor: ArDoorSign? = null,
 )
 
 object RouteArrows {
