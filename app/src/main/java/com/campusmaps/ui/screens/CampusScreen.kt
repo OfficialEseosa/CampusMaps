@@ -2,7 +2,14 @@ package com.campusmaps.ui.screens
 
 import androidx.compose.ui.platform.testTag
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -19,7 +26,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -150,8 +156,8 @@ private fun ColumnScope.CampusCard(campus: Campus, mapped: Int, onClick: () -> U
             .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick)
             .testTag("campus_${campus.code}"),
     ) {
-        // Big faded code in the bottom right corner, cut by the card edge.
-        CampusGhostCode(campus.code, fontSize = 170.sp, letterSpacing = (-8).sp, color = p.ghost, x = 14.dp, y = 40.dp)
+        // Big faded mascot in the bottom right corner, cut by the card edge (was the campus code in letters).
+        CampusGhostMark(campus.markRes, color = p.ghost, x = 18.dp, y = 30.dp, sizing = Modifier.fillMaxHeight(0.66f))
 
         Column(
             Modifier.fillMaxSize().padding(22.dp),
@@ -214,30 +220,28 @@ private fun DeviceChip(icon: ImageVector, bg: Color, tint: Color) {
     }
 }
 
-// A huge faded code pinned to the bottom right and pushed past the edge by (x, y); the parent clips it.
+// The campus mascot as a faded watermark: pinned to the bottom right, pushed past the edge by (x, y), tinted with
+// the palette's ghost colour (the same colour and alpha the letters used). `sizing` sets its height; width follows.
 @Composable
-internal fun androidx.compose.foundation.layout.BoxScope.CampusGhostCode(
-    text: String,
-    fontSize: TextUnit,
-    letterSpacing: TextUnit,
+internal fun androidx.compose.foundation.layout.BoxScope.CampusGhostMark(
+    @DrawableRes markRes: Int,
     color: Color,
     x: Dp,
     y: Dp,
+    sizing: Modifier,
 ) {
-    Text(
-        text,
+    val painter = painterResource(markRes)
+    val ratio = painter.intrinsicSize.let { if (it.height > 0f) it.width / it.height else 1f }
+    Image(
+        painter,
+        contentDescription = null,
         modifier = Modifier
             .align(Alignment.BottomEnd)
             .offset(x = x, y = y)
-            .wrapContentSize(Alignment.BottomEnd, unbounded = true),
-        style = TextStyle(
-            fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = fontSize,
-            lineHeight = fontSize, letterSpacing = letterSpacing,
-            lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None),
-        ),
-        color = color,
-        maxLines = 1,
-        softWrap = false,
+            .then(sizing)
+            .aspectRatio(ratio, matchHeightConstraintsFirst = true),
+        contentScale = ContentScale.Fit,
+        colorFilter = ColorFilter.tint(color),
     )
 }
 

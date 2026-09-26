@@ -106,7 +106,7 @@ private fun BuildingsHeader(campus: Campus, otherName: String, p: CampusPalette,
             .background(p.accent)
             .drawBehind { drawCampusRings(Offset(size.width, 0f), 38.dp, 39.5.dp, p.ring) },
     ) {
-        CampusGhostCode(campus.code, fontSize = 130.sp, letterSpacing = (-6).sp, color = p.ghost, x = 6.dp, y = 30.dp)
+        CampusGhostMark(campus.markRes, color = p.ghost, x = 10.dp, y = 22.dp, sizing = Modifier.height(150.dp))
 
         Column(
             Modifier
