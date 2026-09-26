@@ -73,6 +73,6 @@ class KlausRefreshTest {
         val draft = cse.copy(nodes = cse.nodes.map { it.copy(access = null) }, demoDestinations = emptyList())
         val b = HandTuned.keep(draft, cse).building
         assertEquals(cse.node("E-MAIN").access, b.node("E-MAIN").access)
-        assertEquals(listOf("R-220"), b.demoDestinations)
+        assertEquals(listOf("R-AUD"), b.demoDestinations) // CSE surveyed 2026-09-26: the Speaker Auditorium
     }
 }

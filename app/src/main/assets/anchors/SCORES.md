@@ -7,7 +7,7 @@ Tool: `arcoreimg.exe` from google-ar/arcore-android-sdk tag v1.56.0 (`tools/arco
 |---|---|---|---|
 | CS/CS-A01.jpg (1600x541, greyscale) | CS-A01, CLASSROOM SOUTH sign over the Walters main door | fail: "Failed to get enough keypoints from target image" (below 0) | no |
 | CS/CS-A08.jpg (1600x329, greyscale) | CS-A08, CLASSROOM SOUTH canopy sign, floor-2 main entrance | fail: same message | no |
-| CSE/* | none: no image files exist yet | - | - |
+| CSE/* | see "Student Center East" below (2026-09-26) | - | - |
 
 ## Klaus (survey export KL-20260926-0946, scored 2026-09-26)
 
@@ -33,7 +33,7 @@ mullions and door frames give corners once the contrast is stretched. The width 
 1600 px), so widthM = 3.0 x 1600/999 = 4.80; tape it to fix the scale. Tree shadows cross the facade in the morning: check on the
 phone at the demo hour.
 
-`anchors.imgdb` (5 KB) holds one image, `KL-A01`, width 4.80 m, built with:
+`anchors.imgdb` (5 KB) held one image, `KL-A01`, width 4.80 m (now three: KL-A01, CS-A09, CSE-A02, see "Student Center East" below), built with:
 
 ```powershell
 # image_list.txt:  KL-A01|app\src\main\assets\anchors\KL\KL-A01.jpg|4.80
@@ -94,6 +94,44 @@ Copy-Item reports\w7-csanchor-banner.jpg app\src\main\assets\anchors\CS\CS-A09.j
 Tested in a scratch folder: that list builds a 9.2 KB database (the current one-image file is 5.3 KB) and both names `KL-A01` and
 `CS-A09` are in it. arcoreimg has no list command (actions: build-db, eval-db, eval-img), so the check was the file size and a
 search of the file for the two names.
+
+## Student Center East (survey export CSE-20260926-1530, scored 2026-09-26)
+
+arcoreimg 1.56.0 eval-img, threshold 75. Each photo is 3060x4080; variants downscaled with LANCZOS, JPEG 85.
+
+| Image | Anchor | Score | Kept |
+|---|---|---|---|
+| A01 straight / far / angle, whole, colour 1200x1600 | CSE-A01, SPEAKER'S AUDITORIUM lettering on a plain wall | 0 / 0 / 0 | no |
+| A01 straight / far / angle, whole, greyscale 1200 | same | 0 / 0 / 0 | no |
+| A01 straight / far / angle, whole, greyscale equalised 1200 | same | 0 / 0 / 20 | no |
+| A01 straight, crop to the lettering band, colour and greyscale 1024 / 1200 / 1600 | same | fail (not enough keypoints) | no |
+| A01 straight, same crop, greyscale equalised 1024 / 1200 / 1600 | same | 0 / 0 / 0 | no |
+| A02 straight / far / angle, whole, colour 1200x1600 | CSE-A02, SEPTEMBER MOVIES @ CINEFEST poster tower in the lobby | 35 / 45 / 40 | no |
+| A02 straight / far / angle, whole, greyscale 1200 | same | 35 / 45 / 40 | no |
+| A02 straight / far / angle, whole, greyscale equalised 1200 | same | 80 / 65 / 60 | no (floor and lobby dominate) |
+| A02 straight and far, tight crop to the tower, colour, grey, equalised, 1024 / 1200 / 1600 | same | 0 everywhere | no |
+| A02 straight, tower plus a margin of lobby, colour 1024 / 1200 / 1600 | same | 45 / 50 / 50 | no |
+| A02 straight, tower plus a margin, greyscale 1024 / 1200 / 1600 | same | 45 / 50 / 50 | no |
+| A02 straight, tower plus a margin, greyscale equalised 1024 / 1200 | same | 45 / 40 | no |
+| **CSE/CSE-A02.jpg** = straight, tower plus a margin, greyscale equalised, 860x1600 | CSE-A02 | **80** (twice) | **yes, in anchors.imgdb (widthM 1.02)** |
+
+- `CSE/CSE-A01.jpg` is the straight shot (colour 1200x1600), kept as a hint picture; CSE-A01 is a text anchor (OCR reads the lettering
+  as "SPEA ER'S AUDITC RIUM": thin light letters on a grey wall, like the CLASSROOM SOUTH sign).
+- CSE-A02 width: the export says 50 cm (estimated); the tower is about 420 of 860 px, so widthM = 0.5 x 860/420 = 1.02. Tape it.
+- The poster advertises films up to September 30 and stands on its own base: it can be moved or replaced. Check it before the demo.
+- Scores jump between neighbouring variants (the tight crop scores 0, the wider one 80), so trust only the phone test.
+
+`anchors.imgdb` now holds three images (13.5 KB), built with:
+
+```powershell
+# image_list.txt:
+#   KL-A01|app\src\main\assets\anchors\KL\KL-A01.jpg|4.80
+#   CS-A09|app\src\main\assets\anchors\CS\CS-A09.jpg|1.20
+#   CSE-A02|app\src\main\assets\anchors\CSE\CSE-A02.jpg|1.02
+& $exe build-db --input_image_list_path=image_list.txt --output_db_path=app\src\main\assets\anchors\anchors.imgdb
+```
+
+(build-db also writes `anchors.imgdb-imglist.txt` next to the database; it was deleted, not committed.) The three names were found in the file.
 
 ## How the app uses this folder
 

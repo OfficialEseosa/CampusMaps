@@ -17,7 +17,6 @@ import java.time.LocalDateTime
 class CoreRouterTest {
     private val router = CoreRouter()
     private val satNine = LocalDateTime.of(2026, 9, 26, 21, 0)
-    private val satTwo = LocalDateTime.of(2026, 9, 26, 14, 0)
     private val friNoon = LocalDateTime.of(2026, 9, 25, 12, 0)
 
     private fun options(plan: RoutePlan) = (plan as RoutePlan.Options).options
@@ -65,26 +64,28 @@ class CoreRouterTest {
         assertTrue(stepFree.all { o -> o.route.points.none { it.arrivedBy == EdgeKind.STAIRS } })
     }
 
+    // CSE surveyed 2026-09-26: one entrance (the placeholder West entrance is gone), PantherCard-only all weekend and after
+    // weekday hours. Demo C at Saturday 21:00 is therefore: no route without the card, the Main entrance with it.
     @Test
-    fun demoC_saturdayNightNamesBothEntrances() {
+    fun demoC_saturdayNightNeedsThePanthercard() {
         val cse = TestBuildings.cse
-        val plan = router.plan(cse, cse.defaultStartId, "R-220", satNine, avoidStairs = false) as RoutePlan.Options
-        val notice = plan.lockedNotice!!
-        assertEquals("Main entrance", notice.lockedEntrance)
-        assertEquals("West entrance", notice.usingEntrance)
-        assertEquals("Main entrance is card-only now. Using West entrance instead.", notice.text)
-        assertEquals("West entrance", plan.options.first().entrance!!.name)
-        // Afternoon: no banner, Main entrance first.
-        val day = router.plan(cse, cse.defaultStartId, "R-220", satTwo, avoidStairs = false) as RoutePlan.Options
-        assertNull(day.lockedNotice)
-        assertEquals("Main entrance", day.options.first().entrance!!.name)
+        val noCard = router.plan(cse, cse.defaultStartId, "R-AUD", satNine, avoidStairs = false)
+        assertEquals("No route to Speaker Auditorium: every entrance is card-only at Sat 21:00.", (noCard as RoutePlan.NoRoute).message)
+        val card = router.plan(cse, cse.defaultStartId, "R-AUD", satNine, avoidStairs = false, hasCard = true) as RoutePlan.Options
+        assertNull(card.lockedNotice)
+        assertEquals("Main entrance", card.options.first().entrance!!.name)
+        assertTrue(card.options.first().cardNeeded)
+        for (s in card.options.first().route.steps) println("CSE Sat 21:00 card: ${s.kind} | ${s.text} | ${"%.1f".format(s.completeAtM)} m")
     }
 
     @Test
     fun everyEntranceLockedSaysSo() {
+        // Closed for everyone: an hour no window covers. CSE's door is card-only at every non-public hour, so close it by hand.
         val cse = TestBuildings.cse
-        val plan = router.plan(cse, cse.defaultStartId, "R-220", LocalDateTime.of(2026, 9, 26, 23, 30), avoidStairs = false)
-        assertEquals("No route to Room 220: every entrance is closed at Sat 23:30.", (plan as RoutePlan.NoRoute).message)
+        val core = cse.core.copy(nodes = cse.core.nodes.map { if (it.id == "E-MAIN") it.copy(access = listOf(com.campusmaps.data.AccessWindow("Mon-Sun", "08:00", "09:00", com.campusmaps.data.AccessRule.PUBLIC))) else it })
+        val closed = cse.copy(core = core)
+        val plan = router.plan(closed, cse.defaultStartId, "R-AUD", LocalDateTime.of(2026, 9, 26, 23, 30), avoidStairs = false)
+        assertEquals("No route to Speaker Auditorium: every entrance is closed at Sat 23:30.", (plan as RoutePlan.NoRoute).message)
     }
 
     @Test

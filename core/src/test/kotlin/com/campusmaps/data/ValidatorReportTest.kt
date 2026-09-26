@@ -22,7 +22,7 @@ class ValidatorReportTest {
     private fun demoRoutes(b: Building): List<List<String>> = when (b.code) {
         "KL" -> listOf(top(b, Start.AtNode("S1"), "R-1116W"), top(b, Start.AtNode("S2"), "R-1116W"))
         "CS" -> b.startPoints.map { p -> top(b, Start.Outside(p.lat, p.lng), "R-608") }
-        "CSE" -> listOf(top(b, Start.AtNode("E-MAIN"), "R-220"))
+        "CSE" -> listOf(top(b, Start.AtNode("E-MAIN"), "R-AUD")) // from the door: Sat 14:00 is card-only outside (surveyed 2026-09-26)
         else -> emptyList()
     }
 

@@ -32,7 +32,8 @@ class CoreBridgeTest {
         assertEquals(listOf(CoreBridge.OUTSIDE_ORIGIN_ID), kl.outdoorStarts.keys.toList())
         assertEquals("S1", kl.defaultStartId)
         assertTrue(kl.startIds.indexOf("S1") < kl.startIds.indexOf("H3"))
-        assertEquals(CoreBridge.OUTSIDE_ORIGIN_ID, TestBuildings.cse.defaultStartId)
+        // CSE surveyed 2026-09-26 has a START point (the Passio Go stop), so it starts at P1 like CS.
+        assertEquals("P1", TestBuildings.cse.defaultStartId)
     }
 
     @Test
@@ -53,6 +54,6 @@ class CoreBridgeTest {
     fun demoDestinationsSurvive() {
         assertEquals(listOf("R-1116W", "R-3361"), TestBuildings.kl.demoDestinationIds)
         assertEquals(listOf("R-150", "R-608"), TestBuildings.cs.demoDestinationIds)
-        assertEquals(listOf("R-220"), TestBuildings.cse.demoDestinationIds)
+        assertEquals(listOf("R-AUD"), TestBuildings.cse.demoDestinationIds) // CSE surveyed 2026-09-26: Speaker Auditorium replaces the placeholder Room 220
     }
 }
