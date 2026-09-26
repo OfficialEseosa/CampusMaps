@@ -208,6 +208,8 @@ fun GuidanceScreen(
                     }
                 }
             }
+            // Card-only door and the user carries the card: "Tap your PantherCard at this door" (CardDoorBanner.kt).
+            if (!state.arrived && state.step.kind == StepKind.WALK_TO_ENTRANCE) state.step.cardName?.let { CardDoorBanner(it) }
             if (state.startsOutside && !state.arrived) {
                 RerouteChip(state)
             }

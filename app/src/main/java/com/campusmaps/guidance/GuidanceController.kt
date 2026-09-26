@@ -59,6 +59,8 @@ class GuidanceController(
     private val speaker: Speaker,
     private val speakEnabled: () -> Boolean,
     private val watch: WatchBridge,
+    // "I carry a PantherCard": reroutes may use card-only entrances too.
+    private val hasCard: () -> Boolean = { false },
 ) {
     private var route: Route = firstRoute
     private var progress = Progress()
@@ -66,6 +68,7 @@ class GuidanceController(
     private var lastRerouteAt = 0L
     private var chipUntil = 0L
     private var lastSpokenStep = -1
+    private var cardSpokenStep = -1
     // "Locate me" shows after 2 s of low confidence and hides after 1 s of good confidence, so it does not blink (qa-phone N5).
     private val locate = LocateHysteresis()
     private var rawLocating = false
@@ -196,10 +199,16 @@ class GuidanceController(
         if (state.progress.stepIndex != lastSpokenStep && (pose.confidence >= LOCATE_CONFIDENCE || state.gpsDistance)) {
             val first = lastSpokenStep == -1 && rerouteCount == 0
             lastSpokenStep = state.progress.stepIndex
+            if (state.step.cardName != null && state.bannerText == state.step.approachText) cardSpokenStep = state.progress.stepIndex
             if (speakEnabled() && !glassesMode) {
                 val text = if (state.arrived) state.step.text else state.bannerText
                 speaker.speak(if (first && lockedNotice != null) "Heads up: ${lockedNotice.text} $text" else text)
             }
+        }
+        // Card-only door: "Tap your PantherCard at the Main entrance", said once when the banner switches to it near the door.
+        if (state.step.cardName != null && state.bannerText == state.step.approachText && cardSpokenStep != state.progress.stepIndex) {
+            cardSpokenStep = state.progress.stepIndex
+            if (speakEnabled() && !glassesMode && lastSpokenStep == state.progress.stepIndex) speaker.speak(state.bannerText)
         }
 
         // Show the locked entrance on the watch for the first 4 seconds, then the steps.
@@ -337,6 +346,7 @@ class GuidanceController(
             extraEdges = extraEdges(),
             cameFromId = cameFrom,
             preferMethod = methodOf(route),
+            hasCard = hasCard(),
         ) ?: return
         adopt(newRoute)
     }
@@ -360,6 +370,7 @@ class GuidanceController(
             extraEdges = extraEdges(),
             cameFromId = route.points.getOrNull(progress.segmentIndex)?.node?.takeIf { !it.isOutdoor }?.id,
             preferMethod = methodOf(route),
+            hasCard = hasCard(),
         ) ?: return
         lastRerouteAt = System.currentTimeMillis()
         adopt(newRoute)
