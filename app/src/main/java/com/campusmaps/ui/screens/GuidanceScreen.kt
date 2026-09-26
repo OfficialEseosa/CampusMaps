@@ -637,6 +637,15 @@ private fun BackToRoutesButton(onClick: () -> Unit) {
 @Composable
 private fun OutdoorGeoEffect(geo: com.campusmaps.geo.ArCoreGeospatialProvider?, entrance: com.campusmaps.geo.GeoEntrance?, outdoorLeg: Boolean) {
     if (geo == null) return
+    // Geospatial and FusedLocation need location; ask once on the outdoor leg (the map screen should ask earlier, so the
+    // AR session starts with Geospatial on; a grant here takes effect on the next AR session).
+    val context = LocalContext.current
+    val askLocation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+        android.util.Log.i("Geo", "location permission ${if (ok) "granted" else "denied"}")
+    }
+    LaunchedEffect(outdoorLeg) {
+        if (outdoorLeg && !com.campusmaps.geo.FusedLocationFixes.hasPermission(context)) askLocation.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
     LaunchedEffect(geo, entrance, outdoorLeg) {
         if (outdoorLeg) {
             geo.start()
