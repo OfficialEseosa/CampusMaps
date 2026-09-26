@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -46,7 +47,7 @@ data class WalkState(
 )
 
 // The screens from the flow in section 3 of the handoff.
-enum class Screen { DESTINATION, ROUTES, GUIDANCE, GLASSES, ADD_SHORTCUT }
+enum class Screen { DESTINATION, ROUTES, GUIDANCE, GLASSES, ADD_SHORTCUT, EXPLORE }
 
 // What the user has picked on S1. Kept apart from settings because Reset clears it.
 data class Selection(
@@ -212,7 +213,8 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         when (_screen.value) {
             Screen.ROUTES, Screen.ADD_SHORTCUT -> go(Screen.DESTINATION)
             Screen.GUIDANCE, Screen.GLASSES -> endGuidance()
-            Screen.DESTINATION -> Unit
+            Screen.DESTINATION -> if (_exploreHome.value) go(Screen.EXPLORE)
+            Screen.EXPLORE -> Unit
         }
     }
 
@@ -265,6 +267,47 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             )
         }
         go(if (glasses) Screen.GLASSES else Screen.GUIDANCE)
+    }
+
+    // ---------- Explore (leg 1, outdoor map; outdoor/ExploreViewModel.kt) ----------
+
+    // True once Explore is home (picked at start when far from every building) or was opened; Back on S1 then returns to it.
+    private val _exploreHome = MutableStateFlow(false)
+    val exploreHome: StateFlow<Boolean> = _exploreHome.asStateFlow()
+
+    fun showExploreAsHome() {
+        _exploreHome.value = true
+        if (_screen.value == Screen.DESTINATION && selection.value.destinationId == null) go(Screen.EXPLORE)
+    }
+
+    fun openExplore() {
+        _exploreHome.value = true
+        go(Screen.EXPLORE)
+    }
+
+    // Search field on the Explore top bar.
+    fun openSearchFromExplore() = go(Screen.DESTINATION)
+
+    // "Start AR navigation" on Explore: same building, room and entrance as the map, started from the outdoor start point
+    // nearest the student, then the same S2 path S1b uses (startSession).
+    fun startFromExplore(buildingId: String, destinationId: String, entranceId: String, lat: Double?, lng: Double?) {
+        if (!settled()) return
+        viewModelScope.launch {
+            if (settings.value.buildingId != buildingId) app.settings.setBuilding(buildingId)
+            val building = app.building(buildingId)
+            val startId = building.outdoorStarts.minByOrNull { (_, p) ->
+                if (lat == null || lng == null) 0.0 else com.campusmaps.data.Geo.haversineM(lat, lng, p.lat, p.lng)
+            }?.key ?: building.defaultStartId
+            updateSelection { Selection(destinationId = destinationId, startId = startId) }
+            val t = kotlinx.coroutines.withTimeoutOrNull(3_000L) {
+                trip.first { it.building.id == buildingId && it.destination?.id == destinationId && it.start.id == startId && it.plan != null }
+            } ?: return@launch
+            when (val plan = t.plan) {
+                is RoutePlan.Options -> startSession((plan.options.firstOrNull { it.entrance?.id == entranceId } ?: plan.options.first()).route, glasses = false)
+                is RoutePlan.AlreadyHere -> startSession(plan.route, glasses = false)
+                else -> go(Screen.ROUTES)
+            }
+        }
     }
 
     // ---------- S2 / S3 ----------
