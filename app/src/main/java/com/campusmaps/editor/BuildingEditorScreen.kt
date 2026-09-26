@@ -27,7 +27,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -81,16 +80,25 @@ import kotlin.math.min
 
 private val Ink = Color(0xFF313131)
 private val Cream = Color(0xFFF9F2ED)
-private val ClayDeep = Color(0xFFA85F33)
 private val DoorTeal = Color(0xFF2F6B7A)
 private val EntranceGreen = Color(0xFF2E7D32)
 private val VerticalPlum = Color(0xFF6E5A4E)
 private val Corridor = Color(0xFFD9C8BC)
 
 // Settings > "Edit this building" (demo mode off). Floor plan with pan and zoom; modes as chips; Save writes the patch.
-@OptIn(ExperimentalMaterial3Api::class)
+// Visual: the editor is a team tool on the campus skin. Its buttons, chips and dialog actions use the campus line colour
+// (navy / blue) instead of the accent, because GT gold text on a light dialog is unreadable. Dark follows the system.
 @Composable
 fun BuildingEditorScreen(app: AppContainer, code: String, onClose: () -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    MaterialTheme(colorScheme = cs.copy(primary = cs.secondary, onPrimary = cs.onSecondary)) {
+        BuildingEditorContent(app, code, onClose)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BuildingEditorContent(app: AppContainer, code: String, onClose: () -> Unit) {
     val vm: EditorViewModel = viewModel(key = "editor-$code", factory = EditorViewModel.Factory(app, code))
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
@@ -112,7 +120,7 @@ fun BuildingEditorScreen(app: AppContainer, code: String, onClose: () -> Unit) {
                 navigationIcon = { IconButton(onClick = leave) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back") } },
                 actions = {
                     IconButton(onClick = vm::undo, enabled = vm.canUndo) { Icon(Icons.AutoMirrored.Rounded.Undo, "Undo") }
-                    IconButton(onClick = vm::save) { Icon(Icons.Rounded.Save, "Save", tint = if (vm.dirty) ClayDeep else LocalContentColorOr()) }
+                    IconButton(onClick = vm::save) { Icon(Icons.Rounded.Save, "Save", tint = if (vm.dirty) MaterialTheme.colorScheme.secondary else LocalContentColorOr()) }
                     Box {
                         IconButton(onClick = { menu = true }) { Icon(Icons.Rounded.MoreVert, "More") }
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
@@ -134,7 +142,7 @@ fun BuildingEditorScreen(app: AppContainer, code: String, onClose: () -> Unit) {
                 val color = if (vm.errorCount > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                 Text("${vm.errorCount} errors, ${vm.warningCount} warnings", color = color, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 if (vm.problems.isNotEmpty()) {
-                    Text("Show", color = ClayDeep, fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                    Text("Show", color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp, fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable { vm.showProblems = true }.padding(horizontal = 10.dp, vertical = 6.dp))
                 }
                 Spacer(Modifier.weight(1f))
@@ -210,7 +218,7 @@ private fun LocalContentColorOr(): Color = androidx.compose.material3.LocalConte
 
 @Composable
 private fun chipColors() = FilterChipDefaults.filterChipColors(
-    selectedContainerColor = ClayDeep, selectedLabelColor = Color.White,
+    selectedContainerColor = MaterialTheme.colorScheme.secondary, selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
 )
 
 @Composable
@@ -221,6 +229,7 @@ private fun PlanCanvas(vm: EditorViewModel, modifier: Modifier) {
     var pan by remember(vm.code) { mutableStateOf(Offset.Zero) }
     val measurer = rememberTextMeasurer()
     val label = TextStyle(fontFamily = Sora, fontSize = 10.sp, color = Ink, fontWeight = FontWeight.SemiBold)
+    val roomColor = com.campusmaps.ui.theme.LocalCampusPalette.current.line
     // Fit the shown floor's points (plan coordinates: x east, y down = -core y), at least 20 m across.
     val shown = b.nodes.filter { it.floor == vm.floor }.ifEmpty { b.nodes }
     val cx = (shown.minOf { it.x } + shown.maxOf { it.x }) / 2; val cy = (shown.minOf { -it.y } + shown.maxOf { -it.y }) / 2
@@ -275,14 +284,14 @@ private fun PlanCanvas(vm: EditorViewModel, modifier: Modifier) {
         for (n in b.nodes.filter { it.floor == vm.floor }) {
             val c = at(n.x, n.y)
             val color = when {
-                n.type == NodeType.ROOM -> ClayDeep
+                n.type == NodeType.ROOM -> roomColor
                 n.type == NodeType.ENTRANCE -> EntranceGreen
                 n.type == NodeType.STAIRS || n.type == NodeType.ELEVATOR -> VerticalPlum
                 BuildingEdits.isDoor(n) -> DoorTeal
                 else -> Ink
             }
             val r = if (n.type == NodeType.ROOM) 7.dp.toPx() else 5.dp.toPx()
-            if (n.id == vm.selectedId || n.id == vm.connectFrom) drawCircle(ClayDeep.copy(alpha = 0.25f), r + 9.dp.toPx(), c)
+            if (n.id == vm.selectedId || n.id == vm.connectFrom) drawCircle(roomColor.copy(alpha = 0.25f), r + 9.dp.toPx(), c)
             drawCircle(color, r, c)
             drawCircle(Color.White, r, c, style = Stroke(1.5.dp.toPx()))
             // Vertical links (stairs, elevator) leave the floor: a small ring marks them.
@@ -310,7 +319,7 @@ private fun AddDialog(vm: EditorViewModel) {
     AlertDialog(
         onDismissRequest = vm::cancelAdd,
         confirmButton = {
-            Button(onClick = { vm.confirmAdd(name) }, colors = ButtonDefaults.buttonColors(containerColor = ClayDeep)) { Text("Add") }
+            Button(onClick = { vm.confirmAdd(name) }) { Text("Add") }
         },
         dismissButton = { TextButton(onClick = vm::cancelAdd) { Text("Cancel") } },
         title = { Text(vm.mode.label + " on floor ${vm.floor}") },
@@ -337,7 +346,7 @@ private fun NodeCard(vm: EditorViewModel, id: String, modifier: Modifier) {
         elevation = CardDefaults.cardElevation(6.dp)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("${n.id}  ·  ${n.type.name.lowercase()}  ·  floor ${n.floor}", fontWeight = FontWeight.Bold, fontFamily = Sora, color = Ink)
+                Text("${n.id}  ·  ${n.type.name.lowercase()}  ·  floor ${n.floor}", fontWeight = FontWeight.Bold, fontFamily = Sora, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.weight(1f))
                 TextButton(onClick = vm::deselect) { Text("Close") }
             }
@@ -385,5 +394,5 @@ private fun NodeCard(vm: EditorViewModel, id: String, modifier: Modifier) {
 @Composable
 private fun SmallBtn(text: String, onClick: () -> Unit) {
     OutlinedButton(onClick = onClick, contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-        modifier = Modifier.heightIn(min = 36.dp)) { Text(text, fontSize = 12.sp, color = Ink) }
+        modifier = Modifier.heightIn(min = 48.dp)) { Text(text, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface) }
 }
