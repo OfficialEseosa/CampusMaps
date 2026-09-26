@@ -384,7 +384,8 @@
     }
   ],
   "demoDestinations": [
-    "R-1116W"
+    "R-1116W",
+    "R-3361"
   ],
   "notes": "Measured 2026-09-26 (survey export KL-20260926-0946, stride 0.768 m by gps-walk, 3 walk videos). floorHeightM 4.7 from the barometer (1.06 hPa over 2 floors on the elevator ride, 0.112 hPa/m). walkingSpeedMps 1.36 from the three walk videos (111 m in 82 s). Stairs up 21.6 s/floor (obs #7 + #8 and walk #12, 86.3 s over 4 floors), down 17.9 s/floor (walk #23, 35.8 s over 2 floors); walks #12 and #23 were stair climbs logged as walks and are not hallway edges. Start points S1, S2 and the table T were not named in the survey: placed in the atrium on the measured H1 -> elevator walk. Anything marked estimated is a guess; see docs/19."
 }
