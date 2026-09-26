@@ -20,7 +20,13 @@ import androidx.core.view.WindowCompat
 import com.campusmaps.AppContainer
 import com.campusmaps.guidance.GuidanceState
 import com.campusmaps.route.Formats
+import com.campusmaps.outdoor.ExploreViewModel
 import com.campusmaps.ui.screens.AddShortcutScreen
+import com.campusmaps.ui.screens.ExploreActions
+import com.campusmaps.ui.screens.ExploreScreen
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.campusmaps.ui.screens.DebugLink
 import com.campusmaps.ui.screens.DebugOverlay
 import com.campusmaps.ui.screens.DebugControls
@@ -56,12 +62,17 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     val glassesPhase by app.glasses.phase.collectAsState()
     val glassesSeen by app.glasses.seen.collectAsState()
     val glassesStill by app.glasses.lastStill.collectAsState()
+    // Explore map (leg 1): its own state holder; home when far from every building (outdoor/ExploreViewModel.kt).
+    val exploreHome by vm.exploreHome.collectAsState()
+    val exploreVm: ExploreViewModel = viewModel(factory = ExploreViewModel.Factory(app, LocalContext.current))
+    LaunchedEffect(Unit) { if (exploreVm.exploreShouldBeHome()) vm.showExploreAsHome() }
 
     val systemDark = isSystemInDarkTheme()
     val alwaysDark = screen == Screen.GUIDANCE || screen == Screen.GLASSES
     val screenDark = when (screen) {
         Screen.GUIDANCE, Screen.GLASSES -> true
         Screen.ROUTES -> systemDark || settings.demoMode
+        Screen.EXPLORE -> false
         else -> systemDark
     }
 
@@ -83,7 +94,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
         onDispose { }
     }
 
-    BackHandler(enabled = screen != Screen.DESTINATION) { vm.back() }
+    BackHandler(enabled = screen != Screen.EXPLORE && (screen != Screen.DESTINATION || exploreHome)) { vm.back() }
 
     CampusMapsTheme(darkTheme = screenDark) {
         Box(Modifier.fillMaxSize()) {
@@ -137,6 +148,23 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         )
                     }
                     Screen.ADD_SHORTCUT -> AddShortcutScreen(shortcutVm, onBack = vm::back)
+                    Screen.EXPLORE -> {
+                        // A room picked on S1 shows on the map too.
+                        LaunchedEffect(trip.building.id, trip.destination?.id) {
+                            trip.destination?.let { exploreVm.select(trip.building.id, it.id) }
+                        }
+                        ExploreScreen(
+                            vm = exploreVm,
+                            actions = ExploreActions(
+                                onSearch = vm::openSearchFromExplore,
+                                onSettings = vm::openSettings,
+                                onStartAr = { p ->
+                                    val f = exploreVm.state.value.fix
+                                    vm.startFromExplore(p.buildingId, p.destinationId, p.entranceId, f?.lat, f?.lng)
+                                },
+                            ),
+                        )
+                    }
                 }
             }
 
@@ -187,6 +215,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                 }
                 val links = buildList {
                     add(DebugLink("Cycle simulated time (shortcut)", vm::debugCycleClock))
+                    add(DebugLink("Open Explore map", vm::openExplore))
                     add(DebugLink("AR: ${arOverride.label} (tap to change)", vm::debugCycleAr))
                     if (g != null) {
                         add(DebugLink("Drop confidence for 4 s (Locate me)", vm::debugDropConfidence))

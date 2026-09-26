@@ -6,6 +6,13 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Read local.properties so the Google Maps key never goes into git (teammate's original wiring, restored).
+val localProps = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val mapsApiKey: String = localProps.getProperty("MAPS_API_KEY", "")
+
 android {
     namespace = "com.campusmaps"
     // 37, not 36: SceneView 4.38.0 (AR layer) requires compileSdk 37. targetSdk stays 36. See docs/14.
@@ -32,6 +39,9 @@ android {
         }.getProperty("ARCORE_API_KEY").orEmpty()
         manifestPlaceholders["arcoreApiKey"] = arcoreKey
         buildConfigField("boolean", "ARCORE_API_KEY_SET", arcoreKey.isNotBlank().toString())
+        // Explore map: empty key = map tiles stay blank and the route is a straight line (no Directions call).
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
     buildTypes {
@@ -93,6 +103,10 @@ dependencies {
 
     // Sends the current step to the watch.
     implementation(libs.play.services.wearable)
+
+    // Explore map (leg 1): Google Maps in Compose, and the user's position from the fused location provider.
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.location)
 
     // Ray-Ban Meta glasses: toolkit 0.7.0, the version the glasses' DWA 0.7 accepts (docs/06, real-glasses verification).
     implementation(libs.mwdat.core)

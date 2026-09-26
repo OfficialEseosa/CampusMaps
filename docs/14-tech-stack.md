@@ -145,3 +145,11 @@ Compose BOM 2026.04.01, AGP 9.1.0, coroutines 1.10.2, serialization 1.9.0, Gradl
 | Piece | Version | Why |
 |---|---|---|
 | `androidx.core:core-splashscreen` | 1.2.0 | System launch splash on Ink (no white flash), backported to minSdk 29. Used by `MainActivity.installSplashScreen()` and `ui/splash`. |
+## Explore map (leg 1, 2026-09-25)
+
+| Piece | Version | Why |
+|---|---|---|
+| `com.google.maps.android:maps-compose` | 8.2.2 | Teammate's pin, restored for the Explore map (owner decision: the Google map comes back for the outdoor leg). Pulls play-services-maps 20.0.0 |
+| `com.google.android.gms:play-services-location` | 21.4.0 | Fused location for the blue dot. Resolves next to play-services-wearable 19.0.0 (shared base 18.5.0, basement 18.9.0, tasks 18.2.0) |
+
+Key: `MAPS_API_KEY=...` in `local.properties` (gitignored), read at build time into the manifest (`com.google.android.geo.API_KEY`) and `BuildConfig.MAPS_API_KEY`. Without it the tiles are blank and the route is a straight line.
