@@ -61,6 +61,9 @@ data class Selection(
     val query: String = "",
     // The phone's fix when the trip was started from the Explore map: adds the "Your location" start node (CoreBridge.withGpsStart).
     val gps: com.campusmaps.data.model.OutdoorStart? = null,
+    // Set while the start is S1's automatic GPS default (ui/GpsStart): the fix's accuracy in metres. Null = picked by hand,
+    // from Explore, or the building's default. Only an automatic start is replaced by a newer fix.
+    val gpsAutoAccuracyM: Double? = null,
 )
 
 // Everything S1 and S1b draw.
@@ -75,6 +78,7 @@ data class TripUiState(
     val destinationRows: List<GraphNode> = emptyList(),
     val plan: RoutePlan? = null,
     val simulatedTimeLabel: String? = null, // "Sat 21:00" when the clock is simulated
+    val gpsHint: String? = null, // "From your location (GPS, 8 m)" while the start is the automatic GPS default
 ) {
     val startsInside: Boolean get() = !start.isOutdoor
     val routeError: String? get() = (plan as? RoutePlan.NoRoute)?.message
@@ -163,6 +167,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             destinationRows = rowIds.mapNotNull { building.nodes[it] }.filter { it.kind == NodeKind.ROOM },
             plan = plan,
             simulatedTimeLabel = if (app.clock.isSimulated) Formats.dayTime(app.clock.now()) else null,
+            gpsHint = sel.gpsAutoAccuracyM?.takeIf { start.id == com.campusmaps.data.campus.CoreBridge.GPS_START_ID }?.let(GpsStart::hint),
         )
     }.flowOn(Dispatchers.Default).stateIn(
         viewModelScope,
@@ -234,7 +239,33 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         search(trip.value.building, searchText).firstOrNull()?.let { selectDestination(it.id) }
     }
 
-    fun selectStart(id: String) = updateSelection { it.copy(startId = id) }
+    fun selectStart(id: String) = updateSelection { it.copy(startId = id, gpsAutoAccuracyM = null) } // by hand: kept
+
+    // S1 opened directly: while "Where to?" shows, the phone's fix (no permission prompt here; Explore asks) may set the
+    // start to "Your location" (ui/GpsStart). Never over a start picked by hand; never in demo mode.
+    private val s1Fix = MutableStateFlow<com.campusmaps.geo.LocationFix?>(null)
+
+    init {
+        viewModelScope.launch {
+            _screen.map { it == Screen.DESTINATION }.distinctUntilChanged()
+                .flatMapLatest { onS1 -> if (onS1) com.campusmaps.geo.FusedLocationFixes.flow(app.appContext) else kotlinx.coroutines.flow.emptyFlow() }
+                .collect { s1Fix.value = it }
+        }
+        viewModelScope.launch {
+            combine(s1Fix, settings, selection, _screen) { fix, st, sel, screen -> Triple(fix, st, sel) to screen }
+                .collect { (inputs, screen) ->
+                    val (fix, st, sel) = inputs
+                    if (screen != Screen.DESTINATION || _guidance.value != null) return@collect
+                    val next = GpsStart.apply(sel, app.building(st.buildingId), fix, System.currentTimeMillis(), st.demoMode)
+                    if (next != sel) {
+                        android.util.Log.i("GpsStart", if (next.gpsAutoAccuracyM != null)
+                            "S1 start: Your location (%.6f, %.6f, %.0f m) for ${st.buildingId}".format(next.gps!!.lat, next.gps.lng, next.gpsAutoAccuracyM)
+                        else "S1 start: ${st.buildingId} default (fix ${fix?.let { "%.6f, %.6f, %.0f m".format(it.lat, it.lng, it.accuracyM) } ?: "none"}, demo ${st.demoMode})")
+                        updateSelection { cur -> if (cur == sel) next else cur }
+                    }
+                }
+        }
+    }
 
     fun setAvoidStairs(on: Boolean) {
         viewModelScope.launch { app.settings.setAvoidStairs(on) }
@@ -470,7 +501,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         // The student may have moved: S1b cards are recomputed from where they are now (Raphael's docs/20 behaviour).
         _guidance.value?.state?.value?.let { g ->
             val here = if (g.arrived) g.destination else g.route.points.getOrNull(g.progress.segmentIndex)?.node
-            if (here != null && here.id != trip.value.start.id) updateSelection { it.copy(startId = here.id) }
+            if (here != null && here.id != trip.value.start.id) updateSelection { it.copy(startId = here.id, gpsAutoAccuracyM = null) }
         }
         val toMap = _fromExplore.value
         stopSession()
