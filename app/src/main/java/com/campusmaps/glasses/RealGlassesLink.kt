@@ -61,10 +61,16 @@ class RealGlassesLink(
     private var job: Job? = null
     private var building: String? = null
 
+    // Same step: spoken at most once per 25 s (qa-emuA Q4). "Seen:" goes stale after 2 empty bursts (Q5).
+    private val gate = SpeechGate()
+    private val seenTracker = SeenTracker()
+
     override fun start(currentInstruction: () -> String, currentSign: () -> String?, finished: () -> Boolean) {
         job?.cancel()
         _seen.value = null
         _recognisedNode.value = null
+        gate.reset()
+        seenTracker.reset()
         Log.i(TAG, "start: source ${source.name}")
         job = scope.launch {
             var backoff = FIRST_BACKOFF_MS
@@ -135,16 +141,21 @@ class RealGlassesLink(
                     }
                 }
                 val vote = SignVoter.vote(texts, anchors, preferNodes = setOfNotNull(hint?.nodeId))
+                // A miss keeps recognisedNode (localization) but S3 stops showing an old sign after 2 misses.
+                _seen.value = seenTracker.onBurst(vote?.anchor?.text)
                 if (vote != null) {
-                    _seen.value = vote.anchor.text
                     _recognisedNode.value = vote.nodeId
                     Log.i(TAG, "VOTE node ${vote.nodeId} (${vote.anchor.anchorId} '${vote.anchor.text}') ${vote.votes}/${vote.stills} conf ${"%.2f".format(vote.confidence)}")
                 } else {
                     Log.i(TAG, "VOTE none (${stills.size} stills)")
                 }
 
-                _phase.value = GlassesPhase.SPEAKING
                 val text = currentInstruction()
+                if (!gate.shouldSpeak(text, SystemClock.elapsedRealtime())) {
+                    Log.i(TAG, "SPEAK skip: same step said less than ${SpeechGate.DEFAULT_REPEAT_MS / 1000} s ago, cycle $cycle took ${SystemClock.elapsedRealtime() - t0} ms: '$text'")
+                    continue
+                }
+                _phase.value = GlassesPhase.SPEAKING
                 Log.i(TAG, "SPEAK start (camera off, cycle ${SystemClock.elapsedRealtime() - t0} ms so far): '$text'")
                 speakAndWait(text)
                 Log.i(TAG, "SPEAK done, cycle $cycle took ${SystemClock.elapsedRealtime() - t0} ms")

@@ -40,6 +40,10 @@ enum class StepKind {
     DOOR,             // Inside door
     ARRIVE,
     ALREADY_THERE,
+    // Outdoor street steps from Google Directions (Explore start only; outdoor/StreetSteps.kt), followed by GPS.
+    STREET_LEFT,
+    STREET_RIGHT,
+    STREET_STRAIGHT,
 }
 
 // One instruction. The user sees it while walking toward the point where it happens.
@@ -62,6 +66,9 @@ data class RouteStep(
     val side: Side? = null,
     // Only for WALK_TO_ENTRANCE: the text to show once the student reaches the door.
     val approachText: String? = null,
+    // Outdoor steps of an Explore start: where the step ends (lat/lng). The step is then done by GPS, not by the walker
+    // (guidance/OutdoorGps.kt). Null for every indoor step and for routes from S1b's fixed start points.
+    val outdoorEnd: com.campusmaps.outdoor.LatLngPoint? = null,
 )
 
 // A full route from start to destination, ready for guidance.

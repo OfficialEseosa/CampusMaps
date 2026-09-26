@@ -139,6 +139,10 @@ object GuidanceEngine {
         return when (step.kind) {
             StepKind.TURN_LEFT, StepKind.TURN_AROUND -> WatchStep(WatchStepType.LEFT, metres, place)
             StepKind.TURN_RIGHT -> WatchStep(WatchStepType.RIGHT, metres, place)
+            // Street steps (Explore start): the arrow from Google's maneuver, the banner's text as the label.
+            StepKind.STREET_LEFT -> WatchStep(WatchStepType.LEFT, metres, place)
+            StepKind.STREET_RIGHT -> WatchStep(WatchStepType.RIGHT, metres, place)
+            StepKind.STREET_STRAIGHT -> WatchStep(WatchStepType.STRAIGHT, metres, place)
             StepKind.ELEVATOR -> WatchStep(WatchStepType.ELEVATOR, Formats.floorLong(step.targetFloor ?: 0), "Elevator")
             StepKind.STAIRS -> {
                 // completeFloor equals targetFloor for rides, so compare against where the ride starts.

@@ -198,7 +198,9 @@ fun GuidanceScreen(
                         ArrivedBanner(state)
                     }
                 } else if (state.startsOutside) {
-                    CompactBanner(state, onEndRoute, outdoorDistanceM.takeIf { geo != null })
+                    // Explore starts carry their own GPS distance per street step (state.distanceToStepM, the same number
+                    // the watch gets); the entrance distance override is only for routes from S1b's fixed start points.
+                    CompactBanner(state, onEndRoute, outdoorDistanceM.takeIf { geo != null && state.step.outdoorEnd == null })
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         TopRow(state, guideMode, onEndRoute)
@@ -442,7 +444,7 @@ private fun CompactBanner(state: GuidanceState, onEndRoute: () -> Unit, distance
                 .background(ArOverlayColors.arrowCore),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(AppIcons.doorFront, contentDescription = null, tint = BannerIconDark, modifier = Modifier.size(26.dp))
+            Icon(AppIcons.forStep(state.step.kind), contentDescription = null, tint = BannerIconDark, modifier = Modifier.size(26.dp))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
             Text(
@@ -455,6 +457,11 @@ private fun CompactBanner(state: GuidanceState, onEndRoute: () -> Unit, distance
                 modifier = Modifier.testTag("instructionText"),
             )
             Text(Formats.inDistance(distanceOverrideM ?: state.distanceToStepM), color = ArOverlayColors.textMuted, fontFamily = Sora, fontSize = 14.sp)
+            // Street steps (Explore start): the next one, so the student sees the turn after this one.
+            state.nextStep?.takeIf { state.step.outdoorEnd != null }?.let { next ->
+                Text("Then: ${next.text}", style = AppTextStyles.arThen, color = ArOverlayColors.textMuted, maxLines = 2,
+                    modifier = Modifier.testTag("thenText"))
+            }
         }
         Surface(
             onClick = onEndRoute,

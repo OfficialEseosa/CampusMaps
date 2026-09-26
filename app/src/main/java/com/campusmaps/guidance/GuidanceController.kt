@@ -37,9 +37,12 @@ data class GuidanceState(
     val arrived: Boolean,
     val rerouteCount: Int,
     val showRerouteChip: Boolean,  // True for about 3 s after a reroute
+    // True when distanceToStepM is the GPS distance to an outdoor step's end (Explore start, fresh fix).
+    val gpsDistance: Boolean = false,
 ) {
     val floor: Int get() = pose.floor
-    val startsOutside: Boolean get() = step.kind == StepKind.WALK_TO_ENTRANCE
+    // Street steps and the "Enter" step of an Explore start are outdoor too (RouteStep.outdoorEnd).
+    val startsOutside: Boolean get() = step.kind == StepKind.WALK_TO_ENTRANCE || step.outdoorEnd != null
 }
 
 // Runs one guidance session: follows the pose, advances steps, speaks, mirrors to the watch,
@@ -68,6 +71,13 @@ class GuidanceController(
     private var rawLocating = false
     private var loopJob: Job? = null
     private val startedAt = System.currentTimeMillis()
+
+    // Latest FusedLocation fix (MainViewModel feeds it for Explore starts); outdoor steps follow it (OutdoorGps).
+    @Volatile private var lastFix: com.campusmaps.geo.LocationFix? = null
+    // Debug Step / Skip on an outdoor step: move exactly one step on the next tick.
+    @Volatile private var forceNext = false
+
+    fun onFix(fix: com.campusmaps.geo.LocationFix) { lastFix = fix }
 
     // When true, S3 is on screen and the glasses cycle does the speaking.
     var glassesMode: Boolean = false
@@ -129,6 +139,7 @@ class GuidanceController(
 
     // Debug "Skip step" and S3 "Fake step": jump to the end of the current step.
     fun skipStep() {
+        if (OutdoorGps.isOutdoor(_state.value.step)) { forceNext = true; return }
         val step = _state.value.step
         val targetIndex = route.points.indexOfLast { it.cumulativeM <= step.completeAtM + 0.01 && it.floor == step.completeFloor }
         simulation.jumpToPoint(maxOf(targetIndex, step.startIndex))
@@ -137,7 +148,9 @@ class GuidanceController(
     private fun tick() {
         val pose = position.pose.value
         val nowMs = System.currentTimeMillis()
+        val before = progress
         progress = GuidanceEngine.update(route, pose, progress, nowMs)
+        followOutdoorGps(before, nowMs)
 
         // Reroute when clearly off the path (and not while we are unsure where we are).
         if (!progress.arrived &&
@@ -154,7 +167,7 @@ class GuidanceController(
 
         // Say each new instruction once (S2 only; S3's glasses cycle speaks on its own).
         // The first one is prefixed with core's locked-entrance notice (Demo C: "Heads up: ... Using West entrance instead.").
-        if (state.progress.stepIndex != lastSpokenStep && pose.confidence >= LOCATE_CONFIDENCE) {
+        if (state.progress.stepIndex != lastSpokenStep && (pose.confidence >= LOCATE_CONFIDENCE || state.gpsDistance)) {
             val first = lastSpokenStep == -1 && rerouteCount == 0
             lastSpokenStep = state.progress.stepIndex
             if (speakEnabled() && !glassesMode) {
@@ -166,6 +179,37 @@ class GuidanceController(
         // Show the locked entrance on the watch for the first 4 seconds, then the steps.
         val showLocked = nowMs - startedAt < 4_000
         watch.send(GuidanceEngine.watchStep(state.step, state.distanceToStepM, lockedNotice, showLocked))
+    }
+
+    // Outdoor steps (Explore start): GPS completes them, not the walker, while the fix is fresh; the debug Step forces one.
+    // Past the last outdoor step the simulator stands at the entrance, so the indoor engine carries on as when the
+    // walker reaches the door.
+    private fun followOutdoorGps(before: Progress, nowMs: Long) {
+        val prevStep = route.steps.getOrNull(before.stepIndex) ?: return
+        if (!OutdoorGps.isOutdoor(prevStep)) return
+        val force = forceNext
+        forceNext = false
+        val fix = lastFix
+        val next = OutdoorGps.nextIndex(route, before.stepIndex, progress.stepIndex, fix, nowMs, before.stepShownAtMs ?: nowMs, force)
+        if (next == progress.stepIndex && !force && !OutdoorGps.fresh(fix, nowMs)) return // the walker's answer stands
+        val moved = next != before.stepIndex
+        progress = progress.copy(
+            stepIndex = next,
+            arrived = false,
+            stepShownAtMs = if (moved) nowMs else before.stepShownAtMs ?: nowMs,
+        )
+        if (moved) {
+            val why = if (force) "debug step" else "GPS ${OutdoorGps.distanceM(prevStep, fix)?.let { "%.0f m".format(it) }}"
+            runCatching { android.util.Log.i("Outdoor", "step ${before.stepIndex} done ($why): ${prevStep.text}") }
+            if (!OutdoorGps.isOutdoor(route.steps.getOrNull(next))) {
+                runCatching { android.util.Log.i("Outdoor", "entrance reached: indoor steps from ${route.points.getOrNull(prevStep.startIndex)?.node?.id}") }
+                simulation.jumpToPoint(prevStep.startIndex)
+                // Stand at the entrance for this tick's banner and watch too (the jump reaches the pose on the next tick).
+                val at = prevStep.startIndex.coerceIn(0, route.points.lastIndex)
+                progress = progress.copy(alongM = maxOf(progress.alongM, route.points[at].cumulativeM),
+                    segmentIndex = maxOf(progress.segmentIndex, (at).coerceAtMost(route.points.size - 2).coerceAtLeast(0)))
+            }
+        }
     }
 
     private fun reroute(pose: Pose) {
@@ -211,6 +255,7 @@ class GuidanceController(
 
     // Debug fake walk "Step": move to the next node of the route (Raphael's one-node step).
     fun stepToNextNode() {
+        if (OutdoorGps.isOutdoor(_state.value.step)) { forceNext = true; return }
         val next = (progress.segmentIndex + 1).coerceAtMost(route.points.lastIndex)
         simulation.jumpToPoint(next)
     }
@@ -233,7 +278,9 @@ class GuidanceController(
     private fun buildState(pose: Pose): GuidanceState {
         val step = route.steps[progress.stepIndex.coerceIn(0, route.steps.lastIndex)]
         val next = route.steps.getOrNull(progress.stepIndex + 1)
-        val distance = GuidanceEngine.distanceToStep(route, step, progress)
+        val nowMs = System.currentTimeMillis()
+        val fix = lastFix
+        val distance = OutdoorGps.displayDistanceM(step, fix, nowMs, progress.alongM, GuidanceEngine.distanceToStep(route, step, progress))
         return GuidanceState(
             building = building,
             route = route,
@@ -248,6 +295,7 @@ class GuidanceController(
             arrived = progress.arrived,
             rerouteCount = rerouteCount,
             showRerouteChip = System.currentTimeMillis() < chipUntil,
+            gpsDistance = OutdoorGps.isOutdoor(step) && OutdoorGps.shown(fix, nowMs),
         )
     }
 

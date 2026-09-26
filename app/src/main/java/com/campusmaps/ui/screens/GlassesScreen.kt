@@ -1,7 +1,6 @@
 package com.campusmaps.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,7 +33,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -47,7 +48,11 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import com.campusmaps.glasses.SeenTracker
+import com.campusmaps.platform.SpeechOutput
+import kotlinx.coroutines.delay
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -127,6 +132,7 @@ fun GlassesScreen(
                 )
                 ConnectionChip(glasses.connected)
             }
+            SpeechOutputLine()
 
             // 2. Seen line
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -134,7 +140,9 @@ fun GlassesScreen(
                 Text(
                     buildAnnotatedString {
                         append("Seen: ")
-                        if (glasses.seen != null) {
+                        if (glasses.seen == SeenTracker.NOTHING_NEW) {
+                            append(glasses.seen)
+                        } else if (glasses.seen != null) {
                             withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.ExtraBold)) { append(glasses.seen) }
                         } else {
                             append("nothing yet")
@@ -157,9 +165,9 @@ fun GlassesScreen(
                 ) {
                     Icon(icon, contentDescription = null, tint = Color.Black, modifier = Modifier.size(44.dp))
                 }
-                Crossfade(targetState = instruction, animationSpec = tween(300), label = "instruction") { text ->
-                    Text(text, style = AppTextStyles.glassesInstruction, color = Color.White, modifier = Modifier.testTag("glassesInstruction"))
-                }
+                // No Crossfade: on arrival it left a faint ghost of the previous instruction behind
+                // "You have arrived" (filmed). One text at a time, swapped at once.
+                Text(instruction, style = AppTextStyles.glassesInstruction, color = Color.White, modifier = Modifier.testTag("glassesInstruction"))
             }
 
             // 4. Next line (door side on arrival)
@@ -316,6 +324,35 @@ private fun GlassesArrivalButtons(onRepeat: () -> Unit, onDone: () -> Unit, onBa
                 Text("Back to routes", fontFamily = Sora, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1)
             }
         }
+    }
+}
+
+// "Speech: glasses" or "Speech: phone speaker": where the voice comes out now (AudioManager, read every 2 s).
+// The demo team sees at a glance that the glasses are not an audio device yet. No rerouting.
+@Composable
+private fun SpeechOutputLine() {
+    val context = LocalContext.current
+    var label by remember { mutableStateOf(SpeechOutput.label(context)) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(2_000)
+            label = SpeechOutput.label(context)
+        }
+    }
+    Row(
+        Modifier.fillMaxWidth().testTag("speechOutput"),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(AppIcons.volumeUp, contentDescription = null, tint = ArOverlayColors.glassesMuted, modifier = Modifier.size(16.dp))
+        Text(
+            "Speech: $label",
+            color = if (label == "glasses") ArOverlayColors.arrived else ArOverlayColors.glassesMuted,
+            fontFamily = Sora,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 6.dp),
+        )
     }
 }
 

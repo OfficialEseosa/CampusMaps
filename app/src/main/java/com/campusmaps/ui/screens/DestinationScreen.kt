@@ -103,12 +103,15 @@ fun DestinationScreen(state: TripUiState, campus: Campus, buildings: List<Buildi
             .background(palette.surface)
             .imePadding(),
     ) {
+        // The map icon sits next to Reset and Settings in every mode (docs/22 O3): in demo mode the "See the map" row
+        // is hidden, and this is the way to Explore.
         DestinationTopBar(
             code = state.building.code,
             demo = demo,
             onReset = actions.onReset,
             onSettings = actions.onSettings,
             onTitleLongPress = if (demo) null else actions.onTitleLongPress,
+            onMap = actions.onExplore,
         )
 
         Column(
@@ -204,6 +207,7 @@ private fun DestinationTopBar(
     onReset: () -> Unit,
     onSettings: () -> Unit,
     onTitleLongPress: (() -> Unit)?,
+    onMap: (() -> Unit)? = null,
 ) {
     val palette = LocalCampusPalette.current
     Row(
@@ -261,6 +265,11 @@ private fun DestinationTopBar(
         }
         IconButton(onClick = onSettings, modifier = Modifier.size(44.dp)) {
             Icon(AppIcons.settings, contentDescription = "Settings", tint = palette.muted, modifier = Modifier.size(22.dp))
+        }
+        if (onMap != null) {
+            IconButton(onClick = onMap, modifier = Modifier.size(44.dp).testTag("s1MapButton")) {
+                Icon(AppIcons.map, contentDescription = "Campus map", tint = palette.muted, modifier = Modifier.size(22.dp))
+            }
         }
     }
 }

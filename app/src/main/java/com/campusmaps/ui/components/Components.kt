@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,13 +54,15 @@ fun AppTopBar(
     onReset: (() -> Unit)? = null,
     onSettings: (() -> Unit)? = null,
     onTitleLongPress: (() -> Unit)? = null,
+    // Optional third icon after Settings (S1's "Campus map"). With it the start gap shrinks so "DEMO" still fits at 411 dp.
+    onMap: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
             .height(64.dp)
-            .padding(horizontal = 8.dp),
+            .padding(start = 8.dp, end = if (onMap != null) 0.dp else 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (onBack != null) {
@@ -67,7 +70,7 @@ fun AppTopBar(
                 Icon(AppIcons.arrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
             }
         } else {
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(if (onMap != null) 4.dp else 12.dp))
         }
         Row(
             modifier = Modifier
@@ -100,6 +103,11 @@ fun AppTopBar(
         if (onSettings != null) {
             IconButton(onClick = onSettings, modifier = Modifier.size(48.dp)) {
                 Icon(AppIcons.settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        if (onMap != null) {
+            IconButton(onClick = onMap, modifier = Modifier.size(48.dp).testTag("s1MapButton")) {
+                Icon(AppIcons.map, contentDescription = "Campus map", tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

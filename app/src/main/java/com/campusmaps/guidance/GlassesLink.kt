@@ -1,6 +1,8 @@
 package com.campusmaps.guidance
 
+import android.os.SystemClock
 import androidx.compose.ui.graphics.ImageBitmap
+import com.campusmaps.glasses.SpeechGate
 import com.campusmaps.platform.Speaker
 import com.campusmaps.platform.TtsStatus
 import kotlinx.coroutines.CoroutineScope
@@ -53,10 +55,12 @@ class SimulatedGlassesLink(
     override val lastStill: StateFlow<ImageBitmap?> = MutableStateFlow(null)
 
     private var job: Job? = null
+    private val gate = SpeechGate() // Same step at most once per 25 s, like the real link (qa-emuA Q4)
 
     override fun start(currentInstruction: () -> String, currentSign: () -> String?, finished: () -> Boolean) {
         job?.cancel()
         _seen.value = null
+        gate.reset()
         job = scope.launch {
             while (isActive) {
                 // Arrived and said so: stop cycling. It re-spoke "Room 220 is on your right" every 5 s until Stop (docs/22 #6).
@@ -74,8 +78,10 @@ class SimulatedGlassesLink(
                 _phase.value = GlassesPhase.RECOGNISING
                 delay(1_200)
                 currentSign()?.let { _seen.value = it }
+                val text = currentInstruction()
+                if (!gate.shouldSpeak(text, SystemClock.elapsedRealtime())) continue
                 _phase.value = GlassesPhase.SPEAKING
-                speakAndWait(currentInstruction())
+                speakAndWait(text)
             }
         }
     }
