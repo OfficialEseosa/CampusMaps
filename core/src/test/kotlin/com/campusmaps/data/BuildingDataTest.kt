@@ -20,10 +20,10 @@ class BuildingDataTest {
     }
 
     @Test fun everyGuessIsFlagged() {
-        for (code in listOf("CSE")) {
-            val b = TestData.load(code)
-            assertTrue((b.nodes.map { it.estimated } + b.edges.map { it.estimated } + b.anchors.map { it.estimated }).all { it }, "$code has unflagged values")
-        }
+        // Survey CSE-20260926-1530: all three nodes and both edges are walked; only the anchors (widths not taped) are estimated.
+        val cse = TestData.load("CSE")
+        assertTrue(cse.nodes.none { it.estimated } && cse.edges.none { it.estimated })
+        assertTrue(cse.anchors.all { it.estimated })
         // Survey KL-20260926-0946: the door fix and the walked nodes are unestimated; S1, S2, T, the stair nodes, floor 3 are placed.
         val kl = TestData.load("KL")
         assertEquals(setOf("E-RWD", "H1", "H2", "EL-1", "R-1116W"), kl.nodes.filter { !it.estimated }.map { it.id }.toSet())

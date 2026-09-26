@@ -2,10 +2,13 @@ package com.campusmaps.routing
 
 import com.campusmaps.TestData
 import com.campusmaps.data.Access
+import com.campusmaps.data.AccessRule
+import com.campusmaps.data.AccessWindow
 import com.campusmaps.data.Building
 import com.campusmaps.data.Geo
 import com.campusmaps.data.Node
 import com.campusmaps.data.NodeType
+import java.time.LocalDateTime
 import kotlin.math.hypot
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -120,21 +123,23 @@ class RouterTest {
         }
     }
 
-    @Test fun studentCenterAfterHoursRedirects() {
+    // CSE surveyed 2026-09-26: one entrance only (the placeholder West entrance is gone), public on weekdays, PantherCard-only
+    // otherwise (owner). So after hours there is no public door to redirect to: without the card there is no route at all.
+    @Test fun studentCenterAfterHoursNeedsTheCard() {
         val main = cse.node("E-MAIN")
         val (lat, lng) = Geo.offset(main.lat!!, main.lng!!, 0.0, -15.0)
         val start = Start.Outside(lat, lng)
-        val late = Router.route(cse, start, "R-220", Prefs(now = TestData.saturday(21)))
-        show("CSE Sat 21:00", late)
-        val notice = assertNotNull(late.first().notice)
-        assertTrue("Main entrance" in notice && "West entrance" in notice, notice)
-        assertEquals("E-WEST", late.first().entrance)
-        assertEquals(InstructionType.LOCKED_NOTICE, late.first().instructions.first().type)
+        val late = Router.route(cse, start, "R-AUD", Prefs(now = TestData.saturday(21)))
+        assertEquals(emptyList(), late)
+        assertTrue(Access.blocks(main, TestData.saturday(21), hasCard = false))
+        assertFalse(Access.isClosed(main, TestData.saturday(21)))
 
-        val afternoon = Router.route(cse, start, "R-220", Prefs(now = TestData.saturday(14)))
-        show("CSE Sat 14:00", afternoon)
-        assertNull(afternoon.first().notice)
-        assertEquals("E-MAIN", afternoon.first().entrance)
+        // Weekday daytime: public, no notice, no card.
+        val tuesday = Router.route(cse, start, "R-AUD", Prefs(now = LocalDateTime.of(2026, 9, 29, 14, 0)))
+        show("CSE Tue 14:00", tuesday)
+        assertNull(tuesday.first().notice)
+        assertEquals("E-MAIN", tuesday.first().entrance)
+        assertFalse(tuesday.first().cardNeeded)
     }
 
     @Test fun panthercardOpensTheCardOnlyEntrance() {
@@ -143,35 +148,34 @@ class RouterTest {
         val start = Start.Outside(lat, lng)
         val sat21 = TestData.saturday(21)
 
-        val noCard = Router.route(cse, start, "R-220", Prefs(now = sat21))
-        assertEquals("E-WEST", noCard.first().entrance)
-        assertTrue("card-only" in assertNotNull(noCard.first().notice))
-        assertTrue(noCard.none { it.cardNeeded })
+        // No public door on a Saturday evening (single entrance, card-only all weekend): nothing without the card.
+        assertTrue(Router.route(cse, start, "R-AUD", Prefs(now = sat21)).isEmpty())
 
-        val card = Router.route(cse, start, "R-220", Prefs(now = sat21, hasCard = true))
+        val card = Router.route(cse, start, "R-AUD", Prefs(now = sat21, hasCard = true))
         show("CSE Sat 21:00 with card", card)
         assertEquals("E-MAIN", card.first().entrance)
+        assertEquals(listOf("E-MAIN", "H1", "R-AUD"), card.first().nodes.drop(1))
         assertTrue(card.first().cardNeeded)
         assertNull(card.first().notice)
         assertTrue(card.none { it.instructions.any { i -> i.type == InstructionType.LOCKED_NOTICE } })
 
-        // Daytime: Main is public, so no card is needed even for a card holder.
-        val day = Router.route(cse, start, "R-220", Prefs(now = TestData.saturday(14), hasCard = true))
+        // Weekday daytime: Main is public, so no card is needed even for a card holder.
+        val day = Router.route(cse, start, "R-AUD", Prefs(now = LocalDateTime.of(2026, 9, 29, 14, 0), hasCard = true))
         assertEquals("E-MAIN", day.first().entrance)
         assertTrue(day.none { it.cardNeeded })
 
-        // 23:30: every door is closed; the card opens nothing.
-        assertTrue(Router.route(cse, start, "R-220", Prefs(now = TestData.saturday(23, 30))).isEmpty())
-        assertTrue(Router.route(cse, start, "R-220", Prefs(now = TestData.saturday(23, 30), hasCard = true)).isEmpty())
+        // 23:30 is card-only too now (the owner: after hours means card, not closed): the card still opens the door.
+        assertTrue(Router.route(cse, start, "R-AUD", Prefs(now = TestData.saturday(23, 30))).isEmpty())
+        assertTrue(Router.route(cse, start, "R-AUD", Prefs(now = TestData.saturday(23, 30), hasCard = true)).first().cardNeeded)
 
-        // "after 8 pm": the Saturday public window closed at 20:00.
-        assertEquals(20 * 60, Access.cardOnlySince(main, sat21))
-        assertNull(Access.cardOnlySince(main, TestData.saturday(14)))
+        // Saturday has no public window, so there is no "after 8 pm"; on Friday the public window closes at 20:00.
+        assertNull(Access.cardOnlySince(main, sat21))
+        assertEquals(20 * 60, Access.cardOnlySince(main, LocalDateTime.of(2026, 9, 25, 21, 0)))
     }
 
     @Test fun instructionsAreShortAndEndWithArrival() {
         val routes = listOf(Router.route(kl, Start.AtNode("S1"), "R-1116W", daytime), Router.route(cs, p1, "R-608", daytime),
-            Router.route(cs, p2, "R-150", daytime), Router.route(cse, Start.AtNode("E-MAIN"), "R-220", daytime)).flatten()
+            Router.route(cs, p2, "R-150", daytime), Router.route(cse, Start.AtNode("E-MAIN"), "R-AUD", daytime)).flatten()
         for (o in routes) {
             assertEquals(InstructionType.ARRIVE, o.instructions.last().type)
             assertEquals(InstructionType.START, o.instructions.first { it.type != InstructionType.LOCKED_NOTICE }.type)
@@ -190,9 +194,10 @@ class RouterTest {
     }
 
     @Test fun unreachableGivesNoOptions() {
-        val closedAll = cse.copy(nodes = cse.nodes.map { if (it.id == "E-WEST") it.copy(access = cse.node("E-MAIN").access) else it })
+        // CSE has one entrance; closing it (no windows cover the time) leaves nothing, card or not.
+        val closedAll = cse.copy(nodes = cse.nodes.map { if (it.id == "E-MAIN") it.copy(access = listOf(AccessWindow("Mon-Sun", "08:00", "09:00", AccessRule.PUBLIC))) else it })
         val main = cse.node("E-MAIN")
-        assertEquals(emptyList(), Router.route(closedAll, Start.Outside(main.lat!!, main.lng!!), "R-220", Prefs(now = TestData.saturday(23))))
+        assertEquals(emptyList(), Router.route(closedAll, Start.Outside(main.lat!!, main.lng!!), "R-AUD", Prefs(now = TestData.saturday(23), hasCard = true)))
     }
 
     @Test fun cs608FromP1ShowsDistinctCardsAndFoldsTwinEntrances() {

@@ -8,23 +8,26 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDateTime
 
-// The PantherCard prompt on S1b and the S1 hint, on Student Center East (Main entrance card-only 20:00 to 23:00 on Saturday).
+// The PantherCard prompt on S1b and the S1 hint, on Student Center East. Surveyed 2026-09-26: one entrance only, public on weekdays
+// (Mon-Thu 08-22, Fri 08-20), PantherCard-only at every other time including all weekend (owner). No public door to route around to.
 class CardAccessTest {
     private val router = CoreRouter()
     private val cse = TestBuildings.cse
     private val sat21 = LocalDateTime.of(2026, 9, 26, 21, 0)
     private val sat14 = LocalDateTime.of(2026, 9, 26, 14, 0)
+    private val tue14 = LocalDateTime.of(2026, 9, 29, 14, 0)
+    private val fri21 = LocalDateTime.of(2026, 9, 25, 21, 0)
     private val sat2330 = LocalDateTime.of(2026, 9, 26, 23, 30)
 
-    private fun plan(time: LocalDateTime, hasCard: Boolean) = router.plan(cse, cse.defaultStartId, "R-220", time, avoidStairs = false, hasCard = hasCard)
+    private fun plan(time: LocalDateTime, hasCard: Boolean) = router.plan(cse, cse.defaultStartId, "R-AUD", time, avoidStairs = false, hasCard = hasCard)
 
     @Test
-    fun withoutCardTheCardAsksAndOffersBothButtons() {
+    fun withoutCardThereIsNoRouteAndItSaysCardOnly() {
+        // Was: West entrance plus the prompt. The West entrance was never surveyed and is gone; the only door is card-only.
         val plan = plan(sat21, hasCard = false)
-        val p = CardAccess.prompt(plan, cse, sat21, hasCard = false, routedAround = false)!!
-        assertEquals("Main entrance needs a PantherCard after 8 pm", p.title)
-        assertTrue(p.canTurnOn)
-        assertEquals("West entrance", (plan as RoutePlan.Options).options.first().entrance!!.name)
+        assertEquals("No route to Speaker Auditorium: every entrance is card-only at Sat 21:00.", (plan as RoutePlan.NoRoute).message)
+        // The S1b prompt only shows over route options, so here it is null (the S1 hint still asks for the card).
+        assertNull(CardAccess.prompt(plan, cse, sat21, hasCard = false, routedAround = false))
     }
 
     @Test
@@ -38,7 +41,10 @@ class CardAccessTest {
         assertEquals(StepKind.WALK_TO_ENTRANCE, walk.kind)
         assertEquals("PantherCard", walk.cardName)
         assertEquals("Tap your PantherCard at the Main entrance", walk.approachText)
+        assertEquals(listOf("E-MAIN", "H1", "R-AUD"), main.route.points.map { it.node.id }.filter { it in setOf("E-MAIN", "H1", "R-AUD") })
         val p = CardAccess.prompt(plan, cse, sat21, hasCard = true, routedAround = false)!!
+        // Saturday has no public window, so no "after 8 pm".
+        assertEquals("Main entrance needs a PantherCard right now", p.title)
         assertFalse(p.canTurnOn)
         // Watch: near the door a LOCKED-style face labelled "PantherCard"; farther away the usual arrow.
         val near = com.campusmaps.guidance.GuidanceEngine.watchStep(walk, 5.0, null, showLocked = false)
@@ -49,17 +55,25 @@ class CardAccessTest {
 
     @Test
     fun routeMeAroundHidesTheCard() {
-        assertNull(CardAccess.prompt(plan(sat21, false), cse, sat21, hasCard = false, routedAround = true))
+        assertNull(CardAccess.prompt(plan(sat21, true), cse, sat21, hasCard = true, routedAround = true))
     }
 
     @Test
-    fun daytimeAndClosedShowNothing() {
-        assertNull(CardAccess.prompt(plan(sat14, false), cse, sat14, hasCard = false, routedAround = false))
-        assertNull(CardAccess.hint(cse, sat14, hasCard = false))
-        // 23:30: every door closed, the card opens nothing; no prompt, no hint.
-        assertTrue(plan(sat2330, true) is RoutePlan.NoRoute)
-        assertNull(CardAccess.prompt(plan(sat2330, false), cse, sat2330, hasCard = false, routedAround = false))
-        assertNull(CardAccess.hint(cse, sat2330, hasCard = false))
+    fun weekdayEveningSaysAfter8pm() {
+        // Friday's public window closes at 20:00; after that the card prompt names the time.
+        val p = CardAccess.prompt(plan(fri21, true), cse, fri21, hasCard = true, routedAround = false)!!
+        assertEquals("Main entrance needs a PantherCard after 8 pm", p.title)
+    }
+
+    @Test
+    fun weekdayDaytimeShowsNothingAndLateNightStillTakesTheCard() {
+        assertNull(CardAccess.prompt(plan(tue14, false), cse, tue14, hasCard = false, routedAround = false))
+        assertNull(CardAccess.hint(cse, tue14, hasCard = false))
+        // Saturday 14:00 is card-only now (weekends are card-only), so the hint shows.
+        assertEquals("After hours: bring your PantherCard or we route you to the public door", CardAccess.hint(cse, sat14, hasCard = false))
+        // 23:30 is card-only, not closed (owner): the card still gets you in.
+        assertTrue(plan(sat2330, true) is RoutePlan.Options)
+        assertTrue(plan(sat2330, false) is RoutePlan.NoRoute)
     }
 
     @Test
