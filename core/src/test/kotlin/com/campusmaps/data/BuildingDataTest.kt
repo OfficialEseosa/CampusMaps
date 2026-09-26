@@ -80,7 +80,7 @@ class BuildingDataTest {
 
     @Test fun demoDestinationNeedsAnAnchorAndImagesAreChecked() {
         val b = TestData.load("CS")
-        assertTrue(BuildingValidator.validate(b.copy(anchors = b.anchors.filter { it.node != "R-608" })).any { it.rule == 6 })
+        assertTrue(BuildingValidator.validate(b.copy(anchors = b.anchors.filter { it.floor != 6 })).any { it.rule == 6 })
         assertTrue(BuildingValidator.validate(b, imageExists = { false }).any { it.rule == 7 && "CS-A01" in it.message })
     }
 
@@ -135,6 +135,6 @@ class BuildingDataTest {
     }
 
     private val tiny = """{"code":"T","name":"Tiny","origin":{"description":"o","lat":0,"lng":0},
-        "nodes":[{"id":"E","type":"entrance","name":"Door","floor":1,"x":0,"y":0},{"id":"A","type":"room","name":"Room A","floor":1,"x":5,"y":0}],
+        "nodes":[{"id":"E","type":"entrance","name":"Door","floor":1,"x":0,"y":0,"lat":33.75,"lng":-84.38,"headingDeg":90},{"id":"A","type":"room","name":"Room A","floor":1,"x":5,"y":0}],
         "edges":[{"from":"E","to":"A","lengthM":5,"kind":"hallway"}]}"""
 }
