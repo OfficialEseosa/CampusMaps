@@ -127,7 +127,12 @@ class ExploreViewModel(private val app: AppContainer, context: Context) : ViewMo
             val key = "${plan.buildingId}/${plan.entranceId}" // entrance ids like E-N repeat across buildings
             val walked = if (directionsCache.shouldRequest(key, fix.point)) {
                 android.util.Log.i("Directions", "request for $key")
-                directions.walking(fix.point, plan.entrance).also { directionsCache.store(key, fix.point, it) }
+                directions.walking(fix.point, plan.entrance).also { r ->
+                    directionsCache.store(key, fix.point, r)
+                    // Step end points, so a walk (real or faked with `emu geo fix`) can be checked against the 12 m rule.
+                    if (r != null) android.util.Log.i("Directions", "$key: ${r.source} ${r.distanceM.toInt()} m, ${r.streetLegs.size} steps: " +
+                        r.streetLegs.joinToString(" | ") { "%s %.6f,%.6f %d m".format(it.turn, it.end.lat, it.end.lng, it.distanceM.toInt()) })
+                }
             } else directionsCache.cached()
             walked ?: return@launch
             _state.update { if (it.plan == plan) it.copy(route = walked, steps = OutdoorRoutes.sheetSteps(walked, plan)) else it }

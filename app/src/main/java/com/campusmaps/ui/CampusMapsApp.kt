@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.campusmaps.AppContainer
@@ -52,6 +53,7 @@ import com.campusmaps.ui.screens.SettingsActions
 import com.campusmaps.ui.screens.SettingsSheet
 import com.campusmaps.ui.theme.CampusMapsTheme
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 
 // The whole app UI. Picks the screen, applies the theme rules from section 3:
 // Redesign: S0, S0b, S1, S1b and Settings are light in the campus colours (CampusTheme.kt); S2, S3, the 3D preview
@@ -88,7 +90,13 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     // answers, at most 300 ms, so S1 no longer flashes before Explore when animations are off.
     var homeDecided by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        launch { if (exploreVm.exploreShouldBeHome()) vm.showExploreAsHome(); homeDecided = true }
+        launch {
+            // Explore is home when far from every building and not in demo mode; in demo mode S1 is home (the judges
+            // start indoors), otherwise the redesign's campus picker (S0).
+            if (exploreVm.exploreShouldBeHome()) vm.showExploreAsHome()
+            else if (app.settings.settings.first().demoMode) vm.showDemoHome()
+            homeDecided = true
+        }
         delay(300)
         homeDecided = true
     }
@@ -122,7 +130,9 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     SideEffect {
         val window = (view.context as? Activity)?.window ?: return@SideEffect
         WindowCompat.getInsetsController(window, view).apply {
-            isAppearanceLightStatusBars = !screenDark
+            // S0b draws the campus accent under the status bar: light icons on a dark accent (Georgia State blue).
+            val darkHeader = screen == Screen.BUILDINGS && palette.headerText.luminance() > 0.5f
+            isAppearanceLightStatusBars = !screenDark && !darkHeader
             isAppearanceLightNavigationBars = !screenDark
         }
     }
@@ -139,7 +149,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
 
     CampusMapsTheme(darkTheme = screenDark && (screen == Screen.ADD_SHORTCUT || screen == Screen.EDITOR), campus = palette) {
         Box(Modifier.fillMaxSize()) {
-            if (!homeDecided && screen == Screen.DESTINATION) {
+            if (!homeDecided && (screen == Screen.CAMPUS || screen == Screen.DESTINATION)) {
                 Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
             } else Crossfade(targetState = crossTarget, animationSpec = tween(250), label = "screen") { target ->
                 when (target) {
