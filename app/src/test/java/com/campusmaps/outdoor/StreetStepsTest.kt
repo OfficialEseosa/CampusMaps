@@ -54,6 +54,23 @@ class StreetStepsTest {
         assertTrue(DirectionsClient.parseLegacyStreetSteps("""{"status":"ZERO_RESULTS"}""").isEmpty())
     }
 
+    @Test fun blockBreaksBecomeSentences() {
+        assertEquals("Head east. Take the stairs", DirectionsClient.plainText("Head <b>east</b><div>Take the stairs</div>"))
+        assertEquals("Head east. Take the stairs", DirectionsClient.plainText("Head east\nTake the stairs"))
+        assertEquals("Head east. Take the stairs", DirectionsClient.plainText("Head east<br/>Take the stairs"))
+        assertEquals("Continue onto Decatur St. Destination will be on the left",
+            DirectionsClient.plainText("Continue onto Decatur St.\nDestination will be on the left"))
+        assertEquals("Head west on Dobbs Ave NE toward Courtland St NE", DirectionsClient.plainText("Head west on Dobbs Ave NE\ntoward Courtland St NE"))
+        assertEquals("Turn right", DirectionsClient.plainText("<div>Turn right</div>"))
+        // Routes API text (newline between the sentences) reaches both the sheet and S2 with the full stop.
+        val body = """{"routes":[{"distanceMeters":260,"polyline":{"encodedPolyline":"_p~iF~ps|U_ulLnnqC"},"legs":[{"steps":[
+            {"navigationInstruction":{"maneuver":"TURN_RIGHT","instructions":"Turn right onto Central Ave SW\nDestination will be on the left"},
+             "endLocation":{"latLng":{"latitude":33.753,"longitude":-84.388}},"distanceMeters":18}]}]}]}"""
+        val r = DirectionsClient.parseRoutes(body)!!
+        assertEquals("Turn right onto Central Ave SW. Destination will be on the left", r.streetLegs.single().text)
+        assertEquals(listOf("Turn right onto Central Ave SW. Destination will be on the left"), r.streetSteps)
+    }
+
     @Test fun maneuverMapsToArrow() {
         assertEquals(StreetTurn.LEFT, StreetTurn.fromManeuver("TURN_SHARP_LEFT"))
         assertEquals(StreetTurn.RIGHT, StreetTurn.fromManeuver("turn-slight-right"))
