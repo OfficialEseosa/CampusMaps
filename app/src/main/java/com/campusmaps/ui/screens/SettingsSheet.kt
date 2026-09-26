@@ -123,13 +123,13 @@ fun SettingsSheet(settings: AppSettings, tts: TtsStatus, buildings: List<Buildin
                 }
             }
 
-            TextButton(onClick = actions.onResetDemo, modifier = Modifier.heightIn(min = 56.dp)) {
+            TextButton(onClick = actions.onResetDemo, modifier = Modifier.heightIn(min = 56.dp), colors = textColors()) {
                 Icon(AppIcons.restartAlt, contentDescription = null)
                 Text("Reset demo", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 8.dp))
             }
 
             if (!settings.demoMode && actions.onEditBuilding != null) {
-                TextButton(onClick = actions.onEditBuilding, modifier = Modifier.heightIn(min = 56.dp).testTag("editBuilding")) {
+                TextButton(onClick = actions.onEditBuilding, modifier = Modifier.heightIn(min = 56.dp).testTag("editBuilding"), colors = textColors()) {
                     Icon(AppIcons.addRoad, contentDescription = null)
                     Text("Edit this building", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 8.dp))
                 }
@@ -188,3 +188,8 @@ private fun SettingsSwitchRow(
         )
     }
 }
+
+// Text buttons take the campus line colour (navy / blue), not the accent: GT gold text on cream is unreadable.
+// In dark (the sheet over S2 or S3) secondary is the light clay tone.
+@Composable
+private fun textColors() = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)

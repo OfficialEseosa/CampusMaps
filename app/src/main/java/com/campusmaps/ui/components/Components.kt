@@ -261,7 +261,7 @@ fun NavigationRow(
             .heightIn(min = 56.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
             Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
             Icon(AppIcons.chevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
