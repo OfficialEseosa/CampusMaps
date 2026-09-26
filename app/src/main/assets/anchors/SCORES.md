@@ -50,6 +50,51 @@ another fails, so the tool itself runs.
 
 **Result (2026-09-25): no CS image passes.** Klaus below: one passes (KL-A01), so `anchors.imgdb` exists since 2026-09-26.
 
+## CS-A01 (2026-09-26 export)
+
+Export CS-20260926-1445, scored 2026-09-26 about 15:00. **The three photos filed under CS-A01 are not the CLASSROOM SOUTH sign.**
+They show a free-standing roll-up banner indoors (#SLEEVEUPGSU vaccine poster, Georgia State logo), about 7 m from the place the
+export calls "150 Entrance", floor 1: width 100 cm, centre 180 cm high, facing 350 deg. The export's OCR text is the banner's wording.
+
+| Image | Score | Kept |
+|---|---|---|
+| straight, whole photo, colour 1200x1600 | 95 | no |
+| far, whole photo, colour 1200x1600 | 60 | no |
+| angle, whole photo, colour 1200x1600 | 70 | no |
+| straight, whole, colour 1024 / 1600 wide | 100 / 100 | no |
+| straight, whole, greyscale 1200 | 85 | no |
+| straight, whole, greyscale equalised 1200 | 85 | no |
+| straight, whole, colour or greyscale at JPEG 80 | 80 / 80 | no |
+| straight, tight crop to the banner, colour 1024 / 1200 / 1600 | 20 / 20 / 20 | no |
+| straight, tight crop, greyscale 1024 / 1200 / 1600 | 20 / 20 / 20 | no |
+| straight, tight crop, greyscale equalised 1024 / 1200 / 1600 | 65 / 75 / 25 | no |
+| far, tight crop, colour 1024 / 1200 / 1600 | 35 / 40 / 35 | no |
+| far, tight crop, greyscale 1024 / 1200 / 1600 | 35 / 40 / 35 | no |
+| far, tight crop, greyscale equalised 1024 / 1200 / 1600 | 90 / 85 / 85 | no |
+| straight, banner plus a small margin of wall, colour 1200 | 0 | no |
+| **straight, banner plus a small margin, greyscale equalised, 1200x1787 (306 KB)** | **100** (twice) | candidate, see below |
+
+Scores jump between neighbouring variants (the same crop gives 0 in colour and 100 equalised), so trust only the phone test.
+
+**Nothing changed in this folder's images or in `anchors.imgdb`.** Naming the banner `CS-A01` would tell the app the user is at the
+outdoor Walters sign (node E-WM, width 3.29 m): wrong place and a scale three times too big. The sign itself still has no image that
+passes (see the 2026-09-25 table above), so CS-A01 stays a text anchor.
+
+The banner is a good indoor image target (it scores 100) but it can be moved or taken away. To use it, someone who owns `CS.json`
+adds a new image anchor (for example `CS-A09`, node near "150 Entrance", widthM 1.00), then:
+
+```powershell
+Copy-Item reports\w7-csanchor-banner.jpg app\src\main\assets\anchors\CS\CS-A09.jpg
+# image_list.txt:
+#   KL-A01|app\src\main\assets\anchors\KL\KL-A01.jpg|4.80
+#   CS-A09|app\src\main\assets\anchors\CS\CS-A09.jpg|1.00
+& $exe build-db --input_image_list_path=image_list.txt --output_db_path=app\src\main\assets\anchors\anchors.imgdb
+```
+
+Tested in a scratch folder: that list builds a 9.2 KB database (the current one-image file is 5.3 KB) and both names `KL-A01` and
+`CS-A09` are in it. arcoreimg has no list command (actions: build-db, eval-db, eval-img), so the check was the file size and a
+search of the file for the two names.
+
 ## How the app uses this folder
 
 - `anchors/anchors.imgdb` (one database for all buildings, image names = anchor ids such as `KL-A01`): if present, the AR
