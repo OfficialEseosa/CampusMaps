@@ -22,6 +22,8 @@ data class AppSettings(
     val avoidStairs: Boolean = false,
     val demoMode: Boolean = false,
     val buildingId: String = CoreBridge.DEFAULT_BUILDING_ID,
+    // "I carry a PantherCard" (BuzzCard on Georgia Tech): card-only entrances are usable after hours.
+    val hasCard: Boolean = false,
 )
 
 // Saves settings on the phone so they survive restarts ("Avoid stairs" is persisted, per the handoff).
@@ -32,6 +34,7 @@ class SettingsRepository(private val context: Context) {
         val avoidStairs = booleanPreferencesKey("avoid_stairs")
         val demoMode = booleanPreferencesKey("demo_mode")
         val building = stringPreferencesKey("building_id")
+        val hasCard = booleanPreferencesKey("has_campus_card")
         val deviceId = stringPreferencesKey("device_id")
         fun recents(buildingId: String) = stringPreferencesKey("recents_$buildingId")
     }
@@ -42,12 +45,14 @@ class SettingsRepository(private val context: Context) {
             avoidStairs = p[Keys.avoidStairs] ?: false,
             demoMode = p[Keys.demoMode] ?: false,
             buildingId = p[Keys.building] ?: CoreBridge.DEFAULT_BUILDING_ID,
+            hasCard = p[Keys.hasCard] ?: false,
         )
     }
 
     suspend fun setSpeak(on: Boolean) = context.settingsStore.edit { it[Keys.speak] = on }
     suspend fun setAvoidStairs(on: Boolean) = context.settingsStore.edit { it[Keys.avoidStairs] = on }
     suspend fun setDemoMode(on: Boolean) = context.settingsStore.edit { it[Keys.demoMode] = on }
+    suspend fun setHasCard(on: Boolean) = context.settingsStore.edit { it[Keys.hasCard] = on }
     suspend fun setBuilding(id: String) = context.settingsStore.edit { it[Keys.building] = id }
 
     // Recent destinations per building, newest first, at most three.
