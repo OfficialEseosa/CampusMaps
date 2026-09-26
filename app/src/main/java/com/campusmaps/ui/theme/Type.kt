@@ -35,10 +35,10 @@ val AppTypography = Typography(
 object AppTextStyles {
     val etaBest = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp, letterSpacing = (-1).sp)   // S1b best card ETA
     val etaOther = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, letterSpacing = (-0.8).sp)// S1b other card ETA (minimum 28)
-    val arInstruction = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, lineHeight = 32.sp)  // S2 banner (minimum 28)
-    val arDistance = TextStyle(fontFamily = Sora, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)                           // "in 16 m"
+    val arInstruction = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, lineHeight = 26.sp)  // S2 banner (owner 2026-09-26: 28 was too big)
+    val arDistance = TextStyle(fontFamily = Sora, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)                           // "in 16 m"
     val arThen = TextStyle(fontFamily = Sora, fontWeight = FontWeight.Normal, fontSize = 15.sp)                                 // "Then: ..."
-    val arrivedHeadline = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp)
+    val arrivedHeadline = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
     val glassesInstruction = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp, lineHeight = 38.sp) // S3 (minimum 30)
     val glassesNext = TextStyle(fontFamily = Sora, fontWeight = FontWeight.Normal, fontSize = 22.sp, lineHeight = 29.sp)
     val floorBadge = TextStyle(fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)

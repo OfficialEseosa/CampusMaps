@@ -387,19 +387,19 @@ private fun InstructionBanner(state: GuidanceState) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
             .background(ArOverlayColors.scrim)
-            .padding(horizontal = 18.dp, vertical = 16.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
             .testTag("instructionBanner"),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier
-                    .size(60.dp)
+                    .size(48.dp)
                     .clip(RoundedCornerShape(18.dp))
                     .background(ArOverlayColors.arrowCore),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(AppIcons.forStep(step.kind), contentDescription = null, tint = BannerIconDark, modifier = Modifier.size(34.dp))
+                Icon(AppIcons.forStep(step.kind), contentDescription = null, tint = BannerIconDark, modifier = Modifier.size(26.dp))
             }
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(state.bannerText, style = AppTextStyles.arInstruction, color = ArOverlayColors.text, modifier = Modifier.testTag("instructionText"))
