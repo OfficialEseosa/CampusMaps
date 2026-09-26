@@ -32,9 +32,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.campusmaps.loc.AnchorImages
+import com.campusmaps.loc.ArFeed
+import com.campusmaps.loc.ArTracking
 import com.campusmaps.loc.BuildingToWorld
+import com.campusmaps.loc.CameraSample
+import com.campusmaps.loc.ImageFix
 import com.campusmaps.loc.Vec3
+import androidx.compose.ui.platform.LocalContext
 import com.google.ar.core.Anchor
+import com.google.ar.core.AugmentedImage
 import com.google.ar.core.Config
 import com.google.ar.core.Frame
 import com.google.ar.core.Plane
@@ -72,7 +79,11 @@ private class FrameBox {
     /** Anchor translation at the moment of placement; drift of the anchor from this shifts the transform. */
     var anchorRef: Vec3? = null
     var lastAnchorCheckMs = 0L
+    /** Last sign fix per anchor id (ms), to re-snap at most every [IMAGE_FIX_EVERY_MS]. */
+    val lastImageFix = HashMap<String, Long>()
 }
+
+private const val IMAGE_FIX_EVERY_MS = 1500L
 
 /**
  * S2's AR slot (docs/05): SceneView ARScene with the route drawn on the real floor, plus the debug "Place route here"
@@ -95,6 +106,7 @@ fun ArGuidanceView(
     showHints: Boolean = true,
 ) {
     val box = remember { FrameBox() }
+    val context = LocalContext.current
     var tracking by remember { mutableStateOf(TrackingState.PAUSED) }
     var failure by remember { mutableStateOf<TrackingFailureReason?>(null) }
     var floorSeen by remember { mutableStateOf(false) }
@@ -107,6 +119,7 @@ fun ArGuidanceView(
     DisposableEffect(Unit) {
         onDispose {
             box.anchor?.detach(); box.anchor = null
+            ArFeed.viewGone()
             onBuildingToWorld(null)
         }
     }
@@ -132,6 +145,7 @@ fun ArGuidanceView(
             tracking = cam.trackingState
             Log.i(TAG, "tracking $tracking ${cam.trackingFailureReason}")
         }
+        sendSample(frame)
         if (cam.trackingState != TrackingState.TRACKING) return
         val p = cam.pose
         box.camWorld = Float3(p.tx(), p.ty(), p.tz())
@@ -147,6 +161,26 @@ fun ArGuidanceView(
         box.pendingTap?.let { tap ->
             box.pendingTap = null
             placeAt(frame, tap, latestInput, setT, box)?.let { msg -> message = msg; armed = msg.startsWith("No floor") }
+        }
+
+        // Sign snap: a tracked anchor image fixes the whole transform (docs/03 section 1).
+        for (img in frame.getUpdatedTrackables(AugmentedImage::class.java)) {
+            if (img.trackingState != TrackingState.TRACKING || img.trackingMethod != AugmentedImage.TrackingMethod.FULL_TRACKING) continue
+            val nowMs = System.currentTimeMillis()
+            if (nowMs - (box.lastImageFix[img.name] ?: 0L) < IMAGE_FIX_EVERY_MS) continue
+            box.lastImageFix[img.name] = nowMs
+            val anchor = ArFeed.anchors[img.name]
+            if (anchor == null) { Log.w(TAG, "image ${img.name} is not an anchor of this building"); continue }
+            val cp = img.centerPose
+            val n = cp.yAxis
+            val t = ImageFix.transform(anchor, cp.tx().toDouble(), cp.ty().toDouble(), cp.tz().toDouble(), n[0].toDouble(), n[2].toDouble(), ArFeed.floorHeightM)
+            if (t == null) { Log.w(TAG, "image ${img.name}: not on a wall or no facing; ignored"); continue }
+            box.anchor?.detach()
+            box.anchor = img.createAnchor(cp)
+            box.anchorRef = Vec3(cp.tx().toDouble(), cp.ty().toDouble(), cp.tz().toDouble())
+            setT(t)
+            message = "Located from sign ${anchor.id}"
+            Log.i(TAG, "sign fix ${anchor.id} floor ${anchor.floor}: centre=(%.2f, %.2f, %.2f) yaw=%.1f deg".format(cp.tx(), cp.ty(), cp.tz(), t.yawDeg))
         }
 
         // Follow ARCore's corrections to the anchor (translation only; yaw stays from the tap).
@@ -168,7 +202,8 @@ fun ArGuidanceView(
         ARScene(
             modifier = Modifier.fillMaxSize(),
             planeRenderer = shown == null,
-            sessionConfiguration = { _, config ->
+            sessionConfiguration = { session, config ->
+                AnchorImages.load(context, session)?.let { config.augmentedImageDatabase = it }
                 config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
                 config.focusMode = Config.FocusMode.AUTO
                 config.lightEstimationMode = Config.LightEstimationMode.DISABLED
@@ -250,6 +285,21 @@ fun ArGuidanceView(
             }
         }
     }
+}
+
+/** Camera pose for ArPositionProvider (through ArFeed). Heading as in [placeAt]: forward, or screen-up when looking down. */
+private fun sendSample(frame: Frame) {
+    val cam = frame.camera
+    val tr = when (cam.trackingState) {
+        TrackingState.TRACKING -> ArTracking.TRACKING
+        TrackingState.PAUSED -> ArTracking.PAUSED
+        else -> ArTracking.STOPPED
+    }
+    val cp = cam.displayOrientedPose
+    val z = cp.zAxis; val y = cp.yAxis
+    var fx = -z[0].toDouble(); var fz = -z[2].toDouble()
+    if (hypot(fx, fz) < 0.3) { fx = y[0].toDouble(); fz = y[2].toDouble() }
+    ArFeed.sample(CameraSample(tr, cp.tx().toDouble(), cp.ty().toDouble(), cp.tz().toDouble(), fx, fz, System.currentTimeMillis()))
 }
 
 /** Hit-tests the tap on an upward floor plane and sets the transform. Returns a user message. */
