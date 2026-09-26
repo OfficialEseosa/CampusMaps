@@ -6,6 +6,9 @@
     <!-- Uploading shortcut submissions and pulling approved ones. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Outdoor leg: FusedLocation for the 40 m hand-off and ARCore Geospatial (docs/03 section 4). -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- "Your shortcut ... is live." -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -33,6 +36,11 @@
         <meta-data
             android:name="com.google.ar.core"
             android:value="optional" />
+
+        <!-- ARCore Geospatial API key, from ARCORE_API_KEY in local.properties (empty until the owner adds one). -->
+        <meta-data
+            android:name="com.google.android.ar.API_KEY"
+            android:value="${arcoreApiKey}" />
 
         <!-- Meta Wearables Device Access Toolkit (Developer Mode placeholders, see app/build.gradle.kts). -->
         <meta-data

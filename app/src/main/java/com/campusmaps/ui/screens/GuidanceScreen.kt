@@ -41,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -93,8 +94,17 @@ fun GuidanceScreen(
     onDone: () -> Unit,
     buildingToWorld: com.campusmaps.loc.BuildingToWorld? = null,
     onBuildingToWorld: (com.campusmaps.loc.BuildingToWorld?) -> Unit = {},
+    /** Outdoor mode (w1/geo). Null keeps S2 exactly as before. */
+    geo: com.campusmaps.geo.ArCoreGeospatialProvider? = null,
+    /** The entrance the outdoor leg walks to (GeoEntrances.forRoute); null = banner and map only. */
+    outdoorEntrance: com.campusmaps.geo.GeoEntrance? = null,
+    /** FusedLocation distance to [outdoorEntrance] (HandoffUi.distanceToEntranceM); replaces the banner's "in X m" outdoors. */
+    outdoorDistanceM: Double? = null,
 ) {
     val context = LocalContext.current
+    val outdoorLeg = geo != null && state.startsOutside && !state.arrived
+    OutdoorGeoEffect(geo, outdoorEntrance, outdoorLeg)
+    val geoState = geo?.state?.collectAsState()?.value
 
     // Can this phone do AR, and may we use the camera?
     val arSupported by produceState<Boolean?>(initialValue = null) { value = ArSupport.isSupported(context) }
@@ -149,7 +159,8 @@ fun GuidanceScreen(
                 // Keep the AR hint above the minimap (or the enlarged map), and drop it when Locate me or the
                 // arrived buttons take that space; it overlapped both on the S25 (docs/22 #4).
                 hintBottom = bottom + 16.dp + if (mapEnlarged) screenHeight / 2 else 170.dp,
-                showHints = !state.arrived && !state.locating,
+                showHints = !state.arrived && !state.locating && !outdoorLeg,
+                outdoor = geo.takeIf { outdoorLeg },
             )
         } else if (arOn) {
             if (cameraGranted) CameraPreview(Modifier.fillMaxSize()) else PaintedHallway(Modifier.fillMaxSize())
@@ -166,11 +177,17 @@ fun GuidanceScreen(
                 .padding(start = 12.dp, end = 12.dp, top = top),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (geo != null && !state.arrived) {
+                // Board 04 chip: outdoors the Geospatial state, indoors (after the entrance) the current node.
+                if (outdoorLeg && geoState != null) com.campusmaps.ui.ar.TrackingChip(
+                    com.campusmaps.geo.OutdoorArrowGate.chipText(geoState), com.campusmaps.geo.OutdoorArrowGate.shouldDrawArrows(geoState))
+                else com.campusmaps.ui.ar.TrackingChip(com.campusmaps.ui.ar.nearestRouteNodeName(state), live = !state.locating)
+            }
             Crossfade(targetState = state.arrived, animationSpec = tween(350), label = "banner") { arrived ->
                 if (arrived) {
                     ArrivedBanner(state)
                 } else if (state.startsOutside) {
-                    CompactBanner(state, onEndRoute)
+                    CompactBanner(state, onEndRoute, outdoorDistanceM.takeIf { geo != null })
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         TopRow(state, onEndRoute)
@@ -370,7 +387,7 @@ private fun InstructionBanner(state: GuidanceState) {
 
 // Starting outside: compact banner with a door tile and a round close button.
 @Composable
-private fun CompactBanner(state: GuidanceState, onEndRoute: () -> Unit) {
+private fun CompactBanner(state: GuidanceState, onEndRoute: () -> Unit, distanceOverrideM: Double? = null) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -400,7 +417,7 @@ private fun CompactBanner(state: GuidanceState, onEndRoute: () -> Unit) {
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.testTag("instructionText"),
             )
-            Text(Formats.inDistance(state.distanceToStepM), color = ArOverlayColors.textMuted, fontFamily = Sora, fontSize = 14.sp)
+            Text(Formats.inDistance(distanceOverrideM ?: state.distanceToStepM), color = ArOverlayColors.textMuted, fontFamily = Sora, fontSize = 14.sp)
         }
         Surface(
             onClick = onEndRoute,
@@ -612,5 +629,34 @@ private fun BackToRoutesButton(onClick: () -> Unit) {
             .height(56.dp),
     ) {
         Text("Back to routes", fontFamily = Sora, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+// Outdoor mode (w1/geo): start Geospatial on the outdoor leg, check VPS and place the entrance Terrain anchor; stop it
+// once the student is through the entrance and indoor localization takes over.
+@Composable
+private fun OutdoorGeoEffect(geo: com.campusmaps.geo.ArCoreGeospatialProvider?, entrance: com.campusmaps.geo.GeoEntrance?, outdoorLeg: Boolean) {
+    if (geo == null) return
+    // Geospatial and FusedLocation need location; ask once on the outdoor leg (the map screen should ask earlier, so the
+    // AR session starts with Geospatial on; a grant here takes effect on the next AR session).
+    val context = LocalContext.current
+    val askLocation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+        android.util.Log.i("Geo", "location permission ${if (ok) "granted" else "denied"}")
+    }
+    LaunchedEffect(outdoorLeg) {
+        if (outdoorLeg && !com.campusmaps.geo.FusedLocationFixes.hasPermission(context)) askLocation.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+    LaunchedEffect(geo, entrance, outdoorLeg) {
+        if (outdoorLeg) {
+            geo.start()
+            if (entrance != null) {
+                geo.checkVps(entrance.latLng.lat, entrance.latLng.lng)
+                geo.placeTerrainAnchor(entrance.latLng.lat, entrance.latLng.lng)
+            } else {
+                android.util.Log.w("Geo", "outdoor leg without entrance lat/lng: banner and map only")
+            }
+        } else {
+            geo.stop()
+        }
     }
 }

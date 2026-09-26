@@ -104,7 +104,10 @@ fun ArGuidanceView(
     hintBottom: androidx.compose.ui.unit.Dp = 220.dp,
     /** False hides the hint column (host shows its own prompt, e.g. Locate me or the arrived buttons). */
     showHints: Boolean = true,
+    /** Outdoor leg (w1/geo): feeds this session to the Geospatial provider and draws its chevrons toward the entrance. */
+    outdoor: com.campusmaps.geo.ArCoreGeospatialProvider? = null,
 ) {
+    val latestOutdoor by rememberUpdatedState(outdoor)
     val box = remember { FrameBox() }
     val context = LocalContext.current
     var tracking by remember { mutableStateOf(TrackingState.PAUSED) }
@@ -208,8 +211,9 @@ fun ArGuidanceView(
                 config.focusMode = Config.FocusMode.AUTO
                 config.lightEstimationMode = Config.LightEstimationMode.DISABLED
                 config.depthMode = Config.DepthMode.DISABLED
+                latestOutdoor?.configure(session, config)
             },
-            onSessionUpdated = { _, frame -> onFrame(frame) },
+            onSessionUpdated = { session, frame -> onFrame(frame); latestOutdoor?.onFrame(session, frame) },
             onTrackingFailureChanged = { failure = it },
             onSessionFailed = { e -> Log.e(TAG, "AR session failed", e); onFail(e.message ?: e.javaClass.simpleName) },
         ) {
@@ -217,6 +221,8 @@ fun ArGuidanceView(
             val dim = remember(materialLoader) { materialLoader.createUnlitColorInstance(Color(0xFF00707D)) }
             val amber = remember(materialLoader) { materialLoader.createUnlitColorInstance(Color(0xFFFFB300)) }
             val red = remember(materialLoader) { materialLoader.createUnlitColorInstance(Color(0xFFEF5350)) }
+
+            outdoor?.let { OutdoorArrowLayer(it) }
 
             val t = shown
             if (t != null && input != null && tracking == TrackingState.TRACKING) {

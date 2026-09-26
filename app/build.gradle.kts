@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -22,6 +24,14 @@ android {
         // Meta Wearables Device Access Toolkit: "0" works in Developer Mode (no attestation). See docs/06.
         manifestPlaceholders["mwdat_application_id"] = "0"
         manifestPlaceholders["mwdat_client_token"] = "0"
+
+        // ARCore Geospatial (outdoor leg): API key from local.properties `ARCORE_API_KEY=...` (never committed).
+        // Empty is fine: the outdoor leg then falls back to the banner, the map and the FusedLocation distance.
+        val arcoreKey = Properties().apply {
+            rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+        }.getProperty("ARCORE_API_KEY").orEmpty()
+        manifestPlaceholders["arcoreApiKey"] = arcoreKey
+        buildConfigField("boolean", "ARCORE_API_KEY_SET", arcoreKey.isNotBlank().toString())
     }
 
     buildTypes {
@@ -78,6 +88,8 @@ dependencies {
     implementation(libs.arcore)
     // SceneView ARScene for the world-locked route arrows (docs/05).
     implementation(libs.sceneview.arsceneview)
+    // FusedLocation (40 m hand-off trigger) and ARCore Geospatial's location dependency (outdoor leg).
+    implementation(libs.play.services.location)
 
     // Sends the current step to the watch.
     implementation(libs.play.services.wearable)

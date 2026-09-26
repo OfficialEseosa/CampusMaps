@@ -18,6 +18,8 @@ arcore = "1.56.0"
 # World-locked AR layer (Raphael's ui/ar/ArGuidanceView.kt). Its ARCore dependency resolves to 1.56.0 above.
 arsceneview = "4.38.0"
 playServicesWearable = "19.0.0"
+# Outdoor leg only: FusedLocation for the 40 m hand-off trigger, and ARCore Geospatial needs it at runtime (w1/geo).
+playServicesLocation = "21.4.0"
 # Meta Wearables Device Access Toolkit. 0.7.0, not 0.9/1.0: the test glasses report DWA 0.7.0 (docs/06).
 mwdat = "0.7.0"
 wearComposeMaterial3 = "1.6.2"
@@ -61,6 +63,7 @@ mwdat-core = { group = "com.meta.wearable", name = "mwdat-core", version.ref = "
 mwdat-camera = { group = "com.meta.wearable", name = "mwdat-camera", version.ref = "mwdat" }
 mwdat-mockdevice = { group = "com.meta.wearable", name = "mwdat-mockdevice", version.ref = "mwdat" }
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-wear-compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "wearComposeMaterial3" }
 androidx-wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "wearComposeFoundation" }
 androidx-wear = { group = "androidx.wear", name = "wear", version.ref = "wear" }
