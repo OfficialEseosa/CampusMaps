@@ -1,0 +1,3679 @@
+{
+    "format": "campussurvey-log",
+    "formatVersion": 2,
+    "session": {
+        "id": "CS-20260925-1238",
+        "building": "CS",
+        "surveyor": "unknown",
+        "startedAt": "2026-09-25T12:38:03.375336-04:00",
+        "strideM": 0.7683974,
+        "strideCalibrated": true,
+        "strideMethod": "gps-walk",
+        "device": "samsung SM-S938U1 (pa3q) Android 17",
+        "appVersion": "0.3",
+        "nextObservationId": 39,
+        "anchorCount": 8,
+        "videoCount": 5
+    },
+    "observations": [
+        {
+            "kind": "node",
+            "id": 1,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:39:04.52814-04:00",
+                "pressureHpa": 983.50696,
+                "pressureFilteredHpa": 983.51,
+                "deviceHeadingDeg": 100.8,
+                "cameraHeadingDeg": 98.0,
+                "declinationDeg": -5.685847,
+                "forwardHeadingDeg": 100.8,
+                "cameraPitchDeg": -44.6,
+                "rollDeg": -2.0,
+                "lightLux": 2745.0227,
+                "stepsSinceSessionStart": 55,
+                "gps": {
+                    "lat": 33.75288157048278,
+                    "lng": -84.38768797778242,
+                    "accuracyM": 3.0,
+                    "altitudeM": 285.5,
+                    "verticalAccuracyM": 2.52472,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "Walters main",
+            "outdoor": true,
+            "headingMeanDeg": 46.0,
+            "headingSpreadDeg": 22.6,
+            "note": ""
+        },
+        {
+            "kind": "edge",
+            "id": 2,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:39:45.238026-04:00",
+                "pressureHpa": 983.5875,
+                "pressureFilteredHpa": 983.59,
+                "deviceHeadingDeg": 234.4,
+                "cameraHeadingDeg": 227.9,
+                "declinationDeg": -5.685728,
+                "forwardHeadingDeg": 227.9,
+                "cameraPitchDeg": -44.4,
+                "rollDeg": -4.5,
+                "lightLux": 34.02,
+                "stepsSinceSessionStart": 85,
+                "gps": {
+                    "lat": 33.7527332,
+                    "lng": -84.3878626,
+                    "accuracyM": 12.182,
+                    "altitudeM": 284.0,
+                    "verticalAccuracyM": 1.8683813,
+                    "samples": 1,
+                    "ageMs": 91
+                }
+            },
+            "fromNodeId": 1,
+            "toNodeId": 4,
+            "steps": 30,
+            "durationSec": 33.808,
+            "strideM": 0.7683974,
+            "distanceM": 23.051922,
+            "pressureStartHpa": 983.50696,
+            "pressureEndHpa": 983.5875,
+            "headingMeanDeg": 186.4,
+            "headingSpreadDeg": 62.2,
+            "headingSamples": 169,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 4,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:40:37.60015-04:00",
+                "pressureHpa": 983.5975,
+                "pressureFilteredHpa": 983.6,
+                "deviceHeadingDeg": 89.4,
+                "cameraHeadingDeg": 82.2,
+                "declinationDeg": -5.685789,
+                "forwardHeadingDeg": 82.2,
+                "cameraPitchDeg": -41.0,
+                "rollDeg": -4.8,
+                "lightLux": 20.9925,
+                "stepsSinceSessionStart": 85,
+                "gps": {
+                    "lat": 33.7527559,
+                    "lng": -84.3877427,
+                    "accuracyM": 29.078,
+                    "altitudeM": 284.0,
+                    "verticalAccuracyM": 1.9992393,
+                    "samples": 1,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ROOM",
+            "name": "Room 150",
+            "outdoor": false,
+            "headingMeanDeg": 86.3,
+            "headingSpreadDeg": 1.6,
+            "note": ""
+        },
+        {
+            "kind": "edge",
+            "id": 6,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:41:44.953716-04:00",
+                "pressureHpa": 983.6211,
+                "pressureFilteredHpa": 983.62,
+                "deviceHeadingDeg": 45.4,
+                "cameraHeadingDeg": 38.7,
+                "declinationDeg": -5.685829,
+                "forwardHeadingDeg": 45.4,
+                "cameraPitchDeg": -49.2,
+                "rollDeg": -5.1,
+                "lightLux": 3146.985,
+                "stepsSinceSessionStart": 108,
+                "gps": {
+                    "lat": 33.7532639,
+                    "lng": -84.3876695,
+                    "accuracyM": 14.672,
+                    "altitudeM": 284.6000061035156,
+                    "verticalAccuracyM": 1.4392773,
+                    "samples": 1,
+                    "ageMs": 13
+                }
+            },
+            "fromNodeId": 4,
+            "toNodeId": 7,
+            "steps": 23,
+            "durationSec": 67.353,
+            "strideM": 0.7683974,
+            "distanceM": 17.67314,
+            "pressureStartHpa": 983.5975,
+            "pressureEndHpa": 983.6211,
+            "headingMeanDeg": 119.8,
+            "headingSpreadDeg": 56.6,
+            "headingSamples": 336,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 7,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:42:03.264924-04:00",
+                "pressureHpa": 983.6102,
+                "pressureFilteredHpa": 983.61,
+                "deviceHeadingDeg": 33.1,
+                "cameraHeadingDeg": 34.2,
+                "declinationDeg": -5.6858873,
+                "forwardHeadingDeg": 33.1,
+                "cameraPitchDeg": -58.4,
+                "rollDeg": 0.9,
+                "lightLux": 4771.98,
+                "stepsSinceSessionStart": 108,
+                "gps": {
+                    "lat": 33.75325566064956,
+                    "lng": -84.38768534772542,
+                    "accuracyM": 3.063,
+                    "altitudeM": 285.3000183105468,
+                    "verticalAccuracyM": 1.4952729,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "Walters side",
+            "outdoor": true,
+            "headingMeanDeg": 33.5,
+            "headingSpreadDeg": 2.4,
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 8,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:42:32.816107-04:00",
+                "pressureHpa": 983.4685,
+                "pressureFilteredHpa": 983.47,
+                "deviceHeadingDeg": 236.2,
+                "cameraHeadingDeg": 221.7,
+                "declinationDeg": -5.685901,
+                "forwardHeadingDeg": 221.7,
+                "cameraPitchDeg": -5.1,
+                "rollDeg": -1.3,
+                "lightLux": 3511.0127,
+                "stepsSinceSessionStart": 128,
+                "gps": {
+                    "lat": 33.7529481,
+                    "lng": -84.3876259,
+                    "accuracyM": 6.628,
+                    "altitudeM": 285.5,
+                    "verticalAccuracyM": 2.9149177,
+                    "samples": 1,
+                    "ageMs": 29
+                }
+            },
+            "anchorId": "CS-A01",
+            "photos": [
+                "CS-A01-straight.jpg",
+                "CS-A01-far.jpg",
+                "CS-A01-angle.jpg"
+            ],
+            "widthCm": 200,
+            "text": "CLASSROOM SOUTH",
+            "ocr": {
+                "read": "CLASSROOM SOUTH",
+                "maxCharHeightPx": 50,
+                "charHeightAt896": 6,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 616.9302800838585,
+            "nearestNodeId": 1,
+            "heightCm": 250,
+            "offsetFromNodeM": 0.0,
+            "facingDeg": 41.700012,
+            "ocrFar": {
+                "read": "CLASSROOM SOUTH",
+                "maxCharHeightPx": 40,
+                "charHeightAt896": 5,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "straight": 616.9302800838585,
+                "angle": 513.2959094733624,
+                "far": 462.67773390378204
+            },
+            "widthEstimated": false,
+            "note": "Corner of Decatur and Peachtree"
+        },
+        {
+            "kind": "video",
+            "id": 9,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:44:45.372049-04:00",
+                "pressureHpa": 983.606,
+                "pressureFilteredHpa": 983.6,
+                "deviceHeadingDeg": 55.8,
+                "cameraHeadingDeg": 50.5,
+                "declinationDeg": -5.6857705,
+                "forwardHeadingDeg": 55.8,
+                "cameraPitchDeg": -51.9,
+                "rollDeg": -4.2,
+                "lightLux": 262.98,
+                "stepsSinceSessionStart": 183,
+                "gps": {
+                    "lat": 33.7527517,
+                    "lng": -84.3877524,
+                    "accuracyM": 7.444,
+                    "altitudeM": 284.1622009277344,
+                    "verticalAccuracyM": 1.699807,
+                    "samples": 1,
+                    "ageMs": 6
+                }
+            },
+            "file": "CS-W01.mp4",
+            "sensorLogFile": "CS-W01.sensors.json",
+            "durationSec": 41.015,
+            "label": "Waltees main --> 608",
+            "note": ""
+        },
+        {
+            "kind": "video",
+            "id": 10,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:45:44.626944-04:00",
+                "pressureHpa": 983.5871,
+                "pressureFilteredHpa": 983.58,
+                "deviceHeadingDeg": 3.3,
+                "cameraHeadingDeg": 13.1,
+                "declinationDeg": -5.6858387,
+                "forwardHeadingDeg": 3.3,
+                "cameraPitchDeg": -56.4,
+                "rollDeg": 8.2,
+                "lightLux": 144.99,
+                "stepsSinceSessionStart": 243,
+                "gps": {
+                    "lat": 33.7528482,
+                    "lng": -84.3877073,
+                    "accuracyM": 9.122,
+                    "altitudeM": 284.3424987792969,
+                    "verticalAccuracyM": 1.7949986,
+                    "samples": 1,
+                    "ageMs": 32
+                }
+            },
+            "file": "CS-W02.mp4",
+            "sensorLogFile": "CS-W02.sensors.json",
+            "durationSec": 28.874,
+            "label": "Walters side to 150",
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 11,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:47:50.125507-04:00",
+                "pressureHpa": 983.5975,
+                "pressureFilteredHpa": 983.6,
+                "deviceHeadingDeg": 9.8,
+                "cameraHeadingDeg": 5.5,
+                "declinationDeg": -5.6861753,
+                "forwardHeadingDeg": 5.5,
+                "cameraPitchDeg": -42.4,
+                "rollDeg": -2.9,
+                "lightLux": 234.0225,
+                "stepsSinceSessionStart": 352,
+                "gps": {
+                    "lat": 33.75262551049758,
+                    "lng": -84.38716163711864,
+                    "accuracyM": 3.434,
+                    "altitudeM": 284.2900639183393,
+                    "verticalAccuracyM": 2.0443614,
+                    "samples": 11,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "95 Decatur Street main",
+            "outdoor": true,
+            "headingMeanDeg": 11.4,
+            "headingSpreadDeg": 2.0,
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 12,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:48:05.555976-04:00",
+                "pressureHpa": 983.5847,
+                "pressureFilteredHpa": 983.58,
+                "deviceHeadingDeg": 249.6,
+                "cameraHeadingDeg": 216.2,
+                "declinationDeg": -5.6861863,
+                "forwardHeadingDeg": 216.2,
+                "cameraPitchDeg": -1.9,
+                "rollDeg": -1.3,
+                "lightLux": 371.99252,
+                "stepsSinceSessionStart": 355,
+                "gps": {
+                    "lat": 33.7526238,
+                    "lng": -84.3871528,
+                    "accuracyM": 3.887,
+                    "altitudeM": 285.3000183105469,
+                    "verticalAccuracyM": 2.719663,
+                    "samples": 1,
+                    "ageMs": 96
+                }
+            },
+            "anchorId": "CS-A02",
+            "photos": [
+                "CS-A02-straight.jpg",
+                "CS-A02-far.jpg",
+                "CS-A02-angle.jpg"
+            ],
+            "widthCm": 100,
+            "text": "OM SOUTH DECATUR ST",
+            "ocr": {
+                "read": "OM SOUTH S DECHTUR ST",
+                "maxCharHeightPx": 86,
+                "charHeightAt896": 11,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 2354.856372516589,
+            "nearestNodeId": 11,
+            "heightCm": 180,
+            "offsetFromNodeM": 0.0,
+            "facingDeg": 36.200012,
+            "ocrFar": {
+                "read": "TH CAUTION ECATURST",
+                "maxCharHeightPx": 80,
+                "charHeightAt896": 10,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "straight": 2354.856372516589,
+                "angle": 1688.483139821256,
+                "far": 2250.516548025048
+            },
+            "widthEstimated": false,
+            "note": "Street"
+        },
+        {
+            "kind": "anchor",
+            "id": 13,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:48:05.555976-04:00",
+                "pressureHpa": 983.5847,
+                "pressureFilteredHpa": 983.58,
+                "deviceHeadingDeg": 249.6,
+                "cameraHeadingDeg": 216.2,
+                "declinationDeg": -5.6861863,
+                "forwardHeadingDeg": 216.2,
+                "cameraPitchDeg": -1.9,
+                "rollDeg": -1.3,
+                "lightLux": 371.99252,
+                "stepsSinceSessionStart": 355,
+                "gps": {
+                    "lat": 33.7526238,
+                    "lng": -84.3871528,
+                    "accuracyM": 3.887,
+                    "altitudeM": 285.3000183105469,
+                    "verticalAccuracyM": 2.719663,
+                    "samples": 1,
+                    "ageMs": 96
+                }
+            },
+            "anchorId": "CS-A02",
+            "photos": [
+                "CS-A02-straight.jpg",
+                "CS-A02-far.jpg",
+                "CS-A02-angle.jpg"
+            ],
+            "widthCm": 100,
+            "text": "OM SOUTH DECATUR ST",
+            "ocr": {
+                "read": "OM SOUTH S DECHTUR ST",
+                "maxCharHeightPx": 86,
+                "charHeightAt896": 11,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 2354.856372516589,
+            "nearestNodeId": 11,
+            "heightCm": 180,
+            "offsetFromNodeM": 0.0,
+            "facingDeg": 36.200012,
+            "ocrFar": {
+                "read": "TH CAUTION ECATURST",
+                "maxCharHeightPx": 80,
+                "charHeightAt896": 10,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "straight": 2354.856372516589,
+                "angle": 1688.483139821256,
+                "far": 2250.516548025048
+            },
+            "widthEstimated": false,
+            "note": "Street"
+        },
+        {
+            "kind": "video",
+            "id": 14,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:51:25.159104-04:00",
+                "pressureHpa": 983.59283,
+                "pressureFilteredHpa": 983.59,
+                "deviceHeadingDeg": 61.9,
+                "cameraHeadingDeg": 59.2,
+                "declinationDeg": -5.6858306,
+                "forwardHeadingDeg": 61.9,
+                "cameraPitchDeg": -61.3,
+                "rollDeg": -2.4,
+                "lightLux": 371.99252,
+                "stepsSinceSessionStart": 123,
+                "gps": {
+                    "lat": 33.7528433,
+                    "lng": -84.3876988,
+                    "accuracyM": 40.532,
+                    "altitudeM": 284.0,
+                    "verticalAccuracyM": 2.3586354,
+                    "samples": 1,
+                    "ageMs": 7
+                }
+            },
+            "file": "CS-W03.mp4",
+            "sensorLogFile": "CS-W03.sensors.json",
+            "durationSec": 84.135,
+            "label": "95 Decatur --> 105",
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 15,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:52:10.471312-04:00",
+                "pressureHpa": 983.6094,
+                "pressureFilteredHpa": 983.61,
+                "deviceHeadingDeg": 201.9,
+                "cameraHeadingDeg": 196.9,
+                "declinationDeg": -5.685889,
+                "forwardHeadingDeg": 201.9,
+                "cameraPitchDeg": -51.0,
+                "rollDeg": -3.9,
+                "lightLux": 278.9775,
+                "stepsSinceSessionStart": 138,
+                "gps": {
+                    "lat": 33.7528169,
+                    "lng": -84.3876298,
+                    "accuracyM": 21.981,
+                    "altitudeM": 283.6000061035156,
+                    "verticalAccuracyM": 2.3825102,
+                    "samples": 1,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "INTERSECTION",
+            "name": "Walters corner to main",
+            "outdoor": false,
+            "headingMeanDeg": 202.9,
+            "headingSpreadDeg": 1.3,
+            "note": ""
+        },
+        {
+            "kind": "edge",
+            "id": 16,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:52:53.580509-04:00",
+                "pressureHpa": 983.596,
+                "pressureFilteredHpa": 983.59,
+                "deviceHeadingDeg": 179.1,
+                "cameraHeadingDeg": 172.0,
+                "declinationDeg": -5.685958,
+                "forwardHeadingDeg": 179.1,
+                "cameraPitchDeg": -52.2,
+                "rollDeg": -5.7,
+                "lightLux": 198.99,
+                "stepsSinceSessionStart": 177,
+                "gps": {
+                    "lat": 33.7526273,
+                    "lng": -84.3874291,
+                    "accuracyM": 40.307,
+                    "altitudeM": 283.4000244140625,
+                    "verticalAccuracyM": 2.2791626,
+                    "samples": 1,
+                    "ageMs": 4395
+                }
+            },
+            "fromNodeId": 15,
+            "toNodeId": 17,
+            "steps": 39,
+            "durationSec": 43.109,
+            "strideM": 0.7683974,
+            "distanceM": 29.967499,
+            "pressureStartHpa": 983.6094,
+            "pressureEndHpa": 983.596,
+            "headingMeanDeg": 148.4,
+            "headingSpreadDeg": 26.3,
+            "headingSamples": 215,
+            "note": "Elevator lobby turn (where the vending machines are)"
+        },
+        {
+            "kind": "node",
+            "id": 17,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:53:16.32493-04:00",
+                "pressureHpa": 983.60236,
+                "pressureFilteredHpa": 983.6,
+                "deviceHeadingDeg": 222.0,
+                "cameraHeadingDeg": 211.6,
+                "declinationDeg": -5.686018,
+                "forwardHeadingDeg": 222.0,
+                "cameraPitchDeg": -55.8,
+                "rollDeg": -8.6,
+                "lightLux": 184.005,
+                "stepsSinceSessionStart": 177,
+                "gps": {
+                    "lat": 33.752601299662395,
+                    "lng": -84.38739720067521,
+                    "accuracyM": 13.011,
+                    "altitudeM": 283.4000244140625,
+                    "verticalAccuracyM": 2.4744074,
+                    "samples": 2,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "INTERSECTION",
+            "name": "Elevator lobby turn",
+            "outdoor": false,
+            "headingMeanDeg": 219.9,
+            "headingSpreadDeg": 1.1,
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 18,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:53:28.671133-04:00",
+                "pressureHpa": 983.603,
+                "pressureFilteredHpa": 983.6,
+                "deviceHeadingDeg": 247.9,
+                "cameraHeadingDeg": 234.2,
+                "declinationDeg": -5.6860175,
+                "forwardHeadingDeg": 234.2,
+                "cameraPitchDeg": -8.5,
+                "rollDeg": -2.1,
+                "lightLux": 45.967503,
+                "stepsSinceSessionStart": 177,
+                "gps": {
+                    "lat": 33.7526035,
+                    "lng": -84.3873998,
+                    "accuracyM": 7.833,
+                    "altitudeM": 283.4000244140625,
+                    "verticalAccuracyM": 2.423318,
+                    "samples": 1,
+                    "ageMs": 17
+                }
+            },
+            "anchorId": "CS-A04",
+            "photos": [
+                "CS-A04-straight.jpg",
+                "CS-A04-far.jpg",
+                "CS-A04-angle.jpg"
+            ],
+            "widthCm": 150,
+            "text": "STAIRS",
+            "ocr": {
+                "read": "NOTICE STAIRS Do your part f public health NoTICE E",
+                "maxCharHeightPx": 46,
+                "charHeightAt896": 6,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 1550.9329388791848,
+            "nearestNodeId": 17,
+            "heightCm": 210,
+            "offsetFromNodeM": 300.0,
+            "facingDeg": 54.200012,
+            "ocrFar": {
+                "read": "STAIRS",
+                "maxCharHeightPx": 50,
+                "charHeightAt896": 6,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "straight": 1550.9329388791848,
+                "angle": 1022.7590656745306,
+                "far": 2145.3823186057
+            },
+            "widthEstimated": true,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 19,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T12:56:30.310713-04:00",
+                "pressureHpa": 982.9625,
+                "pressureFilteredHpa": 982.96,
+                "deviceHeadingDeg": 359.7,
+                "cameraHeadingDeg": 351.3,
+                "declinationDeg": -5.686255,
+                "forwardHeadingDeg": 359.7,
+                "cameraPitchDeg": -64.4,
+                "rollDeg": -7.6,
+                "lightLux": 7555.0054,
+                "stepsSinceSessionStart": 295,
+                "gps": {
+                    "lat": 33.75255062999999,
+                    "lng": -84.38702003999998,
+                    "accuracyM": 3.0,
+                    "altitudeM": 288.8200073242186,
+                    "verticalAccuracyM": 1.9824259,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "LibSo main 2",
+            "outdoor": true,
+            "headingMeanDeg": 16.3,
+            "headingSpreadDeg": 57.2,
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 20,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T12:56:37.568163-04:00",
+                "pressureHpa": 982.93195,
+                "pressureFilteredHpa": 982.94,
+                "deviceHeadingDeg": 346.1,
+                "cameraHeadingDeg": 189.5,
+                "declinationDeg": -5.686255,
+                "forwardHeadingDeg": 189.5,
+                "cameraPitchDeg": 1.6,
+                "rollDeg": -0.7,
+                "lightLux": 2746.9802,
+                "stepsSinceSessionStart": 295,
+                "gps": {
+                    "lat": 33.7525555,
+                    "lng": -84.3870189,
+                    "accuracyM": 3.05,
+                    "altitudeM": 288.70001220703125,
+                    "verticalAccuracyM": 1.9380958,
+                    "samples": 1,
+                    "ageMs": 17
+                }
+            },
+            "anchorId": "CS-A05",
+            "photos": [
+                "CS-A05-straight.jpg",
+                "CS-A05-far.jpg",
+                "CS-A05-angle.jpg"
+            ],
+            "widthCm": 150,
+            "text": "LIBRARY SOUTH",
+            "ocr": {
+                "read": "OMATIC CAUTION PUTH BLibrarY Entrance",
+                "maxCharHeightPx": 174,
+                "charHeightAt896": 22,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 1056.6154528448008,
+            "nearestNodeId": 19,
+            "heightCm": 300,
+            "offsetFromNodeM": 0.0,
+            "facingDeg": 9.5,
+            "ocrFar": {
+                "read": "CAUTION DOO 13UTH Library Entrance",
+                "maxCharHeightPx": 204,
+                "charHeightAt896": 26,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "straight": 1056.6154528448008,
+                "angle": 2070.8616674230966,
+                "far": 1023.3137853162973
+            },
+            "widthEstimated": true,
+            "note": ""
+        },
+        {
+            "kind": "stairs",
+            "id": 21,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:58:15.460086-04:00",
+                "pressureHpa": 983.44916,
+                "pressureFilteredHpa": 983.45,
+                "deviceHeadingDeg": 323.4,
+                "cameraHeadingDeg": 310.7,
+                "declinationDeg": -5.686275,
+                "forwardHeadingDeg": 323.4,
+                "cameraPitchDeg": -55.0,
+                "rollDeg": -10.4,
+                "lightLux": 298.0125,
+                "stepsSinceSessionStart": 332,
+                "gps": {
+                    "lat": 33.7524758,
+                    "lng": -84.3870102,
+                    "accuracyM": 6.154,
+                    "altitudeM": 286.2274302865961,
+                    "verticalAccuracyM": 1.92578,
+                    "samples": 1,
+                    "ageMs": 6
+                }
+            },
+            "fromFloor": 2,
+            "toFloor": 1,
+            "durationSec": 20.788,
+            "steps": 29,
+            "pressureTrace": [
+                {
+                    "tSec": 0.0,
+                    "hpa": 982.9211
+                },
+                {
+                    "tSec": 0.024,
+                    "hpa": 982.9241
+                },
+                {
+                    "tSec": 0.265,
+                    "hpa": 982.9351
+                },
+                {
+                    "tSec": 0.504,
+                    "hpa": 982.93915
+                },
+                {
+                    "tSec": 0.745,
+                    "hpa": 982.9364
+                },
+                {
+                    "tSec": 0.984,
+                    "hpa": 982.93726
+                },
+                {
+                    "tSec": 1.224,
+                    "hpa": 982.9368
+                },
+                {
+                    "tSec": 1.464,
+                    "hpa": 982.91895
+                },
+                {
+                    "tSec": 1.704,
+                    "hpa": 982.93896
+                },
+                {
+                    "tSec": 1.944,
+                    "hpa": 982.97675
+                },
+                {
+                    "tSec": 2.186,
+                    "hpa": 982.96893
+                },
+                {
+                    "tSec": 2.424,
+                    "hpa": 982.94684
+                },
+                {
+                    "tSec": 2.664,
+                    "hpa": 982.9489
+                },
+                {
+                    "tSec": 2.904,
+                    "hpa": 982.9453
+                },
+                {
+                    "tSec": 3.144,
+                    "hpa": 982.953
+                },
+                {
+                    "tSec": 3.384,
+                    "hpa": 982.95935
+                },
+                {
+                    "tSec": 3.625,
+                    "hpa": 982.9787
+                },
+                {
+                    "tSec": 3.864,
+                    "hpa": 982.98975
+                },
+                {
+                    "tSec": 4.104,
+                    "hpa": 983.00995
+                },
+                {
+                    "tSec": 4.344,
+                    "hpa": 983.0176
+                },
+                {
+                    "tSec": 4.584,
+                    "hpa": 983.0314
+                },
+                {
+                    "tSec": 4.825,
+                    "hpa": 983.03754
+                },
+                {
+                    "tSec": 5.065,
+                    "hpa": 983.04987
+                },
+                {
+                    "tSec": 5.304,
+                    "hpa": 983.05646
+                },
+                {
+                    "tSec": 5.545,
+                    "hpa": 983.0707
+                },
+                {
+                    "tSec": 5.785,
+                    "hpa": 983.07153
+                },
+                {
+                    "tSec": 6.024,
+                    "hpa": 983.07477
+                },
+                {
+                    "tSec": 6.264,
+                    "hpa": 983.0722
+                },
+                {
+                    "tSec": 6.505,
+                    "hpa": 983.089
+                },
+                {
+                    "tSec": 6.744,
+                    "hpa": 983.09705
+                },
+                {
+                    "tSec": 6.984,
+                    "hpa": 983.0975
+                },
+                {
+                    "tSec": 7.224,
+                    "hpa": 983.14404
+                },
+                {
+                    "tSec": 7.464,
+                    "hpa": 983.12555
+                },
+                {
+                    "tSec": 7.704,
+                    "hpa": 983.1157
+                },
+                {
+                    "tSec": 7.944,
+                    "hpa": 983.1213
+                },
+                {
+                    "tSec": 8.184,
+                    "hpa": 983.12317
+                },
+                {
+                    "tSec": 8.424,
+                    "hpa": 983.12024
+                },
+                {
+                    "tSec": 8.664,
+                    "hpa": 983.13806
+                },
+                {
+                    "tSec": 8.904,
+                    "hpa": 983.1272
+                },
+                {
+                    "tSec": 9.144,
+                    "hpa": 983.13617
+                },
+                {
+                    "tSec": 9.384,
+                    "hpa": 983.15314
+                },
+                {
+                    "tSec": 9.624,
+                    "hpa": 983.16547
+                },
+                {
+                    "tSec": 9.865,
+                    "hpa": 983.1827
+                },
+                {
+                    "tSec": 10.104,
+                    "hpa": 983.19055
+                },
+                {
+                    "tSec": 10.344,
+                    "hpa": 983.2048
+                },
+                {
+                    "tSec": 10.584,
+                    "hpa": 983.2205
+                },
+                {
+                    "tSec": 10.824,
+                    "hpa": 983.22687
+                },
+                {
+                    "tSec": 11.065,
+                    "hpa": 983.24536
+                },
+                {
+                    "tSec": 11.304,
+                    "hpa": 983.2456
+                },
+                {
+                    "tSec": 11.544,
+                    "hpa": 983.2596
+                },
+                {
+                    "tSec": 11.785,
+                    "hpa": 983.24835
+                },
+                {
+                    "tSec": 12.024,
+                    "hpa": 983.2628
+                },
+                {
+                    "tSec": 12.264,
+                    "hpa": 983.26984
+                },
+                {
+                    "tSec": 12.505,
+                    "hpa": 983.2709
+                },
+                {
+                    "tSec": 12.744,
+                    "hpa": 983.2779
+                },
+                {
+                    "tSec": 12.984,
+                    "hpa": 983.2964
+                },
+                {
+                    "tSec": 13.225,
+                    "hpa": 983.2998
+                },
+                {
+                    "tSec": 13.465,
+                    "hpa": 983.3053
+                },
+                {
+                    "tSec": 13.704,
+                    "hpa": 983.3002
+                },
+                {
+                    "tSec": 13.945,
+                    "hpa": 983.29407
+                },
+                {
+                    "tSec": 14.184,
+                    "hpa": 983.3208
+                },
+                {
+                    "tSec": 14.424,
+                    "hpa": 983.3159
+                },
+                {
+                    "tSec": 14.665,
+                    "hpa": 983.31506
+                },
+                {
+                    "tSec": 14.904,
+                    "hpa": 983.32806
+                },
+                {
+                    "tSec": 15.144,
+                    "hpa": 983.3359
+                },
+                {
+                    "tSec": 15.384,
+                    "hpa": 983.3285
+                },
+                {
+                    "tSec": 15.624,
+                    "hpa": 983.34546
+                },
+                {
+                    "tSec": 15.864,
+                    "hpa": 983.35266
+                },
+                {
+                    "tSec": 16.104,
+                    "hpa": 983.34906
+                },
+                {
+                    "tSec": 16.344,
+                    "hpa": 983.3703
+                },
+                {
+                    "tSec": 16.584,
+                    "hpa": 983.3846
+                },
+                {
+                    "tSec": 16.825,
+                    "hpa": 983.40967
+                },
+                {
+                    "tSec": 17.064,
+                    "hpa": 983.44556
+                },
+                {
+                    "tSec": 17.304,
+                    "hpa": 983.4305
+                },
+                {
+                    "tSec": 17.544,
+                    "hpa": 983.40686
+                },
+                {
+                    "tSec": 17.752,
+                    "hpa": 983.4285
+                },
+                {
+                    "tSec": 17.944,
+                    "hpa": 983.44214
+                },
+                {
+                    "tSec": 18.185,
+                    "hpa": 983.4534
+                },
+                {
+                    "tSec": 18.424,
+                    "hpa": 983.4487
+                },
+                {
+                    "tSec": 18.666,
+                    "hpa": 983.45575
+                },
+                {
+                    "tSec": 18.904,
+                    "hpa": 983.4572
+                },
+                {
+                    "tSec": 19.145,
+                    "hpa": 983.4379
+                },
+                {
+                    "tSec": 19.384,
+                    "hpa": 983.4347
+                },
+                {
+                    "tSec": 19.624,
+                    "hpa": 983.44385
+                },
+                {
+                    "tSec": 19.864,
+                    "hpa": 983.4487
+                },
+                {
+                    "tSec": 20.104,
+                    "hpa": 983.4466
+                },
+                {
+                    "tSec": 20.348,
+                    "hpa": 983.447
+                },
+                {
+                    "tSec": 20.585,
+                    "hpa": 983.4479
+                }
+            ],
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 22,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:59:00.957623-04:00",
+                "pressureHpa": 983.433,
+                "pressureFilteredHpa": 983.44,
+                "deviceHeadingDeg": 31.5,
+                "cameraHeadingDeg": 19.5,
+                "declinationDeg": -5.686252,
+                "forwardHeadingDeg": 31.5,
+                "cameraPitchDeg": -69.4,
+                "rollDeg": -11.3,
+                "lightLux": 342.02252,
+                "stepsSinceSessionStart": 349,
+                "gps": {
+                    "lat": 33.752439778315534,
+                    "lng": -84.38702435314059,
+                    "accuracyM": 7.912,
+                    "altitudeM": 284.1416235833449,
+                    "verticalAccuracyM": 1.7288942,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "INTERSECTION",
+            "name": "Libso down floor 1",
+            "outdoor": false,
+            "headingMeanDeg": 27.8,
+            "headingSpreadDeg": 5.2,
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 23,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T12:59:12.803388-04:00",
+                "pressureHpa": 983.40265,
+                "pressureFilteredHpa": 983.4,
+                "deviceHeadingDeg": 187.9,
+                "cameraHeadingDeg": 166.8,
+                "declinationDeg": -5.6862326,
+                "forwardHeadingDeg": 166.8,
+                "cameraPitchDeg": -3.7,
+                "rollDeg": -1.4,
+                "lightLux": 18.022501,
+                "stepsSinceSessionStart": 349,
+                "gps": {
+                    "lat": 33.7524425,
+                    "lng": -84.3870351,
+                    "accuracyM": 9.616,
+                    "altitudeM": 284.1000061035156,
+                    "verticalAccuracyM": 1.7597872,
+                    "samples": 1,
+                    "ageMs": 23
+                }
+            },
+            "anchorId": "CS-A06",
+            "photos": [
+                "CS-A06-straight.jpg",
+                "CS-A06-far.jpg",
+                "CS-A06-angle.jpg"
+            ],
+            "widthCm": 80,
+            "text": "LIBRARY SOUTH",
+            "ocr": {
+                "read": "LIBRARY SOUTH FiRE ALARN",
+                "maxCharHeightPx": 66,
+                "charHeightAt896": 8,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 392.0221819007447,
+            "nearestNodeId": 22,
+            "heightCm": 180,
+            "facingDeg": 346.8,
+            "ocrFar": {
+                "read": "LIBRARY SOUTH FIREALARM",
+                "maxCharHeightPx": 64,
+                "charHeightAt896": 8,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "straight": 392.0221819007447,
+                "angle": 1539.3444148975175,
+                "far": 449.2173340997703
+            },
+            "widthEstimated": true,
+            "note": "Right of the elevators"
+        },
+        {
+            "kind": "edge",
+            "id": 24,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T13:01:17.736677-04:00",
+                "pressureHpa": 983.4428,
+                "pressureFilteredHpa": 983.44,
+                "deviceHeadingDeg": 297.7,
+                "cameraHeadingDeg": 283.2,
+                "declinationDeg": -5.685996,
+                "forwardHeadingDeg": 297.7,
+                "cameraPitchDeg": -47.6,
+                "rollDeg": -10.9,
+                "lightLux": 60.007504,
+                "stepsSinceSessionStart": 475,
+                "gps": {
+                    "lat": 33.7527763,
+                    "lng": -84.3877372,
+                    "accuracyM": 13.976,
+                    "altitudeM": 284.0,
+                    "verticalAccuracyM": 1.4197434,
+                    "samples": 1,
+                    "ageMs": 4579
+                }
+            },
+            "fromNodeId": 22,
+            "toNodeId": 4,
+            "steps": 126,
+            "durationSec": 136.778,
+            "strideM": 0.7683974,
+            "distanceM": 96.81807,
+            "pressureStartHpa": 983.433,
+            "pressureEndHpa": 983.4428,
+            "headingMeanDeg": 341.5,
+            "headingSpreadDeg": 81.3,
+            "headingSamples": 682,
+            "note": ""
+        },
+        {
+            "kind": "video",
+            "id": 25,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T13:02:39.105449-04:00",
+                "pressureHpa": 983.46954,
+                "pressureFilteredHpa": 983.47,
+                "deviceHeadingDeg": 87.9,
+                "cameraHeadingDeg": 78.2,
+                "declinationDeg": -5.6860423,
+                "forwardHeadingDeg": 87.9,
+                "cameraPitchDeg": -62.4,
+                "rollDeg": -8.6,
+                "lightLux": 328.99503,
+                "stepsSinceSessionStart": 574,
+                "gps": {
+                    "lat": 33.7525955,
+                    "lng": -84.3874307,
+                    "accuracyM": 25.198,
+                    "altitudeM": 283.4000244140625,
+                    "verticalAccuracyM": 1.23213,
+                    "samples": 1,
+                    "ageMs": 6
+                }
+            },
+            "file": "CS-W04.mp4",
+            "sensorLogFile": "CS-W04.sensors.json",
+            "durationSec": 48.322,
+            "label": "Walters side -> Elevator lobby",
+            "note": ""
+        },
+        {
+            "kind": "elevator",
+            "id": 26,
+            "floor": 6,
+            "snapshot": {
+                "at": "2026-09-25T13:03:21.570008-04:00",
+                "pressureHpa": 981.25916,
+                "pressureFilteredHpa": 981.26,
+                "deviceHeadingDeg": 75.8,
+                "cameraHeadingDeg": 60.0,
+                "declinationDeg": -5.685968,
+                "forwardHeadingDeg": 75.8,
+                "cameraPitchDeg": -62.3,
+                "rollDeg": -14.1,
+                "lightLux": 332.0325,
+                "stepsSinceSessionStart": 578,
+                "gps": {
+                    "lat": 33.7525923,
+                    "lng": -84.3874554,
+                    "accuracyM": 28.303,
+                    "altitudeM": 295.0,
+                    "verticalAccuracyM": 1.4365405,
+                    "samples": 1,
+                    "ageMs": 4838
+                }
+            },
+            "fromFloor": 1,
+            "toFloor": 6,
+            "waitSec": 3.446,
+            "rideSec": 22.389,
+            "pressureTrace": [
+                {
+                    "tSec": 0.0,
+                    "hpa": 983.4547
+                },
+                {
+                    "tSec": 0.079,
+                    "hpa": 983.4534
+                },
+                {
+                    "tSec": 0.319,
+                    "hpa": 983.4532
+                },
+                {
+                    "tSec": 0.559,
+                    "hpa": 983.4477
+                },
+                {
+                    "tSec": 0.799,
+                    "hpa": 983.44855
+                },
+                {
+                    "tSec": 1.039,
+                    "hpa": 983.45514
+                },
+                {
+                    "tSec": 1.279,
+                    "hpa": 983.4613
+                },
+                {
+                    "tSec": 1.519,
+                    "hpa": 983.4553
+                },
+                {
+                    "tSec": 1.759,
+                    "hpa": 983.46594
+                },
+                {
+                    "tSec": 1.999,
+                    "hpa": 983.46954
+                },
+                {
+                    "tSec": 2.239,
+                    "hpa": 983.4625
+                },
+                {
+                    "tSec": 2.479,
+                    "hpa": 983.4751
+                },
+                {
+                    "tSec": 2.719,
+                    "hpa": 983.47296
+                },
+                {
+                    "tSec": 2.959,
+                    "hpa": 983.46704
+                },
+                {
+                    "tSec": 3.2,
+                    "hpa": 983.47424
+                },
+                {
+                    "tSec": 3.439,
+                    "hpa": 983.47
+                },
+                {
+                    "tSec": 3.679,
+                    "hpa": 983.45636
+                },
+                {
+                    "tSec": 3.919,
+                    "hpa": 983.44366
+                },
+                {
+                    "tSec": 4.159,
+                    "hpa": 983.44446
+                },
+                {
+                    "tSec": 4.4,
+                    "hpa": 983.4513
+                },
+                {
+                    "tSec": 4.639,
+                    "hpa": 983.45557
+                },
+                {
+                    "tSec": 4.879,
+                    "hpa": 983.4547
+                },
+                {
+                    "tSec": 5.119,
+                    "hpa": 983.4477
+                },
+                {
+                    "tSec": 5.359,
+                    "hpa": 983.45276
+                },
+                {
+                    "tSec": 5.599,
+                    "hpa": 983.4515
+                },
+                {
+                    "tSec": 5.84,
+                    "hpa": 983.4543
+                },
+                {
+                    "tSec": 6.079,
+                    "hpa": 983.45575
+                },
+                {
+                    "tSec": 6.319,
+                    "hpa": 983.4572
+                },
+                {
+                    "tSec": 6.56,
+                    "hpa": 983.45636
+                },
+                {
+                    "tSec": 6.8,
+                    "hpa": 983.4602
+                },
+                {
+                    "tSec": 7.039,
+                    "hpa": 983.4685
+                },
+                {
+                    "tSec": 7.279,
+                    "hpa": 983.46405
+                },
+                {
+                    "tSec": 7.519,
+                    "hpa": 983.4649
+                },
+                {
+                    "tSec": 7.759,
+                    "hpa": 983.46826
+                },
+                {
+                    "tSec": 8.0,
+                    "hpa": 983.4717
+                },
+                {
+                    "tSec": 8.239,
+                    "hpa": 983.47485
+                },
+                {
+                    "tSec": 8.479,
+                    "hpa": 983.477
+                },
+                {
+                    "tSec": 8.719,
+                    "hpa": 983.4785
+                },
+                {
+                    "tSec": 8.959,
+                    "hpa": 983.4781
+                },
+                {
+                    "tSec": 9.2,
+                    "hpa": 983.47
+                },
+                {
+                    "tSec": 9.439,
+                    "hpa": 983.4579
+                },
+                {
+                    "tSec": 9.679,
+                    "hpa": 983.47235
+                },
+                {
+                    "tSec": 9.919,
+                    "hpa": 983.474
+                },
+                {
+                    "tSec": 10.159,
+                    "hpa": 983.46576
+                },
+                {
+                    "tSec": 10.399,
+                    "hpa": 983.45807
+                },
+                {
+                    "tSec": 10.639,
+                    "hpa": 983.4481
+                },
+                {
+                    "tSec": 10.879,
+                    "hpa": 983.4305
+                },
+                {
+                    "tSec": 11.119,
+                    "hpa": 983.409
+                },
+                {
+                    "tSec": 11.359,
+                    "hpa": 983.38116
+                },
+                {
+                    "tSec": 11.599,
+                    "hpa": 983.34717
+                },
+                {
+                    "tSec": 11.839,
+                    "hpa": 983.3053
+                },
+                {
+                    "tSec": 12.079,
+                    "hpa": 983.25793
+                },
+                {
+                    "tSec": 12.319,
+                    "hpa": 983.2152
+                },
+                {
+                    "tSec": 12.559,
+                    "hpa": 983.195
+                },
+                {
+                    "tSec": 12.799,
+                    "hpa": 983.18756
+                },
+                {
+                    "tSec": 13.039,
+                    "hpa": 983.10956
+                },
+                {
+                    "tSec": 13.279,
+                    "hpa": 983.01654
+                },
+                {
+                    "tSec": 13.519,
+                    "hpa": 982.9566
+                },
+                {
+                    "tSec": 13.76,
+                    "hpa": 982.9124
+                },
+                {
+                    "tSec": 13.999,
+                    "hpa": 982.865
+                },
+                {
+                    "tSec": 14.239,
+                    "hpa": 982.82184
+                },
+                {
+                    "tSec": 14.479,
+                    "hpa": 982.7751
+                },
+                {
+                    "tSec": 14.719,
+                    "hpa": 982.7286
+                },
+                {
+                    "tSec": 14.959,
+                    "hpa": 982.6916
+                },
+                {
+                    "tSec": 15.199,
+                    "hpa": 982.65295
+                },
+                {
+                    "tSec": 15.439,
+                    "hpa": 982.6032
+                },
+                {
+                    "tSec": 15.679,
+                    "hpa": 982.5556
+                },
+                {
+                    "tSec": 15.919,
+                    "hpa": 982.51544
+                },
+                {
+                    "tSec": 16.16,
+                    "hpa": 982.4738
+                },
+                {
+                    "tSec": 16.399,
+                    "hpa": 982.436
+                },
+                {
+                    "tSec": 16.639,
+                    "hpa": 982.3828
+                },
+                {
+                    "tSec": 16.879,
+                    "hpa": 982.3208
+                },
+                {
+                    "tSec": 17.121,
+                    "hpa": 982.2664
+                },
+                {
+                    "tSec": 17.359,
+                    "hpa": 982.22156
+                },
+                {
+                    "tSec": 17.599,
+                    "hpa": 982.1833
+                },
+                {
+                    "tSec": 17.839,
+                    "hpa": 982.16394
+                },
+                {
+                    "tSec": 18.079,
+                    "hpa": 982.11255
+                },
+                {
+                    "tSec": 18.319,
+                    "hpa": 982.05347
+                },
+                {
+                    "tSec": 18.559,
+                    "hpa": 981.9982
+                },
+                {
+                    "tSec": 18.799,
+                    "hpa": 981.9449
+                },
+                {
+                    "tSec": 19.039,
+                    "hpa": 981.8926
+                },
+                {
+                    "tSec": 19.28,
+                    "hpa": 981.8452
+                },
+                {
+                    "tSec": 19.519,
+                    "hpa": 981.7946
+                },
+                {
+                    "tSec": 19.76,
+                    "hpa": 981.746
+                },
+                {
+                    "tSec": 19.999,
+                    "hpa": 981.7011
+                },
+                {
+                    "tSec": 20.239,
+                    "hpa": 981.6431
+                },
+                {
+                    "tSec": 20.479,
+                    "hpa": 981.59534
+                },
+                {
+                    "tSec": 20.719,
+                    "hpa": 981.55304
+                },
+                {
+                    "tSec": 20.96,
+                    "hpa": 981.5052
+                },
+                {
+                    "tSec": 21.199,
+                    "hpa": 981.45105
+                },
+                {
+                    "tSec": 21.439,
+                    "hpa": 981.3947
+                },
+                {
+                    "tSec": 21.679,
+                    "hpa": 981.3471
+                },
+                {
+                    "tSec": 21.919,
+                    "hpa": 981.32355
+                },
+                {
+                    "tSec": 22.159,
+                    "hpa": 981.30145
+                },
+                {
+                    "tSec": 22.399,
+                    "hpa": 981.27594
+                },
+                {
+                    "tSec": 22.639,
+                    "hpa": 981.2551
+                },
+                {
+                    "tSec": 22.879,
+                    "hpa": 981.2481
+                },
+                {
+                    "tSec": 23.119,
+                    "hpa": 981.2424
+                },
+                {
+                    "tSec": 23.359,
+                    "hpa": 981.2404
+                },
+                {
+                    "tSec": 23.599,
+                    "hpa": 981.23706
+                },
+                {
+                    "tSec": 23.84,
+                    "hpa": 981.24
+                },
+                {
+                    "tSec": 24.079,
+                    "hpa": 981.25256
+                },
+                {
+                    "tSec": 24.319,
+                    "hpa": 981.2625
+                },
+                {
+                    "tSec": 24.512,
+                    "hpa": 981.2653
+                },
+                {
+                    "tSec": 24.719,
+                    "hpa": 981.26575
+                },
+                {
+                    "tSec": 24.959,
+                    "hpa": 981.2642
+                },
+                {
+                    "tSec": 25.199,
+                    "hpa": 981.2691
+                },
+                {
+                    "tSec": 25.439,
+                    "hpa": 981.25916
+                },
+                {
+                    "tSec": 25.679,
+                    "hpa": 981.25446
+                }
+            ],
+            "pressureBoardHpa": 983.47,
+            "pressureArriveHpa": 981.25916,
+            "note": ""
+        },
+        {
+            "kind": "stairs",
+            "id": 27,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-25T13:05:03.036423-04:00",
+                "pressureHpa": 983.433,
+                "pressureFilteredHpa": 983.43,
+                "deviceHeadingDeg": 61.2,
+                "cameraHeadingDeg": 57.1,
+                "declinationDeg": -5.6858573,
+                "forwardHeadingDeg": 61.2,
+                "cameraPitchDeg": -62.8,
+                "rollDeg": -3.6,
+                "lightLux": 78.03001,
+                "stepsSinceSessionStart": 703,
+                "gps": {
+                    "lat": 33.7525382,
+                    "lng": -84.3876327,
+                    "accuracyM": 7.263,
+                    "altitudeM": 285.1574164796843,
+                    "verticalAccuracyM": 1.3689847,
+                    "samples": 1,
+                    "ageMs": 5
+                }
+            },
+            "fromFloor": 6,
+            "toFloor": 1,
+            "durationSec": 60.901,
+            "steps": 98,
+            "pressureTrace": [
+                {
+                    "tSec": 0.0,
+                    "hpa": 981.26
+                },
+                {
+                    "tSec": 0.078,
+                    "hpa": 981.25256
+                },
+                {
+                    "tSec": 0.318,
+                    "hpa": 981.24084
+                },
+                {
+                    "tSec": 0.558,
+                    "hpa": 981.2281
+                },
+                {
+                    "tSec": 0.798,
+                    "hpa": 981.2298
+                },
+                {
+                    "tSec": 1.038,
+                    "hpa": 981.24255
+                },
+                {
+                    "tSec": 1.278,
+                    "hpa": 981.2636
+                },
+                {
+                    "tSec": 1.519,
+                    "hpa": 981.24744
+                },
+                {
+                    "tSec": 1.758,
+                    "hpa": 981.2642
+                },
+                {
+                    "tSec": 1.998,
+                    "hpa": 981.2916
+                },
+                {
+                    "tSec": 2.238,
+                    "hpa": 981.29205
+                },
+                {
+                    "tSec": 2.478,
+                    "hpa": 981.2823
+                },
+                {
+                    "tSec": 2.718,
+                    "hpa": 981.3078
+                },
+                {
+                    "tSec": 2.959,
+                    "hpa": 981.31036
+                },
+                {
+                    "tSec": 3.198,
+                    "hpa": 981.3293
+                },
+                {
+                    "tSec": 3.438,
+                    "hpa": 981.3728
+                },
+                {
+                    "tSec": 3.679,
+                    "hpa": 981.38666
+                },
+                {
+                    "tSec": 3.918,
+                    "hpa": 981.36816
+                },
+                {
+                    "tSec": 4.158,
+                    "hpa": 981.38873
+                },
+                {
+                    "tSec": 4.398,
+                    "hpa": 981.4198
+                },
+                {
+                    "tSec": 4.638,
+                    "hpa": 981.4538
+                },
+                {
+                    "tSec": 4.878,
+                    "hpa": 981.4557
+                },
+                {
+                    "tSec": 5.118,
+                    "hpa": 981.43085
+                },
+                {
+                    "tSec": 5.358,
+                    "hpa": 981.40063
+                },
+                {
+                    "tSec": 5.598,
+                    "hpa": 981.4204
+                },
+                {
+                    "tSec": 5.839,
+                    "hpa": 981.4355
+                },
+                {
+                    "tSec": 6.078,
+                    "hpa": 981.4264
+                },
+                {
+                    "tSec": 6.318,
+                    "hpa": 981.4002
+                },
+                {
+                    "tSec": 6.558,
+                    "hpa": 981.4253
+                },
+                {
+                    "tSec": 6.798,
+                    "hpa": 981.4319
+                },
+                {
+                    "tSec": 7.038,
+                    "hpa": 981.4323
+                },
+                {
+                    "tSec": 7.279,
+                    "hpa": 981.4408
+                },
+                {
+                    "tSec": 7.518,
+                    "hpa": 981.42896
+                },
+                {
+                    "tSec": 7.758,
+                    "hpa": 981.4502
+                },
+                {
+                    "tSec": 7.999,
+                    "hpa": 981.4614
+                },
+                {
+                    "tSec": 8.238,
+                    "hpa": 981.478
+                },
+                {
+                    "tSec": 8.479,
+                    "hpa": 981.4814
+                },
+                {
+                    "tSec": 8.719,
+                    "hpa": 981.48755
+                },
+                {
+                    "tSec": 8.958,
+                    "hpa": 981.5235
+                },
+                {
+                    "tSec": 9.198,
+                    "hpa": 981.55536
+                },
+                {
+                    "tSec": 9.439,
+                    "hpa": 981.54834
+                },
+                {
+                    "tSec": 9.678,
+                    "hpa": 981.576
+                },
+                {
+                    "tSec": 9.918,
+                    "hpa": 981.59125
+                },
+                {
+                    "tSec": 10.159,
+                    "hpa": 981.61145
+                },
+                {
+                    "tSec": 10.398,
+                    "hpa": 981.6193
+                },
+                {
+                    "tSec": 10.638,
+                    "hpa": 981.61444
+                },
+                {
+                    "tSec": 10.878,
+                    "hpa": 981.617
+                },
+                {
+                    "tSec": 11.118,
+                    "hpa": 981.63635
+                },
+                {
+                    "tSec": 11.358,
+                    "hpa": 981.6376
+                },
+                {
+                    "tSec": 11.599,
+                    "hpa": 981.64355
+                },
+                {
+                    "tSec": 11.838,
+                    "hpa": 981.644
+                },
+                {
+                    "tSec": 12.079,
+                    "hpa": 981.6414
+                },
+                {
+                    "tSec": 12.318,
+                    "hpa": 981.64886
+                },
+                {
+                    "tSec": 12.558,
+                    "hpa": 981.6429
+                },
+                {
+                    "tSec": 12.798,
+                    "hpa": 981.6527
+                },
+                {
+                    "tSec": 13.041,
+                    "hpa": 981.67163
+                },
+                {
+                    "tSec": 13.278,
+                    "hpa": 981.6856
+                },
+                {
+                    "tSec": 13.518,
+                    "hpa": 981.7262
+                },
+                {
+                    "tSec": 13.758,
+                    "hpa": 981.7141
+                },
+                {
+                    "tSec": 13.998,
+                    "hpa": 981.7262
+                },
+                {
+                    "tSec": 14.238,
+                    "hpa": 981.7587
+                },
+                {
+                    "tSec": 14.479,
+                    "hpa": 981.7827
+                },
+                {
+                    "tSec": 14.718,
+                    "hpa": 981.8023
+                },
+                {
+                    "tSec": 14.958,
+                    "hpa": 981.80035
+                },
+                {
+                    "tSec": 15.198,
+                    "hpa": 981.7923
+                },
+                {
+                    "tSec": 15.438,
+                    "hpa": 981.8082
+                },
+                {
+                    "tSec": 15.679,
+                    "hpa": 981.8082
+                },
+                {
+                    "tSec": 15.918,
+                    "hpa": 981.8212
+                },
+                {
+                    "tSec": 16.159,
+                    "hpa": 981.83716
+                },
+                {
+                    "tSec": 16.4,
+                    "hpa": 981.8471
+                },
+                {
+                    "tSec": 16.638,
+                    "hpa": 981.84863
+                },
+                {
+                    "tSec": 16.879,
+                    "hpa": 981.8467
+                },
+                {
+                    "tSec": 17.118,
+                    "hpa": 981.8571
+                },
+                {
+                    "tSec": 17.358,
+                    "hpa": 981.86346
+                },
+                {
+                    "tSec": 17.599,
+                    "hpa": 981.8762
+                },
+                {
+                    "tSec": 17.839,
+                    "hpa": 981.8756
+                },
+                {
+                    "tSec": 18.078,
+                    "hpa": 981.9036
+                },
+                {
+                    "tSec": 18.318,
+                    "hpa": 981.9109
+                },
+                {
+                    "tSec": 18.558,
+                    "hpa": 981.91534
+                },
+                {
+                    "tSec": 18.799,
+                    "hpa": 981.9028
+                },
+                {
+                    "tSec": 19.039,
+                    "hpa": 981.9175
+                },
+                {
+                    "tSec": 19.278,
+                    "hpa": 981.95526
+                },
+                {
+                    "tSec": 19.518,
+                    "hpa": 981.9606
+                },
+                {
+                    "tSec": 19.758,
+                    "hpa": 981.9918
+                },
+                {
+                    "tSec": 19.999,
+                    "hpa": 982.01434
+                },
+                {
+                    "tSec": 20.239,
+                    "hpa": 982.005
+                },
+                {
+                    "tSec": 20.48,
+                    "hpa": 982.0235
+                },
+                {
+                    "tSec": 20.718,
+                    "hpa": 982.03796
+                },
+                {
+                    "tSec": 20.958,
+                    "hpa": 982.0388
+                },
+                {
+                    "tSec": 21.198,
+                    "hpa": 982.0401
+                },
+                {
+                    "tSec": 21.439,
+                    "hpa": 982.0401
+                },
+                {
+                    "tSec": 21.678,
+                    "hpa": 982.04346
+                },
+                {
+                    "tSec": 21.918,
+                    "hpa": 982.0477
+                },
+                {
+                    "tSec": 22.158,
+                    "hpa": 982.0522
+                },
+                {
+                    "tSec": 22.398,
+                    "hpa": 982.0575
+                },
+                {
+                    "tSec": 22.638,
+                    "hpa": 982.0643
+                },
+                {
+                    "tSec": 22.878,
+                    "hpa": 982.06793
+                },
+                {
+                    "tSec": 23.118,
+                    "hpa": 982.0845
+                },
+                {
+                    "tSec": 23.358,
+                    "hpa": 982.0972
+                },
+                {
+                    "tSec": 23.598,
+                    "hpa": 982.11
+                },
+                {
+                    "tSec": 23.838,
+                    "hpa": 982.12805
+                },
+                {
+                    "tSec": 24.078,
+                    "hpa": 982.1321
+                },
+                {
+                    "tSec": 24.318,
+                    "hpa": 982.127
+                },
+                {
+                    "tSec": 24.558,
+                    "hpa": 982.147
+                },
+                {
+                    "tSec": 24.798,
+                    "hpa": 982.16565
+                },
+                {
+                    "tSec": 25.038,
+                    "hpa": 982.1799
+                },
+                {
+                    "tSec": 25.279,
+                    "hpa": 982.1854
+                },
+                {
+                    "tSec": 25.519,
+                    "hpa": 982.2003
+                },
+                {
+                    "tSec": 25.758,
+                    "hpa": 982.222
+                },
+                {
+                    "tSec": 25.998,
+                    "hpa": 982.2356
+                },
+                {
+                    "tSec": 26.238,
+                    "hpa": 982.2481
+                },
+                {
+                    "tSec": 26.478,
+                    "hpa": 982.2549
+                },
+                {
+                    "tSec": 26.718,
+                    "hpa": 982.2643
+                },
+                {
+                    "tSec": 26.958,
+                    "hpa": 982.26764
+                },
+                {
+                    "tSec": 27.199,
+                    "hpa": 982.26385
+                },
+                {
+                    "tSec": 27.438,
+                    "hpa": 982.2606
+                },
+                {
+                    "tSec": 27.678,
+                    "hpa": 982.26556
+                },
+                {
+                    "tSec": 27.918,
+                    "hpa": 982.2689
+                },
+                {
+                    "tSec": 28.159,
+                    "hpa": 982.2819
+                },
+                {
+                    "tSec": 28.398,
+                    "hpa": 982.29315
+                },
+                {
+                    "tSec": 28.638,
+                    "hpa": 982.3
+                },
+                {
+                    "tSec": 28.878,
+                    "hpa": 982.3125
+                },
+                {
+                    "tSec": 29.118,
+                    "hpa": 982.338
+                },
+                {
+                    "tSec": 29.358,
+                    "hpa": 982.34503
+                },
+                {
+                    "tSec": 29.598,
+                    "hpa": 982.3514
+                },
+                {
+                    "tSec": 29.838,
+                    "hpa": 982.3537
+                },
+                {
+                    "tSec": 30.078,
+                    "hpa": 982.35864
+                },
+                {
+                    "tSec": 30.318,
+                    "hpa": 982.36884
+                },
+                {
+                    "tSec": 30.558,
+                    "hpa": 982.38855
+                },
+                {
+                    "tSec": 30.798,
+                    "hpa": 982.3984
+                },
+                {
+                    "tSec": 31.038,
+                    "hpa": 982.4122
+                },
+                {
+                    "tSec": 31.278,
+                    "hpa": 982.4275
+                },
+                {
+                    "tSec": 31.518,
+                    "hpa": 982.4317
+                },
+                {
+                    "tSec": 31.759,
+                    "hpa": 982.4394
+                },
+                {
+                    "tSec": 31.998,
+                    "hpa": 982.45166
+                },
+                {
+                    "tSec": 32.238,
+                    "hpa": 982.45
+                },
+                {
+                    "tSec": 32.478,
+                    "hpa": 982.4417
+                },
+                {
+                    "tSec": 32.718,
+                    "hpa": 982.4434
+                },
+                {
+                    "tSec": 32.958,
+                    "hpa": 982.4479
+                },
+                {
+                    "tSec": 33.198,
+                    "hpa": 982.45233
+                },
+                {
+                    "tSec": 33.438,
+                    "hpa": 982.4574
+                },
+                {
+                    "tSec": 33.679,
+                    "hpa": 982.47253
+                },
+                {
+                    "tSec": 33.918,
+                    "hpa": 982.4853
+                },
+                {
+                    "tSec": 34.158,
+                    "hpa": 982.4846
+                },
+                {
+                    "tSec": 34.398,
+                    "hpa": 982.49225
+                },
+                {
+                    "tSec": 34.638,
+                    "hpa": 982.49695
+                },
+                {
+                    "tSec": 34.878,
+                    "hpa": 982.5114
+                },
+                {
+                    "tSec": 35.118,
+                    "hpa": 982.53564
+                },
+                {
+                    "tSec": 35.359,
+                    "hpa": 982.5469
+                },
+                {
+                    "tSec": 35.598,
+                    "hpa": 982.55817
+                },
+                {
+                    "tSec": 35.838,
+                    "hpa": 982.56683
+                },
+                {
+                    "tSec": 36.078,
+                    "hpa": 982.57874
+                },
+                {
+                    "tSec": 36.318,
+                    "hpa": 982.59705
+                },
+                {
+                    "tSec": 36.559,
+                    "hpa": 982.61597
+                },
+                {
+                    "tSec": 36.798,
+                    "hpa": 982.6423
+                },
+                {
+                    "tSec": 37.038,
+                    "hpa": 982.65784
+                },
+                {
+                    "tSec": 37.281,
+                    "hpa": 982.6589
+                },
+                {
+                    "tSec": 37.519,
+                    "hpa": 982.661
+                },
+                {
+                    "tSec": 37.759,
+                    "hpa": 982.67163
+                },
+                {
+                    "tSec": 37.998,
+                    "hpa": 982.66675
+                },
+                {
+                    "tSec": 38.238,
+                    "hpa": 982.6553
+                },
+                {
+                    "tSec": 38.479,
+                    "hpa": 982.6706
+                },
+                {
+                    "tSec": 38.719,
+                    "hpa": 982.67523
+                },
+                {
+                    "tSec": 38.959,
+                    "hpa": 982.6714
+                },
+                {
+                    "tSec": 39.198,
+                    "hpa": 982.6814
+                },
+                {
+                    "tSec": 39.438,
+                    "hpa": 982.67267
+                },
+                {
+                    "tSec": 39.678,
+                    "hpa": 982.71075
+                },
+                {
+                    "tSec": 39.919,
+                    "hpa": 982.7322
+                },
+                {
+                    "tSec": 40.158,
+                    "hpa": 982.7258
+                },
+                {
+                    "tSec": 40.398,
+                    "hpa": 982.7277
+                },
+                {
+                    "tSec": 40.638,
+                    "hpa": 982.74133
+                },
+                {
+                    "tSec": 40.878,
+                    "hpa": 982.7583
+                },
+                {
+                    "tSec": 41.118,
+                    "hpa": 982.76556
+                },
+                {
+                    "tSec": 41.358,
+                    "hpa": 982.79
+                },
+                {
+                    "tSec": 41.598,
+                    "hpa": 982.7974
+                },
+                {
+                    "tSec": 41.838,
+                    "hpa": 982.8076
+                },
+                {
+                    "tSec": 42.079,
+                    "hpa": 982.8446
+                },
+                {
+                    "tSec": 42.318,
+                    "hpa": 982.84436
+                },
+                {
+                    "tSec": 42.558,
+                    "hpa": 982.8482
+                },
+                {
+                    "tSec": 42.798,
+                    "hpa": 982.8518
+                },
+                {
+                    "tSec": 43.038,
+                    "hpa": 982.8637
+                },
+                {
+                    "tSec": 43.279,
+                    "hpa": 982.8661
+                },
+                {
+                    "tSec": 43.519,
+                    "hpa": 982.85693
+                },
+                {
+                    "tSec": 43.758,
+                    "hpa": 982.86115
+                },
+                {
+                    "tSec": 43.999,
+                    "hpa": 982.8624
+                },
+                {
+                    "tSec": 44.238,
+                    "hpa": 982.86523
+                },
+                {
+                    "tSec": 44.478,
+                    "hpa": 982.8743
+                },
+                {
+                    "tSec": 44.719,
+                    "hpa": 982.8754
+                },
+                {
+                    "tSec": 44.959,
+                    "hpa": 982.8899
+                },
+                {
+                    "tSec": 45.198,
+                    "hpa": 982.8937
+                },
+                {
+                    "tSec": 45.439,
+                    "hpa": 982.9071
+                },
+                {
+                    "tSec": 45.679,
+                    "hpa": 982.91516
+                },
+                {
+                    "tSec": 45.918,
+                    "hpa": 982.9345
+                },
+                {
+                    "tSec": 46.159,
+                    "hpa": 982.9443
+                },
+                {
+                    "tSec": 46.399,
+                    "hpa": 982.9645
+                },
+                {
+                    "tSec": 46.638,
+                    "hpa": 982.9857
+                },
+                {
+                    "tSec": 46.878,
+                    "hpa": 983.0161
+                },
+                {
+                    "tSec": 47.119,
+                    "hpa": 983.0369
+                },
+                {
+                    "tSec": 47.358,
+                    "hpa": 983.03455
+                },
+                {
+                    "tSec": 47.598,
+                    "hpa": 983.0312
+                },
+                {
+                    "tSec": 47.839,
+                    "hpa": 983.048
+                },
+                {
+                    "tSec": 48.079,
+                    "hpa": 983.06134
+                },
+                {
+                    "tSec": 48.318,
+                    "hpa": 983.07306
+                },
+                {
+                    "tSec": 48.558,
+                    "hpa": 983.089
+                },
+                {
+                    "tSec": 48.798,
+                    "hpa": 983.1153
+                },
+                {
+                    "tSec": 49.039,
+                    "hpa": 983.1359
+                },
+                {
+                    "tSec": 49.278,
+                    "hpa": 983.14954
+                },
+                {
+                    "tSec": 49.518,
+                    "hpa": 983.1506
+                },
+                {
+                    "tSec": 49.758,
+                    "hpa": 983.1587
+                },
+                {
+                    "tSec": 49.999,
+                    "hpa": 983.1574
+                },
+                {
+                    "tSec": 50.239,
+                    "hpa": 983.157
+                },
+                {
+                    "tSec": 50.478,
+                    "hpa": 983.15656
+                },
+                {
+                    "tSec": 50.718,
+                    "hpa": 983.1485
+                },
+                {
+                    "tSec": 50.958,
+                    "hpa": 983.14526
+                },
+                {
+                    "tSec": 51.198,
+                    "hpa": 983.1481
+                },
+                {
+                    "tSec": 51.439,
+                    "hpa": 983.14764
+                },
+                {
+                    "tSec": 51.679,
+                    "hpa": 983.1521
+                },
+                {
+                    "tSec": 51.918,
+                    "hpa": 983.16376
+                },
+                {
+                    "tSec": 52.158,
+                    "hpa": 983.15955
+                },
+                {
+                    "tSec": 52.399,
+                    "hpa": 983.1744
+                },
+                {
+                    "tSec": 52.638,
+                    "hpa": 983.185
+                },
+                {
+                    "tSec": 52.878,
+                    "hpa": 983.20264
+                },
+                {
+                    "tSec": 53.118,
+                    "hpa": 983.20966
+                },
+                {
+                    "tSec": 53.359,
+                    "hpa": 983.22516
+                },
+                {
+                    "tSec": 53.598,
+                    "hpa": 983.2524
+                },
+                {
+                    "tSec": 53.839,
+                    "hpa": 983.2607
+                },
+                {
+                    "tSec": 54.079,
+                    "hpa": 983.2953
+                },
+                {
+                    "tSec": 54.319,
+                    "hpa": 983.29193
+                },
+                {
+                    "tSec": 54.558,
+                    "hpa": 983.2981
+                },
+                {
+                    "tSec": 54.799,
+                    "hpa": 983.30273
+                },
+                {
+                    "tSec": 55.038,
+                    "hpa": 983.3174
+                },
+                {
+                    "tSec": 55.279,
+                    "hpa": 983.3225
+                },
+                {
+                    "tSec": 55.518,
+                    "hpa": 983.34674
+                },
+                {
+                    "tSec": 55.759,
+                    "hpa": 983.3608
+                },
+                {
+                    "tSec": 55.999,
+                    "hpa": 983.35675
+                },
+                {
+                    "tSec": 56.238,
+                    "hpa": 983.39246
+                },
+                {
+                    "tSec": 56.478,
+                    "hpa": 983.4364
+                },
+                {
+                    "tSec": 56.718,
+                    "hpa": 983.4249
+                },
+                {
+                    "tSec": 56.959,
+                    "hpa": 983.41284
+                },
+                {
+                    "tSec": 57.198,
+                    "hpa": 983.41156
+                },
+                {
+                    "tSec": 57.439,
+                    "hpa": 983.40967
+                },
+                {
+                    "tSec": 57.679,
+                    "hpa": 983.41327
+                },
+                {
+                    "tSec": 57.919,
+                    "hpa": 983.4162
+                },
+                {
+                    "tSec": 58.158,
+                    "hpa": 983.4213
+                },
+                {
+                    "tSec": 58.398,
+                    "hpa": 983.4226
+                },
+                {
+                    "tSec": 58.638,
+                    "hpa": 983.43195
+                },
+                {
+                    "tSec": 58.878,
+                    "hpa": 983.4407
+                },
+                {
+                    "tSec": 59.121,
+                    "hpa": 983.4368
+                },
+                {
+                    "tSec": 59.358,
+                    "hpa": 983.42706
+                },
+                {
+                    "tSec": 59.598,
+                    "hpa": 983.4222
+                },
+                {
+                    "tSec": 59.838,
+                    "hpa": 983.41705
+                },
+                {
+                    "tSec": 60.079,
+                    "hpa": 983.4126
+                },
+                {
+                    "tSec": 60.318,
+                    "hpa": 983.4315
+                },
+                {
+                    "tSec": 60.558,
+                    "hpa": 983.4175
+                },
+                {
+                    "tSec": 60.798,
+                    "hpa": 983.44
+                }
+            ],
+            "note": ""
+        },
+        {
+            "kind": "elevator",
+            "id": 28,
+            "floor": 6,
+            "snapshot": {
+                "at": "2026-09-25T13:05:43.543884-04:00",
+                "pressureHpa": 981.2128,
+                "pressureFilteredHpa": 981.21,
+                "deviceHeadingDeg": 326.5,
+                "cameraHeadingDeg": 311.0,
+                "declinationDeg": -5.685889,
+                "forwardHeadingDeg": 326.5,
+                "cameraPitchDeg": -59.7,
+                "rollDeg": -13.5,
+                "lightLux": 390.015,
+                "stepsSinceSessionStart": 719,
+                "gps": {
+                    "lat": 33.7525208,
+                    "lng": -84.387577,
+                    "accuracyM": 9.608,
+                    "altitudeM": 298.1792096092389,
+                    "verticalAccuracyM": 1.4838516,
+                    "samples": 1,
+                    "ageMs": 67
+                }
+            },
+            "fromFloor": 1,
+            "toFloor": 6,
+            "waitSec": 1.374,
+            "rideSec": 22.03,
+            "pressureTrace": [
+                {
+                    "tSec": 0.0,
+                    "hpa": 983.40814
+                },
+                {
+                    "tSec": 0.074,
+                    "hpa": 983.4056
+                },
+                {
+                    "tSec": 0.314,
+                    "hpa": 983.41644
+                },
+                {
+                    "tSec": 0.554,
+                    "hpa": 983.41705
+                },
+                {
+                    "tSec": 0.794,
+                    "hpa": 983.41174
+                },
+                {
+                    "tSec": 1.034,
+                    "hpa": 983.4143
+                },
+                {
+                    "tSec": 1.274,
+                    "hpa": 983.41345
+                },
+                {
+                    "tSec": 1.514,
+                    "hpa": 983.4186
+                },
+                {
+                    "tSec": 1.754,
+                    "hpa": 983.41003
+                },
+                {
+                    "tSec": 1.994,
+                    "hpa": 983.4169
+                },
+                {
+                    "tSec": 2.234,
+                    "hpa": 983.4252
+                },
+                {
+                    "tSec": 2.474,
+                    "hpa": 983.426
+                },
+                {
+                    "tSec": 2.714,
+                    "hpa": 983.42706
+                },
+                {
+                    "tSec": 2.954,
+                    "hpa": 983.4277
+                },
+                {
+                    "tSec": 3.195,
+                    "hpa": 983.4239
+                },
+                {
+                    "tSec": 3.434,
+                    "hpa": 983.4228
+                },
+                {
+                    "tSec": 3.675,
+                    "hpa": 983.4215
+                },
+                {
+                    "tSec": 3.914,
+                    "hpa": 983.41943
+                },
+                {
+                    "tSec": 4.155,
+                    "hpa": 983.4186
+                },
+                {
+                    "tSec": 4.394,
+                    "hpa": 983.4154
+                },
+                {
+                    "tSec": 4.634,
+                    "hpa": 983.4209
+                },
+                {
+                    "tSec": 4.874,
+                    "hpa": 983.41705
+                },
+                {
+                    "tSec": 5.114,
+                    "hpa": 983.39966
+                },
+                {
+                    "tSec": 5.355,
+                    "hpa": 983.4077
+                },
+                {
+                    "tSec": 5.594,
+                    "hpa": 983.4122
+                },
+                {
+                    "tSec": 5.834,
+                    "hpa": 983.4122
+                },
+                {
+                    "tSec": 6.075,
+                    "hpa": 983.4122
+                },
+                {
+                    "tSec": 6.314,
+                    "hpa": 983.4124
+                },
+                {
+                    "tSec": 6.555,
+                    "hpa": 983.413
+                },
+                {
+                    "tSec": 6.795,
+                    "hpa": 983.41156
+                },
+                {
+                    "tSec": 7.034,
+                    "hpa": 983.40924
+                },
+                {
+                    "tSec": 7.275,
+                    "hpa": 983.4088
+                },
+                {
+                    "tSec": 7.514,
+                    "hpa": 983.409
+                },
+                {
+                    "tSec": 7.755,
+                    "hpa": 983.4077
+                },
+                {
+                    "tSec": 7.994,
+                    "hpa": 983.40753
+                },
+                {
+                    "tSec": 8.234,
+                    "hpa": 983.4077
+                },
+                {
+                    "tSec": 8.474,
+                    "hpa": 983.406
+                },
+                {
+                    "tSec": 8.714,
+                    "hpa": 983.4022
+                },
+                {
+                    "tSec": 8.954,
+                    "hpa": 983.3882
+                },
+                {
+                    "tSec": 9.194,
+                    "hpa": 983.37354
+                },
+                {
+                    "tSec": 9.434,
+                    "hpa": 983.3535
+                },
+                {
+                    "tSec": 9.674,
+                    "hpa": 983.32336
+                },
+                {
+                    "tSec": 9.914,
+                    "hpa": 983.29083
+                },
+                {
+                    "tSec": 10.155,
+                    "hpa": 983.25366
+                },
+                {
+                    "tSec": 10.394,
+                    "hpa": 983.2184
+                },
+                {
+                    "tSec": 10.634,
+                    "hpa": 983.2084
+                },
+                {
+                    "tSec": 10.874,
+                    "hpa": 983.1699
+                },
+                {
+                    "tSec": 11.114,
+                    "hpa": 983.10425
+                },
+                {
+                    "tSec": 11.354,
+                    "hpa": 983.0488
+                },
+                {
+                    "tSec": 11.595,
+                    "hpa": 982.99994
+                },
+                {
+                    "tSec": 11.834,
+                    "hpa": 982.94916
+                },
+                {
+                    "tSec": 12.074,
+                    "hpa": 982.88837
+                },
+                {
+                    "tSec": 12.314,
+                    "hpa": 982.837
+                },
+                {
+                    "tSec": 12.554,
+                    "hpa": 982.7874
+                },
+                {
+                    "tSec": 12.794,
+                    "hpa": 982.74066
+                },
+                {
+                    "tSec": 13.034,
+                    "hpa": 982.6946
+                },
+                {
+                    "tSec": 13.274,
+                    "hpa": 982.6421
+                },
+                {
+                    "tSec": 13.515,
+                    "hpa": 982.5972
+                },
+                {
+                    "tSec": 13.754,
+                    "hpa": 982.5522
+                },
+                {
+                    "tSec": 13.994,
+                    "hpa": 982.5103
+                },
+                {
+                    "tSec": 14.235,
+                    "hpa": 982.46594
+                },
+                {
+                    "tSec": 14.475,
+                    "hpa": 982.4145
+                },
+                {
+                    "tSec": 14.714,
+                    "hpa": 982.3701
+                },
+                {
+                    "tSec": 14.955,
+                    "hpa": 982.3257
+                },
+                {
+                    "tSec": 15.194,
+                    "hpa": 982.2857
+                },
+                {
+                    "tSec": 15.434,
+                    "hpa": 982.24304
+                },
+                {
+                    "tSec": 15.674,
+                    "hpa": 982.1901
+                },
+                {
+                    "tSec": 15.914,
+                    "hpa": 982.14484
+                },
+                {
+                    "tSec": 16.154,
+                    "hpa": 982.10364
+                },
+                {
+                    "tSec": 16.394,
+                    "hpa": 982.06067
+                },
+                {
+                    "tSec": 16.634,
+                    "hpa": 982.01184
+                },
+                {
+                    "tSec": 16.874,
+                    "hpa": 981.95807
+                },
+                {
+                    "tSec": 17.114,
+                    "hpa": 981.9085
+                },
+                {
+                    "tSec": 17.354,
+                    "hpa": 981.8663
+                },
+                {
+                    "tSec": 17.594,
+                    "hpa": 981.82166
+                },
+                {
+                    "tSec": 17.834,
+                    "hpa": 981.76404
+                },
+                {
+                    "tSec": 18.074,
+                    "hpa": 981.70984
+                },
+                {
+                    "tSec": 18.314,
+                    "hpa": 981.6671
+                },
+                {
+                    "tSec": 18.554,
+                    "hpa": 981.63184
+                },
+                {
+                    "tSec": 18.794,
+                    "hpa": 981.5919
+                },
+                {
+                    "tSec": 19.034,
+                    "hpa": 981.5424
+                },
+                {
+                    "tSec": 19.274,
+                    "hpa": 981.4918
+                },
+                {
+                    "tSec": 19.514,
+                    "hpa": 981.44104
+                },
+                {
+                    "tSec": 19.755,
+                    "hpa": 981.3949
+                },
+                {
+                    "tSec": 19.994,
+                    "hpa": 981.3533
+                },
+                {
+                    "tSec": 20.234,
+                    "hpa": 981.3154
+                },
+                {
+                    "tSec": 20.474,
+                    "hpa": 981.27893
+                },
+                {
+                    "tSec": 20.714,
+                    "hpa": 981.25146
+                },
+                {
+                    "tSec": 20.954,
+                    "hpa": 981.2315
+                },
+                {
+                    "tSec": 21.194,
+                    "hpa": 981.2179
+                },
+                {
+                    "tSec": 21.434,
+                    "hpa": 981.2109
+                },
+                {
+                    "tSec": 21.675,
+                    "hpa": 981.2024
+                },
+                {
+                    "tSec": 21.914,
+                    "hpa": 981.19434
+                },
+                {
+                    "tSec": 22.154,
+                    "hpa": 981.18774
+                },
+                {
+                    "tSec": 22.394,
+                    "hpa": 981.1863
+                },
+                {
+                    "tSec": 22.634,
+                    "hpa": 981.19476
+                },
+                {
+                    "tSec": 22.874,
+                    "hpa": 981.2058
+                },
+                {
+                    "tSec": 23.114,
+                    "hpa": 981.2124
+                },
+                {
+                    "tSec": 23.354,
+                    "hpa": 981.2128
+                }
+            ],
+            "pressureBoardHpa": 983.4143,
+            "pressureArriveHpa": 981.2128,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 29,
+            "floor": 6,
+            "snapshot": {
+                "at": "2026-09-25T13:06:11.411763-04:00",
+                "pressureHpa": 981.2417,
+                "pressureFilteredHpa": 981.24,
+                "deviceHeadingDeg": 226.1,
+                "cameraHeadingDeg": 213.4,
+                "declinationDeg": -5.6858916,
+                "forwardHeadingDeg": 226.1,
+                "cameraPitchDeg": -59.2,
+                "rollDeg": -11.0,
+                "lightLux": 143.0325,
+                "stepsSinceSessionStart": 723,
+                "gps": {
+                    "lat": 33.752564046717154,
+                    "lng": -84.38755841126473,
+                    "accuracyM": 5.151,
+                    "altitudeM": 302.70001220703125,
+                    "verticalAccuracyM": 1.0976148,
+                    "samples": 11,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "INTERSECTION",
+            "name": "6th floor elevator lobby",
+            "outdoor": false,
+            "headingMeanDeg": 229.1,
+            "headingSpreadDeg": 5.6,
+            "note": ""
+        },
+        {
+            "kind": "video",
+            "id": 30,
+            "floor": 6,
+            "snapshot": {
+                "at": "2026-09-25T13:06:45.189081-04:00",
+                "pressureHpa": 981.24725,
+                "pressureFilteredHpa": 981.25,
+                "deviceHeadingDeg": 78.5,
+                "cameraHeadingDeg": 86.5,
+                "declinationDeg": -5.6859646,
+                "forwardHeadingDeg": 78.5,
+                "cameraPitchDeg": -60.2,
+                "rollDeg": 6.9,
+                "lightLux": 165.98251,
+                "stepsSinceSessionStart": 743,
+                "gps": {
+                    "lat": 33.7526456,
+                    "lng": -84.3874675,
+                    "accuracyM": 13.348,
+                    "altitudeM": 302.5,
+                    "verticalAccuracyM": 1.1044103,
+                    "samples": 1,
+                    "ageMs": 34
+                }
+            },
+            "file": "CS-W05.mp4",
+            "sensorLogFile": "CS-W05.sensors.json",
+            "durationSec": 21.688,
+            "label": "6th floor elevator lobby to 608",
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 31,
+            "floor": 6,
+            "snapshot": {
+                "at": "2026-09-25T13:06:51.393981-04:00",
+                "pressureHpa": 981.2113,
+                "pressureFilteredHpa": 981.21,
+                "deviceHeadingDeg": 50.1,
+                "cameraHeadingDeg": 53.0,
+                "declinationDeg": -5.685923,
+                "forwardHeadingDeg": 53.0,
+                "cameraPitchDeg": -9.0,
+                "rollDeg": 0.5,
+                "lightLux": 88.020004,
+                "stepsSinceSessionStart": 743,
+                "gps": {
+                    "lat": 33.7526742,
+                    "lng": -84.3875503,
+                    "accuracyM": 9.744,
+                    "altitudeM": 302.4000244140625,
+                    "verticalAccuracyM": 0.9547657,
+                    "samples": 1,
+                    "ageMs": 11
+                }
+            },
+            "anchorId": "CS-A07",
+            "photos": [
+                "CS-A07-straight.jpg",
+                "CS-A07-far.jpg",
+                "CS-A07-angle.jpg"
+            ],
+            "widthCm": 30,
+            "text": "608",
+            "ocr": {
+                "read": "608",
+                "maxCharHeightPx": 36,
+                "charHeightAt896": 4,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 368.1595271788673,
+            "nearestNodeId": 29,
+            "heightCm": 150,
+            "offsetFromNodeM": 6.0,
+            "facingDeg": 233.0,
+            "ocrFar": {
+                "read": "608",
+                "maxCharHeightPx": 48,
+                "charHeightAt896": 6,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "straight": 368.1595271788673,
+                "angle": 181.10532548221406,
+                "far": 237.01298730541782
+            },
+            "widthEstimated": true,
+            "note": "Left of elevator lobby"
+        },
+        {
+            "kind": "node",
+            "id": 32,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T13:08:52.092239-04:00",
+                "pressureHpa": 982.72473,
+                "pressureFilteredHpa": 982.73,
+                "deviceHeadingDeg": 235.9,
+                "cameraHeadingDeg": 233.6,
+                "declinationDeg": -5.6859164,
+                "forwardHeadingDeg": 235.9,
+                "cameraPitchDeg": -64.9,
+                "rollDeg": -2.1,
+                "lightLux": 344.99252,
+                "stepsSinceSessionStart": 746,
+                "gps": {
+                    "lat": 33.75251960615631,
+                    "lng": -84.38755088665168,
+                    "accuracyM": 6.507,
+                    "altitudeM": 288.2000122070313,
+                    "verticalAccuracyM": 0.93362325,
+                    "samples": 3,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "INTERSECTION",
+            "name": "Floor 2 elevator lobby",
+            "outdoor": false,
+            "headingMeanDeg": 235.6,
+            "headingSpreadDeg": 1.9,
+            "note": ""
+        },
+        {
+            "kind": "edge",
+            "id": 33,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T13:09:05.833677-04:00",
+                "pressureHpa": 982.7241,
+                "pressureFilteredHpa": 982.72,
+                "deviceHeadingDeg": 76.6,
+                "cameraHeadingDeg": 72.0,
+                "declinationDeg": -5.6859474,
+                "forwardHeadingDeg": 76.6,
+                "cameraPitchDeg": -62.0,
+                "rollDeg": -4.1,
+                "lightLux": 82.012505,
+                "stepsSinceSessionStart": 746,
+                "gps": {
+                    "lat": 33.7525911,
+                    "lng": -84.387461,
+                    "accuracyM": 26.992,
+                    "altitudeM": 288.3000183105469,
+                    "verticalAccuracyM": 0.9993538,
+                    "samples": 1,
+                    "ageMs": 7
+                }
+            },
+            "fromNodeId": 32,
+            "toNodeId": 34,
+            "steps": 0,
+            "durationSec": 13.74,
+            "strideM": 0.7683974,
+            "distanceM": 0.0,
+            "pressureStartHpa": 982.72473,
+            "pressureEndHpa": 982.7241,
+            "headingMeanDeg": 50.2,
+            "headingSpreadDeg": 48.2,
+            "headingSamples": 69,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 34,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T13:09:28.070613-04:00",
+                "pressureHpa": 982.7441,
+                "pressureFilteredHpa": 982.74,
+                "deviceHeadingDeg": 232.7,
+                "cameraHeadingDeg": 228.9,
+                "declinationDeg": -5.686013,
+                "forwardHeadingDeg": 232.7,
+                "cameraPitchDeg": -64.3,
+                "rollDeg": -3.5,
+                "lightLux": 139.99501,
+                "stepsSinceSessionStart": 746,
+                "gps": {
+                    "lat": 33.752620743650944,
+                    "lng": -84.38741231003857,
+                    "accuracyM": 7.991,
+                    "altitudeM": 288.20001220703125,
+                    "verticalAccuracyM": 0.96802604,
+                    "samples": 2,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "INTERSECTION",
+            "name": "T Junction Floor 2",
+            "outdoor": false,
+            "headingMeanDeg": 233.9,
+            "headingSpreadDeg": 2.6,
+            "note": ""
+        },
+        {
+            "kind": "edge",
+            "id": 35,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T13:10:30.705013-04:00",
+                "pressureHpa": 982.66034,
+                "pressureFilteredHpa": 982.66,
+                "deviceHeadingDeg": 74.2,
+                "cameraHeadingDeg": 75.8,
+                "declinationDeg": -5.686196,
+                "forwardHeadingDeg": 74.2,
+                "cameraPitchDeg": -68.4,
+                "rollDeg": 1.5,
+                "lightLux": 203.985,
+                "stepsSinceSessionStart": 791,
+                "gps": {
+                    "lat": 33.7525382,
+                    "lng": -84.3871091,
+                    "accuracyM": 3.0,
+                    "altitudeM": 290.3000183105469,
+                    "verticalAccuracyM": 1.0124314,
+                    "samples": 1,
+                    "ageMs": 11
+                }
+            },
+            "fromNodeId": 34,
+            "toNodeId": 19,
+            "steps": 45,
+            "durationSec": 62.633,
+            "strideM": 0.7683974,
+            "distanceM": 34.57788,
+            "pressureStartHpa": 982.7441,
+            "pressureEndHpa": 982.66034,
+            "headingMeanDeg": 118.0,
+            "headingSpreadDeg": 44.8,
+            "headingSamples": 313,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 36,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T13:12:06.355646-04:00",
+                "pressureHpa": 982.6761,
+                "pressureFilteredHpa": 982.68,
+                "deviceHeadingDeg": 3.7,
+                "cameraHeadingDeg": 1.1,
+                "declinationDeg": -5.686158,
+                "forwardHeadingDeg": 3.7,
+                "cameraPitchDeg": -53.0,
+                "rollDeg": -2.1,
+                "lightLux": 1018.98004,
+                "stepsSinceSessionStart": 840,
+                "gps": {
+                    "lat": 33.75257996299438,
+                    "lng": -84.38717767032402,
+                    "accuracyM": 3.0,
+                    "altitudeM": 288.22027371386514,
+                    "verticalAccuracyM": 1.0316827,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "Classroom South main floor 2",
+            "outdoor": true,
+            "headingMeanDeg": 18.4,
+            "headingSpreadDeg": 8.9,
+            "note": ""
+        },
+        {
+            "kind": "edge",
+            "id": 37,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T13:11:56.34145-04:00",
+                "pressureHpa": 982.668,
+                "pressureFilteredHpa": 982.66,
+                "deviceHeadingDeg": 33.0,
+                "cameraHeadingDeg": 24.9,
+                "declinationDeg": -5.686164,
+                "forwardHeadingDeg": 33.0,
+                "cameraPitchDeg": -63.6,
+                "rollDeg": -7.3,
+                "lightLux": 2729.0251,
+                "stepsSinceSessionStart": 840,
+                "gps": {
+                    "lat": 33.7525793,
+                    "lng": -84.3871788,
+                    "accuracyM": 3.004,
+                    "altitudeM": 288.4000244140625,
+                    "verticalAccuracyM": 1.0984814,
+                    "samples": 1,
+                    "ageMs": 14
+                }
+            },
+            "fromNodeId": 19,
+            "toNodeId": 36,
+            "steps": 49,
+            "durationSec": 85.636,
+            "strideM": 0.7683974,
+            "distanceM": 37.651474,
+            "pressureStartHpa": 982.66034,
+            "pressureEndHpa": 982.668,
+            "headingMeanDeg": 29.0,
+            "headingSpreadDeg": 47.2,
+            "headingSamples": 427,
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 38,
+            "floor": 2,
+            "snapshot": {
+                "at": "2026-09-25T13:12:16.422496-04:00",
+                "pressureHpa": 982.6202,
+                "pressureFilteredHpa": 982.62,
+                "deviceHeadingDeg": 234.7,
+                "cameraHeadingDeg": 214.7,
+                "declinationDeg": -5.686165,
+                "forwardHeadingDeg": 214.7,
+                "cameraPitchDeg": -0.5,
+                "rollDeg": -0.2,
+                "lightLux": 1731.9825,
+                "stepsSinceSessionStart": 843,
+                "gps": {
+                    "lat": 33.7525819,
+                    "lng": -84.3871413,
+                    "accuracyM": 3.883,
+                    "altitudeM": 288.4000244140625,
+                    "verticalAccuracyM": 1.1354064,
+                    "samples": 1,
+                    "ageMs": 5
+                }
+            },
+            "anchorId": "CS-A08",
+            "photos": [
+                "CS-A08-straight.jpg",
+                "CS-A08-far.jpg",
+                "CS-A08-angle.jpg"
+            ],
+            "widthCm": 200,
+            "text": "CLASSROOM SOUTH",
+            "ocr": {
+                "read": "CLASSROOM SOUTH",
+                "maxCharHeightPx": 84,
+                "charHeightAt896": 11,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 764.3298480541672,
+            "nearestNodeId": 36,
+            "heightCm": 250,
+            "facingDeg": 34.700012,
+            "ocrFar": {
+                "read": "CLASSROOM SOUTH",
+                "maxCharHeightPx": 74,
+                "charHeightAt896": 9,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "straight": 764.3298480541672,
+                "angle": 637.2557202432123,
+                "far": 738.2743907029369
+            },
+            "widthEstimated": true,
+            "note": ""
+        }
+    ]
+}

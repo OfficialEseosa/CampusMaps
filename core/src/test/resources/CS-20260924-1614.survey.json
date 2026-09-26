@@ -1,0 +1,415 @@
+{
+    "format": "campussurvey-log",
+    "formatVersion": 2,
+    "session": {
+        "id": "CS-20260924-1614",
+        "building": "CS",
+        "surveyor": "Raphael",
+        "startedAt": "2026-09-24T16:14:56.61809-04:00",
+        "strideM": 0.41666666,
+        "strideCalibrated": true,
+        "device": "samsung SM-S938U1 (pa3q) Android 17",
+        "appVersion": "0.2",
+        "nextObservationId": 11,
+        "anchorCount": 2,
+        "videoCount": 0
+    },
+    "observations": [
+        {
+            "kind": "node",
+            "id": 1,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:15:50.906994-04:00",
+                "pressureHpa": 982.5558,
+                "pressureFilteredHpa": 982.56,
+                "deviceHeadingDeg": 359.5,
+                "cameraHeadingDeg": 347.8,
+                "declinationDeg": -5.686036,
+                "forwardHeadingDeg": 359.5,
+                "cameraPitchDeg": -64.6,
+                "rollDeg": -10.6,
+                "lightLux": 223.02,
+                "stepsSinceSessionStart": 25,
+                "gps": {
+                    "lat": 33.75257984376145,
+                    "lng": -84.38712064177373,
+                    "accuracyM": 3.179,
+                    "altitudeM": 284.5410808662286,
+                    "verticalAccuracyM": 1.6257833,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "95 Decatur Street entrance",
+            "outdoor": true,
+            "headingMeanDeg": 243.1,
+            "headingSpreadDeg": 57.5,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 2,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:16:32.979964-04:00",
+                "pressureHpa": 982.5894,
+                "pressureFilteredHpa": 982.59,
+                "deviceHeadingDeg": 49.0,
+                "cameraHeadingDeg": 19.5,
+                "declinationDeg": -5.686063,
+                "forwardHeadingDeg": 49.0,
+                "cameraPitchDeg": -76.3,
+                "rollDeg": -28.8,
+                "lightLux": 456.975,
+                "stepsSinceSessionStart": 36,
+                "gps": {
+                    "lat": 33.75257532289661,
+                    "lng": -84.38708208106995,
+                    "accuracyM": 4.054,
+                    "altitudeM": 284.4655620030246,
+                    "verticalAccuracyM": 1.6952989,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "Library South entrance",
+            "outdoor": true,
+            "headingMeanDeg": 39.0,
+            "headingSpreadDeg": 2.9,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 3,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:17:21.865023-04:00",
+                "pressureHpa": 982.47186,
+                "pressureFilteredHpa": 982.47,
+                "deviceHeadingDeg": 29.1,
+                "cameraHeadingDeg": 11.7,
+                "declinationDeg": -5.6861525,
+                "forwardHeadingDeg": 29.1,
+                "cameraPitchDeg": -76.4,
+                "rollDeg": -17.0,
+                "lightLux": 72.0225,
+                "stepsSinceSessionStart": 74,
+                "gps": {
+                    "lat": 33.752504595456784,
+                    "lng": -84.38692272206308,
+                    "accuracyM": 3.582,
+                    "altitudeM": 283.98380675534753,
+                    "verticalAccuracyM": 2.1807427,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "LibSo main entrance",
+            "outdoor": true,
+            "headingMeanDeg": 24.5,
+            "headingSpreadDeg": 5.3,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 4,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:22:39.070551-04:00",
+                "pressureHpa": 982.45575,
+                "pressureFilteredHpa": 982.46,
+                "deviceHeadingDeg": 37.8,
+                "cameraHeadingDeg": 25.7,
+                "declinationDeg": -5.68564,
+                "forwardHeadingDeg": 37.8,
+                "cameraPitchDeg": -70.9,
+                "rollDeg": -11.5,
+                "lightLux": 8624.003,
+                "stepsSinceSessionStart": 230,
+                "gps": {
+                    "lat": 33.75289636718826,
+                    "lng": -84.38776823821901,
+                    "accuracyM": 3.717,
+                    "altitudeM": 285.37943316192917,
+                    "verticalAccuracyM": 2.3165078,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "Walters main",
+            "outdoor": true,
+            "headingMeanDeg": 35.8,
+            "headingSpreadDeg": 2.2,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 5,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:23:27.329135-04:00",
+                "pressureHpa": 982.63635,
+                "pressureFilteredHpa": 982.62,
+                "deviceHeadingDeg": 302.0,
+                "cameraHeadingDeg": 298.9,
+                "declinationDeg": -5.685687,
+                "forwardHeadingDeg": 302.0,
+                "cameraPitchDeg": -77.2,
+                "rollDeg": -2.9,
+                "lightLux": 915.97504,
+                "stepsSinceSessionStart": 268,
+                "gps": {
+                    "lat": 33.75284306854555,
+                    "lng": -84.38768840442009,
+                    "accuracyM": 3.557,
+                    "altitudeM": 284.05779009067504,
+                    "verticalAccuracyM": 2.5572658,
+                    "samples": 10,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ENTRANCE",
+            "name": "Walters side",
+            "outdoor": true,
+            "headingMeanDeg": 307.9,
+            "headingSpreadDeg": 3.8,
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 6,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:24:26.84919-04:00",
+                "pressureHpa": 982.3941,
+                "pressureFilteredHpa": 982.39,
+                "deviceHeadingDeg": 349.0,
+                "cameraHeadingDeg": 189.9,
+                "declinationDeg": -5.6857934,
+                "forwardHeadingDeg": 189.9,
+                "cameraPitchDeg": 3.4,
+                "rollDeg": -1.3,
+                "lightLux": 2038.0276,
+                "stepsSinceSessionStart": 287,
+                "gps": {
+                    "lat": 33.7531091,
+                    "lng": -84.3876271,
+                    "accuracyM": 5.384,
+                    "altitudeM": 285.5,
+                    "verticalAccuracyM": 2.7161803,
+                    "samples": 1,
+                    "ageMs": 28
+                }
+            },
+            "anchorId": "CS-A01",
+            "photos": [
+                "CS-A01-straight.jpg",
+                "CS-A01-far.jpg",
+                "CS-A01-angle.jpg"
+            ],
+            "widthCm": 200,
+            "text": "CLASSROOM SOUTH",
+            "ocr": {
+                "read": "CLASSROOM SOUTH",
+                "maxCharHeightPx": 62,
+                "charHeightAt896": 8,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 463.10149201507835,
+            "nearestNodeId": 4,
+            "heightCm": 200,
+            "facingDeg": 9.899994,
+            "ocrFar": {
+                "read": "CLASSROOM SOUTH CAUTI",
+                "maxCharHeightPx": 78,
+                "charHeightAt896": 10,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "far": 1794.5412225951009,
+                "straight": 463.10149201507835,
+                "angle": 320.71962242623687
+            },
+            "note": ""
+        },
+        {
+            "kind": "edge",
+            "id": 7,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:27:39.479849-04:00",
+                "pressureHpa": 982.55646,
+                "pressureFilteredHpa": 982.56,
+                "deviceHeadingDeg": 343.1,
+                "cameraHeadingDeg": 330.6,
+                "declinationDeg": -5.6859922,
+                "forwardHeadingDeg": 343.1,
+                "cameraPitchDeg": -51.8,
+                "rollDeg": -9.8,
+                "lightLux": 143.97751,
+                "stepsSinceSessionStart": 415,
+                "gps": {
+                    "lat": 33.752619,
+                    "lng": -84.3871066,
+                    "accuracyM": 3.091,
+                    "altitudeM": 285.3000183105469,
+                    "verticalAccuracyM": 2.8410707,
+                    "samples": 1,
+                    "ageMs": 14
+                }
+            },
+            "fromNodeId": 5,
+            "toNodeId": 1,
+            "steps": 108,
+            "durationSec": 78.341,
+            "strideM": 0.41666666,
+            "distanceM": 45.0,
+            "pressureStartHpa": 982.56433,
+            "pressureEndHpa": 982.55646,
+            "headingMeanDeg": 101.6,
+            "headingSpreadDeg": 55.2,
+            "headingSamples": 391,
+            "note": ""
+        },
+        {
+            "kind": "node",
+            "id": 8,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:29:30.867275-04:00",
+                "pressureHpa": 982.57794,
+                "pressureFilteredHpa": 982.58,
+                "deviceHeadingDeg": 99.2,
+                "cameraHeadingDeg": 87.3,
+                "declinationDeg": -5.68569,
+                "forwardHeadingDeg": 99.2,
+                "cameraPitchDeg": -61.0,
+                "rollDeg": -10.5,
+                "lightLux": 57.982502,
+                "stepsSinceSessionStart": 525,
+                "gps": {
+                    "lat": 33.7526883006448,
+                    "lng": -84.38768682537518,
+                    "accuracyM": 10.118,
+                    "altitudeM": 284.0,
+                    "verticalAccuracyM": 2.0515172,
+                    "samples": 8,
+                    "ageMs": 0
+                }
+            },
+            "nodeType": "ROOM",
+            "name": "Room 150",
+            "outdoor": false,
+            "headingMeanDeg": 119.7,
+            "headingSpreadDeg": 64.7,
+            "doorSide": "AHEAD",
+            "note": ""
+        },
+        {
+            "kind": "anchor",
+            "id": 9,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:29:45.796488-04:00",
+                "pressureHpa": 982.5771,
+                "pressureFilteredHpa": 982.58,
+                "deviceHeadingDeg": 272.9,
+                "cameraHeadingDeg": 261.4,
+                "declinationDeg": -5.685659,
+                "forwardHeadingDeg": 261.4,
+                "cameraPitchDeg": -5.8,
+                "rollDeg": -1.2,
+                "lightLux": 90.990005,
+                "stepsSinceSessionStart": 525,
+                "gps": {
+                    "lat": 33.7527107,
+                    "lng": -84.3877145,
+                    "accuracyM": 8.306,
+                    "altitudeM": 284.0,
+                    "verticalAccuracyM": 2.0778027,
+                    "samples": 1,
+                    "ageMs": 5
+                }
+            },
+            "anchorId": "CS-A02",
+            "photos": [
+                "CS-A02-straight.jpg",
+                "CS-A02-far.jpg",
+                "CS-A02-angle.jpg"
+            ],
+            "widthCm": 200,
+            "text": "150",
+            "ocr": {
+                "read": "AUDITORIUM 150 corgae",
+                "maxCharHeightPx": 38,
+                "charHeightAt896": 5,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScore": 553.668315269199,
+            "nearestNodeId": 8,
+            "heightCm": 160,
+            "offsetFromNodeM": 0.0,
+            "facingDeg": 81.399994,
+            "ocrFar": {
+                "read": "AUDITORIUNM 150 S corgatte",
+                "maxCharHeightPx": 26,
+                "charHeightAt896": 3,
+                "photoWidthPx": 3060,
+                "photoHeightPx": 4080
+            },
+            "blurScores": {
+                "far": 122.87934572829396,
+                "straight": 553.668315269199,
+                "angle": 463.92929307052367
+            },
+            "note": ""
+        },
+        {
+            "kind": "edge",
+            "id": 10,
+            "floor": 1,
+            "snapshot": {
+                "at": "2026-09-24T16:31:52.819885-04:00",
+                "pressureHpa": 982.5783,
+                "pressureFilteredHpa": 982.58,
+                "deviceHeadingDeg": 35.7,
+                "cameraHeadingDeg": 25.7,
+                "declinationDeg": -5.6857424,
+                "forwardHeadingDeg": 35.7,
+                "cameraPitchDeg": -54.5,
+                "rollDeg": -8.1,
+                "lightLux": 4954.028,
+                "stepsSinceSessionStart": 598,
+                "gps": {
+                    "lat": 33.7529204,
+                    "lng": -84.3876572,
+                    "accuracyM": 22.477,
+                    "altitudeM": 284.5,
+                    "verticalAccuracyM": 2.0596228,
+                    "samples": 1,
+                    "ageMs": 12
+                }
+            },
+            "fromNodeId": 8,
+            "toNodeId": 5,
+            "steps": 35,
+            "durationSec": 29.664,
+            "strideM": 0.41666666,
+            "distanceM": 14.583333,
+            "pressureStartHpa": 982.6032,
+            "pressureEndHpa": 982.5783,
+            "headingMeanDeg": 38.5,
+            "headingSpreadDeg": 19.4,
+            "headingSamples": 148,
+            "note": ""
+        }
+    ]
+}

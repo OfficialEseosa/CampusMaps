@@ -25,4 +25,5 @@ rootProject.name = "CampusMaps"
 // app    = the phone app (S1, S1b, S2, S3, S4, Settings, Debug)
 // wear   = the Galaxy Watch app (section 12 of the design handoff)
 // shared = plain Kotlin code both apps need (watch step format and haptics)
-include(":app", ":wear", ":shared")
+// core   = plain Kotlin building model, loader, validator, router, survey converter (Raphael's module)
+include(":app", ":core", ":wear", ":shared")
