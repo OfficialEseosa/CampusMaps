@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import com.campusmaps.glasses.SeenTracker
 import com.campusmaps.platform.SpeechOutput
 import kotlinx.coroutines.delay
 import androidx.compose.ui.text.SpanStyle
@@ -139,7 +140,9 @@ fun GlassesScreen(
                 Text(
                     buildAnnotatedString {
                         append("Seen: ")
-                        if (glasses.seen != null) {
+                        if (glasses.seen == SeenTracker.NOTHING_NEW) {
+                            append(glasses.seen)
+                        } else if (glasses.seen != null) {
                             withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) { append(glasses.seen) }
                         } else {
                             append("nothing yet")
