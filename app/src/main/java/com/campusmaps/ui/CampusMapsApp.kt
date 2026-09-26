@@ -209,6 +209,8 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onGuideMode = vm::setGuideMode,
                             onStart = vm::startSelected,
                             onPreview = vm::openPreview,
+                            onHaveCard = { vm.setHasCard(true) },
+                            onRouteAround = vm::routeAroundCard,
                         ),
                     )
                     Screen.GUIDANCE -> guidance?.let {
@@ -313,6 +315,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onResetDemo = vm::resetDemo,
                             onDismiss = vm::closeSettings,
                             onEditBuilding = { vm.buildingEditor(true) },
+                            onHasCard = vm::setHasCard,
                         ),
                     )
                 }

@@ -64,6 +64,8 @@ data class Selection(
     // Set while the start is S1's automatic GPS default (ui/GpsStart): the fix's accuracy in metres. Null = picked by hand,
     // from Explore, or the building's default. Only an automatic start is replaced by a newer fix.
     val gpsAutoAccuracyM: Double? = null,
+    // "Route me around" on the PantherCard card: the route (building|start|destination) it was pressed for.
+    val routedAroundKey: String? = null,
 )
 
 // Everything S1 and S1b draw.
@@ -79,6 +81,9 @@ data class TripUiState(
     val plan: RoutePlan? = null,
     val simulatedTimeLabel: String? = null, // "Sat 21:00" when the clock is simulated
     val gpsHint: String? = null, // "From your location (GPS, 8 m)" while the start is the automatic GPS default
+    val cardPrompt: com.campusmaps.route.CardPrompt? = null, // S1b PantherCard card (route/CardAccess.kt)
+    val cardHint: String? = null, // S1 one-line hint under the building pill
+    val cardRoutedAround: Boolean = false, // "Route me around" pressed for this route: plan without the card
 ) {
     val startsInside: Boolean get() = !start.isOutdoor
     val routeError: String? get() = (plan as? RoutePlan.NoRoute)?.message
@@ -143,6 +148,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         val building = ExploreStart.building(app.building(settings.buildingId), sel.gps)
         val start = sel.startId?.let { building.nodes[it] } ?: building.node(building.defaultStartId)
         val destination = sel.destinationId?.let { building.nodes[it] }
+        val routedAround = sel.routedAroundKey != null && sel.routedAroundKey == "${building.id}|${start.id}|${destination?.id}"
         val plan = destination?.let {
             app.router.plan(
                 building = building,
@@ -151,6 +157,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
                 time = app.clock.now(),
                 avoidStairs = settings.avoidStairs,
                 extraEdges = approved[building.id].orEmpty(),
+                hasCard = settings.hasCard && !routedAround,
             )
         }
         // Demo mode shows demo destinations only; otherwise recents first, then demo ones.
@@ -167,6 +174,9 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             destinationRows = rowIds.mapNotNull { building.nodes[it] }.filter { it.kind == NodeKind.ROOM },
             plan = plan,
             simulatedTimeLabel = if (app.clock.isSimulated) Formats.dayTime(app.clock.now()) else null,
+            cardPrompt = com.campusmaps.route.CardAccess.prompt(plan, building, app.clock.now(), settings.hasCard, routedAround),
+            cardHint = com.campusmaps.route.CardAccess.hint(building, app.clock.now(), settings.hasCard),
+            cardRoutedAround = routedAround,
             gpsHint = sel.gpsAutoAccuracyM?.takeIf { start.id == com.campusmaps.data.campus.CoreBridge.GPS_START_ID }?.let(GpsStart::hint),
         )
     }.flowOn(Dispatchers.Default).stateIn(
@@ -274,6 +284,18 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         updateSelection { it.copy(startId = nodeId) }
     }
 
+    // PantherCard: the Settings switch and the S1b card's "I have my card" (the plan recomputes from the setting).
+    fun setHasCard(on: Boolean) {
+        if (on) updateSelection { it.copy(routedAroundKey = null) }
+        viewModelScope.launch { app.settings.setHasCard(on) }
+    }
+
+    // S1b card's "Route me around": plan this route without the card and hide the card for it.
+    fun routeAroundCard() {
+        val t = trip.value
+        updateSelection { it.copy(routedAroundKey = "${t.building.id}|${t.start.id}|${t.destination?.id}") }
+    }
+
     fun setAvoidStairs(on: Boolean) {
         viewModelScope.launch { app.settings.setAvoidStairs(on) }
     }
@@ -371,6 +393,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             speaker = app.speaker,
             speakEnabled = { settings.value.speakInstructions },
             watch = app.watch,
+            hasCard = { settings.value.hasCard && !t.cardRoutedAround },
         )
         controller.glassesMode = glasses
         controller.simulation.lowConfidence = _walk.value.lowConfidence

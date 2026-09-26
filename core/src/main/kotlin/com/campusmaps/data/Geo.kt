@@ -72,12 +72,40 @@ object Access {
         else (now.dayOfWeek in days && t >= open) || (now.dayOfWeek.minus(1) in days && t < close)
     }
 
-    /** The rule in force: public if any public window covers now, otherwise card (an entrance with windows but none open is card-only). */
+    /**
+     * The rule in force: closed if a "closed" window covers now; else public if a public window does; else card if a card window
+     * does; else closed (an entrance with windows but none covering now is shut for everyone). No windows at all means public.
+     */
     fun ruleAt(node: Node, now: LocalDateTime): AccessRule {
         val windows = node.access ?: return AccessRule.PUBLIC
         if (windows.isEmpty()) return AccessRule.PUBLIC
-        return if (windows.any { it.rule == AccessRule.PUBLIC && covers(it, now) }) AccessRule.PUBLIC else AccessRule.CARD
+        fun any(r: AccessRule) = windows.any { it.rule == r && covers(it, now) }
+        return when {
+            any(AccessRule.CLOSED) -> AccessRule.CLOSED
+            any(AccessRule.PUBLIC) -> AccessRule.PUBLIC
+            any(AccessRule.CARD) -> AccessRule.CARD
+            else -> AccessRule.CLOSED
+        }
     }
 
+    /** Card-only right now (a campus card opens it). */
     fun isLocked(node: Node, now: LocalDateTime) = node.type == NodeType.ENTRANCE && ruleAt(node, now) == AccessRule.CARD
+
+    /** Shut for everyone right now. */
+    fun isClosed(node: Node, now: LocalDateTime) = node.type == NodeType.ENTRANCE && ruleAt(node, now) == AccessRule.CLOSED
+
+    /** True when this user cannot use the entrance now: closed, or card-only and [hasCard] is false. */
+    fun blocks(node: Node, now: LocalDateTime, hasCard: Boolean) = isClosed(node, now) || (!hasCard && isLocked(node, now))
+
+    /**
+     * When the card-only stretch that covers [now] began, in minutes since midnight: the latest close of a public window that
+     * ended at or before now today (e.g. 1200 for "after 8 pm"). Null when it is not card-only now or no public window ended today.
+     */
+    fun cardOnlySince(node: Node, now: LocalDateTime): Int? {
+        if (!isLocked(node, now)) return null
+        val t = now.hour * 60 + now.minute
+        return node.access.orEmpty().filter { it.rule == AccessRule.PUBLIC && now.dayOfWeek in parseDays(it.days) && minutes(it.open) < minutes(it.close) }
+            .map { minutes(it.close) }.filter { it <= t }
+            .maxOrNull()
+    }
 }

@@ -38,6 +38,7 @@ class CoreRouter {
         avoidStairs: Boolean,
         extraEdges: List<GraphEdge> = emptyList(),
         cameFromId: String? = null,
+        hasCard: Boolean = false,
     ): RoutePlan {
         val start = building.node(startId)
         val destination = building.node(destinationId)
@@ -51,13 +52,13 @@ class CoreRouter {
 
         val core = withShortcuts(building, extraEdges)
         val coreStart = coreStart(building, start, cameFromId)
-        val options = Router.route(core, coreStart, destinationId, Prefs(avoidStairs = avoidStairs, now = time))
+        val options = Router.route(core, coreStart, destinationId, Prefs(avoidStairs = avoidStairs, now = time, hasCard = hasCard))
         if (options.isEmpty()) {
             val outdoorEntrances = core.nodes.filter { it.isOutdoorEntrance }
-            val allLocked = start.isOutdoor && outdoorEntrances.isNotEmpty() && outdoorEntrances.all { Access.isLocked(it, time) }
+            val allLocked = start.isOutdoor && outdoorEntrances.isNotEmpty() && outdoorEntrances.all { Access.blocks(it, time, hasCard) }
             val message = when {
-                allLocked -> RouteText.noRouteLocked(destination.name, Formats.dayTime(time))
-                avoidStairs && Router.route(core, coreStart, destinationId, Prefs(false, time)).isNotEmpty() ->
+                allLocked -> RouteText.noRouteLocked(destination.name, Formats.dayTime(time), closed = outdoorEntrances.all { Access.isClosed(it, time) })
+                avoidStairs && Router.route(core, coreStart, destinationId, Prefs(false, time, hasCard)).isNotEmpty() ->
                     RouteText.noRouteStepFree(destination.name)
                 else -> RouteText.noRouteUnknown(destination.name)
             }
@@ -78,7 +79,8 @@ class CoreRouter {
         extraEdges: List<GraphEdge> = emptyList(),
         cameFromId: String? = null,
         preferMethod: FloorChange? = null,
-    ): Route? = when (val plan = plan(building, startId, destinationId, time, avoidStairs, extraEdges, cameFromId)) {
+        hasCard: Boolean = false,
+    ): Route? = when (val plan = plan(building, startId, destinationId, time, avoidStairs, extraEdges, cameFromId, hasCard)) {
         is RoutePlan.Options -> (plan.options.firstOrNull { it.method == preferMethod } ?: plan.options.first()).route
         is RoutePlan.AlreadyHere -> plan.route
         is RoutePlan.NoRoute -> null
@@ -142,7 +144,8 @@ class CoreRouter {
             points += RoutePoint(node, kind, walked, arrivedByStudentEdge = student != null && edge?.notes?.startsWith("student") == true)
         }
         val destination = building.node(ids.last())
-        val route = Route(building.id, points, steps(o.instructions, o.nodes, points), destination, ids)
+        val cardName = if (o.cardNeeded) com.campusmaps.data.campus.Campuses.of(building.id).cardName else null
+        val route = Route(building.id, points, steps(o.instructions, o.nodes, points, cardName), destination, ids)
         val method = when (o.verticalMethod) {
             VerticalMethod.ELEVATOR -> FloorChange.ELEVATOR
             VerticalMethod.STAIRS -> FloorChange.STAIRS
@@ -165,6 +168,7 @@ class CoreRouter {
             alsoVia = o.alsoVia,
             route = route,
             core = o,
+            cardNeeded = o.cardNeeded,
         )
     }
 
@@ -182,7 +186,7 @@ class CoreRouter {
 
     // Core instructions -> RouteSteps. The text is core's; this only adds where each step starts and when it is done,
     // which is what GuidanceEngine needs to follow a pose along the route.
-    private fun steps(instructions: List<Instruction>, coreNodes: List<String>, points: List<RoutePoint>): List<RouteStep> {
+    private fun steps(instructions: List<Instruction>, coreNodes: List<String>, points: List<RoutePoint>, cardName: String? = null): List<RouteStep> {
         val out = mutableListOf<RouteStep>()
         val last = points.lastIndex
         val list = instructions.filter { it.type != InstructionType.LOCKED_NOTICE }
@@ -209,8 +213,9 @@ class CoreRouter {
                     val next = list.getOrNull(k + 1)
                     val approach = next?.takeIf { it.type == InstructionType.ENTRANCE }?.text
                     if (approach != null) k++
+                    // Card holder at a card-only door: near it, say "Tap your PantherCard at the Main entrance" instead.
                     out += RouteStep(StepKind.WALK_TO_ENTRANCE, ins.text, 1.coerceAtMost(last), cum(1), floor(1), place = name(1),
-                        approachText = approach)
+                        approachText = cardName?.let { "Tap your $it at the ${name(1)}" } ?: approach, cardName = cardName)
                     cursor = 1.coerceAtMost(last)
                 }
                 i == 0 && (ins.type == InstructionType.START || ins.type == InstructionType.TURN) -> {

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.Slideshow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -52,6 +53,7 @@ class SettingsActions(
     val onResetDemo: () -> Unit,
     val onDismiss: () -> Unit,
     val onEditBuilding: (() -> Unit)? = null,
+    val onHasCard: (Boolean) -> Unit = {},
 )
 
 // Settings (section 10, redesign sheet). Team only. Tidy, no extra depth. Rows are 56 dp:
@@ -87,6 +89,15 @@ fun SettingsSheet(settings: AppSettings, tts: TtsStatus, buildings: List<Buildin
                 supporting = "Same as the route screen",
                 checked = settings.avoidStairs,
                 onChange = actions.onAvoidStairs,
+            )
+            // Campus card: "PantherCard" on Georgia State, "BuzzCard" on Georgia Tech (Campuses.cardName).
+            val card = com.campusmaps.data.campus.Campuses.of(settings.buildingId).cardName
+            SettingsSwitchRow(
+                icon = Icons.Rounded.CreditCard,
+                label = "I carry a $card",
+                supporting = "Use card-access doors after hours",
+                checked = settings.hasCard,
+                onChange = actions.onHasCard,
             )
             // No "Watch haptics" row: the design has one, but the app has no such setting.
             SettingsSwitchRow(

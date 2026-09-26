@@ -50,7 +50,8 @@ enum class NodeType {
 }
 
 @Serializable
-enum class AccessRule { @SerialName("public") PUBLIC, @SerialName("card") CARD }
+/** [CLOSED]: nobody gets in, card or not. A time no window covers is closed too. */
+enum class AccessRule { @SerialName("public") PUBLIC, @SerialName("card") CARD, @SerialName("closed") CLOSED }
 
 /** One opening window. [days] like "Mon-Fri", "Sat-Sun", "Sat", "Mon,Wed"; [close] may be before [open] (wraps midnight) or "24:00". */
 @Serializable

@@ -23,6 +23,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded._3dRotation
 import androidx.compose.material.icons.rounded.ViewInAr
@@ -83,6 +84,8 @@ class RouteOptionsActions(
     val onGuideMode: (GuideMode) -> Unit,
     val onStart: () -> Unit,
     val onPreview: () -> Unit,
+    val onHaveCard: () -> Unit = {},      // PantherCard card: "I have my card" (turns the setting on)
+    val onRouteAround: () -> Unit = {},   // PantherCard card: "Route me around" (this route only)
 )
 
 // Guide modes as the redesign shows them: icon, label, sub line.
@@ -142,7 +145,9 @@ fun RouteOptionsScreen(state: TripUiState, guideMode: GuideMode, selectedRouteId
             }
 
             if (plan is RoutePlan.Options) {
-                plan.lockedNotice?.let { notice -> item(key = "locked") { LockedBanner(notice) } }
+                val prompt = state.cardPrompt
+                if (prompt != null) item(key = "cardPrompt") { CardPromptCard(prompt, palette, actions.onHaveCard, actions.onRouteAround) }
+                else plan.lockedNotice?.let { notice -> item(key = "locked") { LockedBanner(notice) } }
 
                 item(key = "preview") {
                     val route = selected?.route
@@ -208,6 +213,7 @@ fun RouteOptionsScreen(state: TripUiState, guideMode: GuideMode, selectedRouteId
                             startsInside = state.startsInside,
                             startFloor = state.start.floor,
                             palette = palette,
+                            cardTag = if (option.cardNeeded) com.campusmaps.route.CardAccess.cardName(state.building.id) else null,
                             onClick = { actions.onSelectRoute(option) },
                             modifier = Modifier.animateItem(
                                 fadeInSpec = androidx.compose.animation.core.tween(250),
@@ -425,6 +431,41 @@ private fun LockedBanner(notice: LockedNotice) {
     }
 }
 
+// PantherCard card (route/CardAccess.kt): "Main entrance needs a PantherCard after 8 pm", "I have my card" / "Route me around".
+@Composable
+private fun CardPromptCard(prompt: com.campusmaps.route.CardPrompt, palette: CampusPalette, onHaveCard: () -> Unit, onRouteAround: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(palette.soft)
+            .border(1.dp, palette.line, RoundedCornerShape(18.dp))
+            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .testTag("cardPrompt"),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Icon(Icons.Rounded.CreditCard, contentDescription = null, tint = palette.line)
+            Text(prompt.title, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold, lineHeight = 20.sp),
+                color = palette.ink)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (prompt.canTurnOn) {
+                androidx.compose.material3.Button(
+                    onClick = onHaveCard,
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = palette.line, contentColor = Color.White),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.testTag("haveCardButton"),
+                ) { Text("I have my card", maxLines = 1) }
+            }
+            androidx.compose.material3.OutlinedButton(onClick = onRouteAround, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.testTag("routeAroundButton")) {
+                Text("Route me around", color = palette.ink, maxLines = 1)
+            }
+        }
+    }
+}
+
 // One route card. The whole card is the tap target and selects the route (Start begins it).
 // The best card stands out by more than color: soft fill, "FASTEST" tag, dark tile and a bigger ETA.
 // The selected card gets the 2 dp line border and a shadow.
@@ -439,6 +480,7 @@ private fun RouteCard(
     palette: CampusPalette,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    cardTag: String? = null,
 ) {
     val title = RouteCardText.title(option, startsInside)
     val subtitle = RouteCardText.subtitle(option, startsInside, startFloor)
@@ -472,9 +514,12 @@ private fun RouteCard(
                     contentDescription = RouteCardText.methodWords(option.method),
                 )
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    if (isBest || option.usesStudentShortcut) {
+                    if (isBest || option.usesStudentShortcut || cardTag != null) {
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             if (isBest) SmallTag("FASTEST", container = palette.line, content = Color.White)
+                            // Card-only entrance the user can open with their card.
+                            if (cardTag != null) SmallTag(cardTag, container = palette.soft, content = palette.line, icon = Icons.Rounded.CreditCard,
+                                modifier = Modifier.border(1.dp, palette.line, MaterialTheme.shapes.extraSmall).testTag("cardTag"))
                             if (option.usesStudentShortcut) {
                                 SmallTag("Student shortcut", container = MaterialTheme.colorScheme.tertiaryContainer, content = MaterialTheme.colorScheme.onTertiaryContainer, icon = AppIcons.addRoad)
                             }
@@ -529,7 +574,7 @@ private fun AlreadyHereCard(roomName: String, onClick: () -> Unit) {
 // No route: centered icon, the sentence in error color, and one way out.
 @Composable
 private fun NoRouteState(message: String, onPickAnother: () -> Unit) {
-    val locked = message.contains("card-only")
+    val locked = message.contains("card-only") || message.contains("every entrance is closed")
     Column(
         modifier = Modifier
             .fillMaxWidth()

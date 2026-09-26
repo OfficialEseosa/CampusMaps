@@ -159,7 +159,8 @@ object GuidanceEngine {
                 else WatchStep(WatchStepType.STAIRS_DOWN, Formats.floorLong(step.targetFloor ?: 0), "Stairs down")
             }
             StepKind.WALK_TO_ENTRANCE ->
-                if (distanceM <= APPROACH_M) WatchStep(WatchStepType.DOOR, place, "Go through")
+                if (distanceM <= APPROACH_M && step.cardName != null) WatchStep(WatchStepType.LOCKED, place, step.cardName)
+                else if (distanceM <= APPROACH_M) WatchStep(WatchStepType.DOOR, place, "Go through")
                 else WatchStep(WatchStepType.STRAIGHT, metres, place)
             StepKind.DOOR -> WatchStep(WatchStepType.DOOR, place, "Go through")
             StepKind.ARRIVE, StepKind.ALREADY_THERE -> WatchStep(WatchStepType.ARRIVED, place, "Arrived")

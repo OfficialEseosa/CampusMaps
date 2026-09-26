@@ -16,8 +16,11 @@ sealed interface Start {
     data class Outside(val lat: Double, val lng: Double) : Start
 }
 
-/** [now] is always supplied by the caller (real clock or the debug overlay); routing never reads the clock. */
-data class Prefs(val avoidStairs: Boolean = false, val now: LocalDateTime)
+/**
+ * [now] is always supplied by the caller (real clock or the debug overlay); routing never reads the clock.
+ * [hasCard]: the user carries a campus card (PantherCard, BuzzCard), so a card-only entrance is usable like a public one.
+ */
+data class Prefs(val avoidStairs: Boolean = false, val now: LocalDateTime, val hasCard: Boolean = false)
 
 enum class VerticalMethod { NONE, STAIRS, ELEVATOR }
 
@@ -38,6 +41,8 @@ data class RouteOption(
     val notice: String?,
     /** Other entrances (names) that give the same route within [Router.DUPLICATE_WITHIN_SEC]; collapsed into this card. */
     val alsoVia: List<String> = emptyList(),
+    /** The entrance is card-only now and the user said they carry the card ([Prefs.hasCard]); the UI says "tap your card". */
+    val cardNeeded: Boolean = false,
 ) {
     val etaSec: Double get() = eta.totalSec
     val etaMinutes: Int get() = ceil(etaSec / 60).toInt().coerceAtLeast(1)
@@ -80,7 +85,7 @@ object Router {
         b.node(destination)
         val net = Net(b, start)
         val entrances: List<String?> = if (start is Start.Outside)
-            b.nodes.filter { it.isOutdoorEntrance && !Access.isLocked(it, prefs.now) }.map { it.id } else listOf(null)
+            b.nodes.filter { it.isOutdoorEntrance && !Access.blocks(it, prefs.now, prefs.hasCard) }.map { it.id } else listOf(null)
         val found = entrances.flatMap { e -> listOf(VerticalMethod.STAIRS, VerticalMethod.ELEVATOR).mapNotNull { v ->
             net.dijkstra(destination, prefs, entrance = e, method = v, ignoreAccess = false) } }
         val unrestricted = net.dijkstra(destination, prefs, entrance = null, method = null, ignoreAccess = true)
@@ -105,15 +110,17 @@ object Router {
         options.retainAll(cards.toSet())
         val best = options.firstOrNull()
         val notice = unrestricted?.let { net.entranceOf(it) }?.let { b.node(it) }
-            ?.takeIf { Access.isLocked(it, prefs.now) && it.id != best?.let(net::entranceOf) }
+            ?.takeIf { Access.blocks(it, prefs.now, prefs.hasCard) && it.id != best?.let(net::entranceOf) }
             ?.let { locked ->
                 val instead = best?.let(net::entranceOf)?.let { b.node(it).name }
-                "Heads up: ${locked.name} is card-only now. " + (instead?.let { "Using $it instead." } ?: "Taking another way.")
+                val why = if (Access.isClosed(locked, prefs.now)) "closed" else "card-only"
+                "Heads up: ${locked.name} is $why now. " + (instead?.let { "Using $it instead." } ?: "Taking another way.")
             }
         return options.take(MAX_OPTIONS).map { p ->
             val ent = net.entranceOf(p)?.let { b.node(it) }
             RouteOption(p.nodes, p.eta, p.distanceM, ent?.id, ent?.name, ent?.floor, p.method,
-                Instructions.build(net, p, notice.takeIf { p === best }), notice, alsoVia[p].orEmpty())
+                Instructions.build(net, p, notice.takeIf { p === best }), notice, alsoVia[p].orEmpty(),
+                cardNeeded = ent != null && Access.isLocked(ent, prefs.now))
         }
     }
 
@@ -203,7 +210,7 @@ internal class Net(val b: Building, val start: Start) {
             if (e.kind == EdgeKind.STAIRS && (prefs.avoidStairs || method == VerticalMethod.ELEVATOR)) return false
             if (e.kind == EdgeKind.ELEVATOR && method == VerticalMethod.STAIRS) return false
             if (e.from == Router.OUTSIDE && entrance != null && to != entrance) return false
-            if (!ignoreAccess && to != startId && Access.isLocked(b.node(to), prefs.now)) return false
+            if (!ignoreAccess && to != startId && Access.blocks(b.node(to), prefs.now, prefs.hasCard)) return false
             return true
         }
         val first = State(startId, null, null)

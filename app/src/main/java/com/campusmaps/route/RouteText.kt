@@ -5,8 +5,9 @@ package com.campusmaps.route
 // through CoreRouter; screens never write their own.
 object RouteText {
     // Error line on S1 and the S1b empty state (docs/20 QA #12).
-    fun noRouteLocked(room: String, dayTime: String) =
-        "No route to $room: every entrance is card-only at $dayTime."
+    // [closed]: every door is shut for everyone (a card does not help either).
+    fun noRouteLocked(room: String, dayTime: String, closed: Boolean = false) =
+        "No route to $room: every entrance is ${if (closed) "closed" else "card-only"} at $dayTime."
 
     fun noRouteStepFree(room: String) = "No route to $room without stairs."
 

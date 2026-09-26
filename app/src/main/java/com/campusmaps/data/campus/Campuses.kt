@@ -23,6 +23,8 @@ data class Campus(
     val buildings: List<CampusBuilding>,
     // Watermark behind the S0 card and S0b header. The marks belong to their universities; decorative use only.
     @DrawableRes val markRes: Int,
+    // The student ID card that opens card-access doors after hours ("I carry a PantherCard" in Settings).
+    val cardName: String = "PantherCard",
 ) {
     val mappedCodes: List<String> get() = buildings.filter { !it.soon }.map { it.code }
 }
@@ -36,6 +38,7 @@ object Campuses {
             CampusBuilding("VL", "Van Leer", 4, soon = true),
         ),
         R.drawable.campus_mark_gt,
+        cardName = "BuzzCard",
     )
     val GSU = Campus(
         CampusId.GSU, "GSU", "Georgia State", "Downtown",
