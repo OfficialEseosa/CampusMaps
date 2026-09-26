@@ -39,6 +39,11 @@ class SimulatedPositionProvider(
     override var speedMultiplier: Double = 1.0
     override var paused: Boolean = false
     override var lowConfidence: Boolean = false
+    // Barometer drives the floor (loc/baro): stand in the elevator / on the stairs instead of riding on a timer.
+    // GuidanceController sets it and moves the student floor by floor with jumpToPoint.
+    var holdRides: Boolean = false
+    // True while the next waypoint is reached by elevator or stairs (the pretend student is riding or about to).
+    val riding: Boolean get() = index in 1 until waypoints.size && waypoints[index].arrivedBy != EdgeKind.WALK
 
     private var waypoints: List<Waypoint> = emptyList()
     private var index = 0           // Next waypoint we are heading to
@@ -135,6 +140,10 @@ class SimulatedPositionProvider(
 
         val target = waypoints[index]
         if (target.arrivedBy != EdgeKind.WALK) {
+            if (holdRides) {
+                _pose.value = p
+                return
+            }
             // Riding: wait (elevator only, first floor of a ride), then one floor per hop.
             val firstHop = waypoints[index - 1].arrivedBy != target.arrivedBy
             val wait = if (target.arrivedBy == EdgeKind.ELEVATOR && firstHop) 2.5 else 0.0

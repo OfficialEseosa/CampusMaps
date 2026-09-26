@@ -47,9 +47,16 @@ class SwitchablePositionProvider(
     private val _mode = MutableStateFlow(PositionMode.AUTO)
     val mode: StateFlow<PositionMode> = _mode.asStateFlow()
 
-    override val pose: StateFlow<Pose> = combine(sim.pose, ar.pose, ar.live, transform, _mode) { s, a, live, t, m ->
-        if (m == PositionMode.AUTO && live && t != null && ar.hasFix) a else s
-    }.stateIn(scope, SharingStarted.Eagerly, sim.pose.value)
+    // Floor from the barometer (loc/baro) while the camera drives; null = the camera's own floor (ARCore height).
+    private val baroFloor = MutableStateFlow<Int?>(null)
+
+    override val pose: StateFlow<Pose> = combine(
+        combine(sim.pose, ar.pose, ar.live, transform, _mode) { s, a, live, t, m ->
+            if (m == PositionMode.AUTO && live && t != null && ar.hasFix) a to true else s to false
+        },
+        baroFloor,
+    ) { (p, fromAr), bf -> if (fromAr && bf != null) p.copy(floor = bf) else p }
+        .stateIn(scope, SharingStarted.Eagerly, sim.pose.value)
 
     /** True when the pose shown now comes from the camera. */
     val usingAr: Boolean get() = _mode.value == PositionMode.AUTO && ar.live.value && transform.value != null && ar.hasFix
@@ -94,6 +101,20 @@ class SwitchablePositionProvider(
             }
         }
     }
+
+    /**
+     * The barometer says the student is on [floor] (loc/baro, only during a ride or at a known-floor re-zero).
+     * Camera: overrides the camera's floor from now on. Simulator: stands the student on route point [routeIndex]
+     * (the ride's node on that floor) without switching modes; without one, keeps the position and changes the floor.
+     */
+    fun setBarometerFloor(floor: Int, routeIndex: Int?) {
+        baroFloor.value = floor
+        if (usingAr) return
+        if (routeIndex != null) sim.jumpToPoint(routeIndex) else sim.placeAt(sim.pose.value.position, floor)
+    }
+
+    /** The camera's floor follows the barometer from now on (the barometer is running), starting at [floor]. */
+    fun barometerFloorKnown(floor: Int) { baroFloor.value = floor }
 
     fun setMode(m: PositionMode) {
         if (m == _mode.value) return

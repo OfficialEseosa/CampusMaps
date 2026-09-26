@@ -109,6 +109,14 @@ class GuidanceController(
         com.campusmaps.loc.ArFeed.setBuilding(building.core)
     }
 
+    // Barometer floor (loc/baro, docs/03 section 3). Null when the device has no barometer: the simulator's timed rides stay.
+    private var baro: com.campusmaps.loc.baro.BarometerFloorTracker? = null
+    private var baroFixJob: Job? = null
+    private var baroCommitAtMs = 0L
+    private var holdSinceMs = 0L      // When the simulator started standing in the elevator waiting for the barometer
+    private var holdGaveUp = false    // The pressure did not move: let the simulator ride on its timer
+    private var holdStep = -1
+
     private val _state = MutableStateFlow(buildState(position.pose.value))
     val state: StateFlow<GuidanceState> = _state.asStateFlow()
 
@@ -117,6 +125,7 @@ class GuidanceController(
         com.campusmaps.loc.ArFeed.attach(arPosition)
         positionSource.start(arExpected = com.campusmaps.loc.ArFeed.arExpected && !glassesMode)
         position.follow(route)
+        startBarometer()
         loopJob = scope.launch {
             while (true) {
                 tick()
@@ -127,6 +136,10 @@ class GuidanceController(
 
     fun stop() {
         loopJob?.cancel()
+        baroFixJob?.cancel()
+        baro?.stop()
+        baro = null
+        simulator.holdRides = false
         com.campusmaps.loc.ArFeed.detach(arPosition)
         position.stop()
         speaker.stop()
@@ -151,6 +164,7 @@ class GuidanceController(
         val before = progress
         progress = GuidanceEngine.update(route, pose, progress, nowMs)
         followOutdoorGps(before, nowMs)
+        followBarometer(before, pose, nowMs)
 
         // Reroute when clearly off the path (and not while we are unsure where we are).
         if (!progress.arrived &&
@@ -210,6 +224,75 @@ class GuidanceController(
                     segmentIndex = maxOf(progress.segmentIndex, (at).coerceAtMost(route.points.size - 2).coerceAtLeast(0)))
             }
         }
+    }
+
+    private fun startBarometer() {
+        val startFloor = position.pose.value.floor
+        val b = com.campusmaps.loc.baro.BaroFeed.newTracker(building.core.floorHeightM) { f -> onBarometerFloor(f) } ?: run {
+            runCatching { android.util.Log.i("Baro", "no barometer: elevator and stairs rides use the simulator's timer") }
+            return
+        }
+        if (!b.start(startFloor)) return
+        baro = b
+        positionSource.barometerFloorKnown(startFloor)
+        // A sign fix or a "Place route here" floor tap puts the student on a known floor: re-zero there.
+        baroFixJob = scope.launch {
+            buildingToWorld.collect { t ->
+                if (t != null) {
+                    b.rezero(t.refFloor, "sign fix / floor tap")
+                    positionSource.barometerFloorKnown(t.refFloor)
+                }
+            }
+        }
+    }
+
+    // Rides follow the barometer: the step's ride gate, the simulator's hold, and the re-zero on known floors.
+    private fun followBarometer(before: Progress, pose: Pose, nowMs: Long) {
+        val b = baro ?: return
+        val step = route.steps.getOrNull(progress.stepIndex)
+        val ride = step?.kind == StepKind.ELEVATOR || step?.kind == StepKind.STAIRS
+        if (ride) b.rideStarted() else b.rideEnded()
+
+        // The pretend student waits in the car for the pressure; if it does not move for 10 s, the timer rides instead.
+        if (progress.stepIndex != holdStep) { holdStep = progress.stepIndex; holdSinceMs = 0L; holdGaveUp = false }
+        if (ride && b.ready && simulator.riding) {
+            if (holdSinceMs == 0L) holdSinceMs = nowMs
+            if (!holdGaveUp && nowMs - holdSinceMs > HOLD_GIVE_UP_MS && b.movedSinceRideStart() < 0.15) {
+                holdGaveUp = true
+                runCatching { android.util.Log.i("Baro", "pressure still after ${HOLD_GIVE_UP_MS / 1000} s in the ride: simulator's timer rides instead") }
+            }
+        }
+        val hold = ride && b.ready && !holdGaveUp
+        if (simulator.holdRides != hold) {
+            simulator.holdRides = hold
+            runCatching { android.util.Log.i("Baro", if (hold) "ride: floor follows the barometer" else "ride hold off") }
+        }
+
+        // A hallway step done on a known floor: re-zero (weather drift).
+        if (progress.stepIndex > before.stepIndex && !b.gateOpen()) {
+            val done = route.steps.getOrNull(before.stepIndex)
+            if (done != null && done.kind != StepKind.ELEVATOR && done.kind != StepKind.STAIRS && !OutdoorGps.isOutdoor(done)) {
+                b.rezero(pose.floor, "step done on foot")
+            }
+        }
+        // Something else set the floor (debug jump, timed ride, camera height): believe it and re-zero there.
+        if (pose.floor != b.floor && nowMs - baroCommitAtMs > 1_000) {
+            b.rezero(pose.floor, "floor ${pose.floor} set by the position source")
+            positionSource.barometerFloorKnown(pose.floor)
+        }
+    }
+
+    private fun onBarometerFloor(floor: Int) {
+        baroCommitAtMs = System.currentTimeMillis()
+        // The ride's node on that floor, nearest to where we are on the route.
+        val pts = route.points
+        val at = progress.segmentIndex
+        val idx = pts.indices
+            .filter { i -> pts[i].floor == floor && (pts[i].arrivedBy != EdgeKind.WALK || pts.getOrNull(i + 1)?.arrivedBy.let { it != null && it != EdgeKind.WALK }) }
+            .filter { i -> i >= at - 1 && i <= at + 12 }
+            .minByOrNull { kotlin.math.abs(it - at) }
+        runCatching { android.util.Log.i("Baro", "floor $floor -> position (route point ${idx ?: "none"}${idx?.let { " " + pts[it].node.id } ?: ""})") }
+        positionSource.setBarometerFloor(floor, idx)
     }
 
     private fun reroute(pose: Pose) {
@@ -326,6 +409,10 @@ class GuidanceController(
             .filter { it.signText != null && it.floor == pose.floor }
             .minByOrNull { it.position.distanceTo(pose.position) }
             ?.signText ?: route.destination.name.uppercase()
+    }
+
+    private companion object {
+        const val HOLD_GIVE_UP_MS = 10_000L
     }
 
     private fun initialHeading(route: Route): Double {
