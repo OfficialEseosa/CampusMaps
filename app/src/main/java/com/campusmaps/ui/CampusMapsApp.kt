@@ -7,6 +7,10 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -77,7 +81,14 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     val exploreHome by vm.exploreHome.collectAsState()
     val exploreBackToS1 by vm.exploreBackToS1.collectAsState()
     val exploreVm: ExploreViewModel = viewModel(factory = ExploreViewModel.Factory(app, LocalContext.current))
-    LaunchedEffect(Unit) { if (exploreVm.exploreShouldBeHome()) vm.showExploreAsHome() }
+    // Pick the home screen before S1 is drawn (docs/22 O6): the first frames stay blank until exploreShouldBeHome()
+    // answers, at most 300 ms, so S1 no longer flashes before Explore when animations are off.
+    var homeDecided by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        launch { if (exploreVm.exploreShouldBeHome()) vm.showExploreAsHome(); homeDecided = true }
+        delay(300)
+        homeDecided = true
+    }
     // LEG 2: the 40 m trigger, the "Almost there" card and the 900 ms map-to-AR transition (geo/, ui/transition/).
     val handoffUi by vm.handoff.ui.collectAsState()
     val fromExplore by vm.fromExplore.collectAsState()
@@ -117,7 +128,9 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
 
     CampusMapsTheme(darkTheme = screenDark) {
         Box(Modifier.fillMaxSize()) {
-            Crossfade(targetState = crossTarget, animationSpec = tween(250), label = "screen") { target ->
+            if (!homeDecided && screen == Screen.DESTINATION) {
+                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+            } else Crossfade(targetState = crossTarget, animationSpec = tween(250), label = "screen") { target ->
                 when (target) {
                     Screen.DESTINATION -> DestinationScreen(
                         state = trip.copy(query = vm.searchText), // Synchronous search text (docs/22 #2)
