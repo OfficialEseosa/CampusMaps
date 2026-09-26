@@ -113,8 +113,9 @@ object AppIcons {
     fun forStep(kind: StepKind): ImageVector = when (kind) {
         StepKind.WALK_TO_ENTRANCE -> doorFront
         StepKind.HEAD, StepKind.CONTINUE, StepKind.EXIT_TOWARD -> straight
-        StepKind.TURN_LEFT -> turnLeft
-        StepKind.TURN_RIGHT -> turnRight
+        StepKind.TURN_LEFT, StepKind.STREET_LEFT -> turnLeft
+        StepKind.TURN_RIGHT, StepKind.STREET_RIGHT -> turnRight
+        StepKind.STREET_STRAIGHT -> straight
         StepKind.TURN_AROUND -> uTurnLeft
         StepKind.ELEVATOR -> elevator
         StepKind.STAIRS -> stairs

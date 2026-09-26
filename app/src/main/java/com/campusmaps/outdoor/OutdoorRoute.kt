@@ -47,7 +47,28 @@ data class OutdoorRoute(
     val minutes: Int,
     val streetSteps: List<String>,
     val source: RouteSource,
+    // Google's maneuvers with where each one ends; S2 follows them by GPS (outdoor/StreetSteps.kt). Empty on a straight line.
+    val streetLegs: List<StreetStep> = emptyList(),
 )
+
+// Which arrow a street step gets (from Google's maneuver: TURN_LEFT, turn-slight-right, STRAIGHT, DEPART, ...).
+enum class StreetTurn {
+    LEFT, RIGHT, STRAIGHT;
+
+    companion object {
+        fun fromManeuver(maneuver: String?): StreetTurn {
+            val m = maneuver.orEmpty().uppercase().replace('-', '_')
+            return when {
+                "LEFT" in m -> LEFT
+                "RIGHT" in m -> RIGHT
+                else -> STRAIGHT
+            }
+        }
+    }
+}
+
+// One Google walking maneuver: plain text, its arrow, where it ends and how long it is.
+data class StreetStep(val text: String, val turn: StreetTurn, val end: LatLngPoint, val distanceM: Double)
 
 object OutdoorRoutes {
     // Walking speed used for the outdoor estimate (docs: 1.3 m/s).

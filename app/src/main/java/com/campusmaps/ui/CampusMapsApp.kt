@@ -193,8 +193,11 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         val plan = exploreState.plan
                         val scope = androidx.compose.runtime.rememberCoroutineScope()
                         val startAr: (com.campusmaps.outdoor.EntrancePlan, Boolean) -> Unit = { p, fromCard ->
-                            val f = exploreVm.state.value.fix
-                            vm.startFromExplore(p.buildingId, p.destinationId, p.entranceId, f?.lat, f?.lng, fromCard)
+                            val es = exploreVm.state.value
+                            val f = es.fix
+                            vm.startFromExplore(p.buildingId, p.destinationId, p.entranceId, f?.lat, f?.lng, fromCard,
+                                streets = es.route?.streetLegs.orEmpty(), entrance = p.entrance.takeIf { !p.approximate },
+                                entranceName = p.entranceName)
                         }
                         // While only the map shows, the hand-off follows the map's recommended entrance so the 40 m
                         // trigger can raise the "Almost there" card before any S2 session exists.
