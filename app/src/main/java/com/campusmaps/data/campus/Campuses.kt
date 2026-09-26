@@ -1,5 +1,8 @@
 package com.campusmaps.data.campus
 
+import androidx.annotation.DrawableRes
+import com.campusmaps.R
+
 // The two campuses on the S0 picker and the buildings under each (CampusMaps redesign, CAMPUSES).
 // Mapped buildings are the codes with a file in assets/buildings; the rest show as "Soon" on S0b.
 // Klaus is Georgia Tech; Classroom South and Student Center East are Georgia State.
@@ -18,6 +21,8 @@ data class Campus(
     val name: String,     // "Georgia Tech"
     val area: String,     // "Midtown"
     val buildings: List<CampusBuilding>,
+    // Watermark behind the S0 card and S0b header. The marks belong to their universities; decorative use only.
+    @DrawableRes val markRes: Int,
 ) {
     val mappedCodes: List<String> get() = buildings.filter { !it.soon }.map { it.code }
 }
@@ -30,6 +35,7 @@ object Campuses {
             CampusBuilding("CULC", "Clough Commons", 5, soon = true),
             CampusBuilding("VL", "Van Leer", 4, soon = true),
         ),
+        R.drawable.campus_mark_gt,
     )
     val GSU = Campus(
         CampusId.GSU, "GSU", "Georgia State", "Downtown",
@@ -38,6 +44,7 @@ object Campuses {
             CampusBuilding("CSE", "Student Center East", 2),
             CampusBuilding("LIB", "Library South", 6, soon = true),
         ),
+        R.drawable.campus_mark_gsu,
     )
     val all = listOf(GT, GSU)
 
