@@ -255,7 +255,10 @@ private fun Sheet(state: ExploreUiState, actions: ExploreActions, modifier: Modi
         shadowElevation = 12.dp,
     ) {
         Column(
-            Modifier.navigationBarsPadding().heightIn(max = 460.dp).verticalScroll(rememberScrollState())
+            Modifier.navigationBarsPadding()
+                // At most half the screen, so the round buttons above it never cover the room chips on short phones.
+                .heightIn(max = minOf(460, androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp / 2).dp)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 12.dp),
         ) {
             Box(Modifier.align(Alignment.CenterHorizontally).size(40.dp, 4.dp).background(Explore.cardBorder, CircleShape))
