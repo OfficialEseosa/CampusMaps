@@ -16,6 +16,8 @@ import com.campusmaps.data.Building as CoreBuilding
 object VpsPosition {
     const val MAX_ACCURACY_M = 10.0
     const val SNAP_M = 15.0
+    /** A door other than the planned one counts only this close (the planned one being out of [SNAP_M]). */
+    const val OTHER_DOOR_M = 10.0
     /** A VPS fix newer than this hides FusedLocation fixes. */
     const val FRESH_MS = 3_000L
 
@@ -42,13 +44,21 @@ object VpsPosition {
     /** Where the VPS position says the student stands: [entranceId], metres away, and whether it differs from the planned one. */
     data class Snap(val entranceId: String, val distanceM: Double, val reroute: Boolean)
 
-    /** Nearest outdoor entrance of [core] within [SNAP_M] of [fix] (any entrance, not only [plannedEntranceId]); null if none. */
+    /**
+     * The door the student is at. The PLANNED entrance wins whenever it is within [SNAP_M]: doors of one building can be
+     * 10 m apart (Walters main and side), and snapping to the wrong one reroutes the student through the wrong lobby
+     * (seen at Classroom South 2026-09-26). Another door only counts when it is within [OTHER_DOOR_M] and the planned
+     * one is beyond [SNAP_M]. Null when no door is close enough.
+     */
     fun snap(core: CoreBuilding, fix: LocationFix, plannedEntranceId: String?): Snap? {
-        val best = core.nodes.filter { it.isOutdoorEntrance && it.lat != null && it.lng != null }
+        val doors = core.nodes.filter { it.isOutdoorEntrance && it.lat != null && it.lng != null }
             .map { it to Geo.haversineM(fix.lat, fix.lng, it.lat!!, it.lng!!) }
-            .minByOrNull { it.second } ?: return null
-        if (best.second > SNAP_M) return null
-        return Snap(best.first.id, best.second, best.first.id != plannedEntranceId)
+        doors.firstOrNull { it.first.id == plannedEntranceId }?.let { (planned, d) ->
+            if (d <= SNAP_M) return Snap(planned.id, d, reroute = false)
+        }
+        val best = doors.filter { it.first.id != plannedEntranceId }.minByOrNull { it.second } ?: return null
+        if (best.second > OTHER_DOOR_M) return null
+        return Snap(best.first.id, best.second, reroute = plannedEntranceId != null)
     }
 
     /** The Logcat line (tag Geo): "VPS snap to E-WM, 6.2 m". */

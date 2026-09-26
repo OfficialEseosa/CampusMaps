@@ -83,3 +83,29 @@ class VpsSnapTest {
         assertEquals(listOf(1.0, 2.0, 4.0), got.map { it.lat }.sorted())
     }
 }
+
+class VpsSnapPlannedDoorWinsTest {
+    private val cs = com.campusmaps.data.campus.TestBuildings.cs
+
+    /** Walters main (E-WM) and Walters side (E-WS) are close: standing between them, the planned side door wins. */
+    @Test fun plannedSideDoorWinsOverNearerMainDoor() {
+        val side = cs.core.nodes.first { it.id == "E-WS" }
+        val main = cs.core.nodes.first { it.id == "E-WM" }
+        // A point 12 m from the side door on the far side from the main door, then nudged toward main.
+        val fix = LocationFix(lat = (side.lat!! * 0.4 + main.lat!! * 0.6), lng = (side.lng!! * 0.4 + main.lng!! * 0.6), accuracyM = 3.0, timeMs = 0L)
+        val dSide = com.campusmaps.data.Geo.haversineM(fix.lat, fix.lng, side.lat!!, side.lng!!)
+        val dMain = com.campusmaps.data.Geo.haversineM(fix.lat, fix.lng, main.lat!!, main.lng!!)
+        org.junit.Assume.assumeTrue("doors close enough for the case", dSide <= VpsPosition.SNAP_M && dMain < dSide)
+        val snap = VpsPosition.snap(cs.core, fix, plannedEntranceId = "E-WS")!!
+        assertEquals("E-WS", snap.entranceId)
+        assertEquals(false, snap.reroute)
+    }
+
+    @Test fun otherDoorOnlyWhenPlannedIsFarAndItIsWithinTenMetres() {
+        val main = cs.core.nodes.first { it.id == "E-WM" }
+        val fix = LocationFix(lat = main.lat!!, lng = main.lng!!, accuracyM = 3.0, timeMs = 0L)
+        val snap = VpsPosition.snap(cs.core, fix, plannedEntranceId = "E-LM2")!!
+        assertEquals("E-WM", snap.entranceId)
+        assertTrue(snap.reroute)
+    }
+}

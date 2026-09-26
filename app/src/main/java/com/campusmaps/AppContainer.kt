@@ -37,6 +37,8 @@ class AppContainer(context: Context) {
     // Lives as long as the app process. Used for syncing and the watch.
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    init { com.campusmaps.platform.LogSink.start(appContext) } // Debug builds: own copy of the guidance log (Logcat ages out in a minute)
+
     private val loaded = CoreBridge.load(appContext)
     @Volatile var buildings: List<Building> = loaded.buildings
         private set
