@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ink #313131 with Clay #C67C4E at 20 % on top, pre-mixed. Must match SplashColors in ui/splash. -->
+    <color name="splash_background">#FF4F4037</color>
+</resources>

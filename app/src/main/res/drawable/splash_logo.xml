@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Launcher mark: the CampusMaps logo mark (viewfinder corners around a map pin), white on
-    Clay Deep #A85F33 (launcher_background). 40-unit mark scaled 1.3x into the 66 dp safe zone.
+    System splash icon: the CampusMaps logo mark (viewfinder corners around a map pin), white.
+    288 dp canvas, mark 120 dp in the middle (inside the 192 dp safe circle). The Compose splash
+    draws the same mark at the same size on its first frame (SplashTiming.HANDOFF_MARK_DP).
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
     <group
-        android:translateX="28"
-        android:translateY="28"
-        android:scaleX="1.3"
-        android:scaleY="1.3">
+        android:translateX="84"
+        android:translateY="84"
+        android:scaleX="3"
+        android:scaleY="3">
         <path
             android:strokeColor="#FFFFFFFF"
             android:strokeWidth="3"

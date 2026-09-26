@@ -139,3 +139,9 @@ The `integration` branch uses the teammate's version catalog (`gradle/libs.versi
 | `maps-compose` | 8.2.2 | removed | Outdoor leg is ARCore Geospatial per the plan (owner decision) |
 
 Compose BOM 2026.04.01, AGP 9.1.0, coroutines 1.10.2, serialization 1.9.0, Gradle 9.3.1 are the teammate's and build with the above.
+
+## Launch splash (2026-09-25)
+
+| Piece | Version | Why |
+|---|---|---|
+| `androidx.core:core-splashscreen` | 1.2.0 | System launch splash on Ink (no white flash), backported to minSdk 29. Used by `MainActivity.installSplashScreen()` and `ui/splash`. |
