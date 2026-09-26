@@ -145,3 +145,14 @@ Four QA agents ran in parallel after the wave 1 merge: the S25 (AR, Geospatial, 
 4. **Watch on the wrist**: the face shows each step and buzzes, returns to idle on Done and Stop, and stairs up and down look different.
 5. **Shortcut persistence** on the phone: add a same-floor shortcut with the walk and 2 photos, debug Approve, force-stop, relaunch, route: the card still says "Student shortcut".
 6. **Speech loudness** at expo volume with media volume raised (it was 3 of 15).
+
+## Wave 3 (2026-09-26, about 09:00): street steps, watch, glasses polish, building editor
+
+Verified on the S25 and the Galaxy Watch 8 Classic (watch app installed over Wi-Fi ADB):
+- **Routes API** works with the key's restriction fixed: real street steps in the Explore sheet.
+- **Glasses end to end**: 3 stills per burst (1080x1440, 1 to 2 s each), camera off before speech, OCR, vote, speech; about 9 s per cycle. A capture timeout used to kill the loop silently (fixed). Speech went to the phone speaker because the glasses were not connected for audio; S3 now shows "Speech: glasses / phone speaker".
+- **Watch**: steps arrive within 1 s with the haptic pattern; the face opens by itself on the first step of a route; text fits inside the round screen.
+- **Street steps in S2 and on the watch** (`reports/w3-outdoor.md`): each Google turn is a step, advanced by GPS (12 m), banner, "Then:", watch and glasses share the same text and GPS distance. To test on a real walk: steps advance at each corner (tune `OutdoorGps.COMPLETE_M`), the Enter step and the hand-over at the door.
+- **Small fixes** (`reports/w3-small.md`): Directions cached per entrance (re-asked after 25 m), S1 map icon in every mode, debug card stays folded and rows are 44 dp, reroute counted once, no S1 flash before Explore.
+- **Glasses polish** (`reports/w3-glasses.md`): no ghost text on arrival, unchanged step spoken at most once per 25 s, "Seen: nothing new" after two empty bursts.
+- **Building editor** (`reports/w3-editor.md`): Settings, "Edit this building" (demo mode off): add room / hallway point / door, connect, move, rename, delete, undo, save (validator counts shown, routing reloads at once), export the merged file via the share sheet. Patches live in filesDir/patches/<code>.json and are applied on top of the asset file at load; a patch that no longer fits is skipped. Not supported: stairs, elevators, entrances, cross-floor links, signs, access hours.

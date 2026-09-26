@@ -47,8 +47,8 @@ data class WalkState(
 )
 
 // The screens from the flow in section 3 of the handoff, plus the redesign's campus picker (CAMPUS),
-// building picker (BUILDINGS) and 3D route preview (PREVIEW).
-enum class Screen { CAMPUS, BUILDINGS, DESTINATION, ROUTES, PREVIEW, GUIDANCE, GLASSES, ADD_SHORTCUT, EXPLORE }
+// building picker (BUILDINGS) and 3D route preview (PREVIEW). EDITOR is the building editor (Settings, editor/).
+enum class Screen { CAMPUS, BUILDINGS, DESTINATION, ROUTES, PREVIEW, GUIDANCE, GLASSES, ADD_SHORTCUT, EXPLORE, EDITOR }
 
 // "Guide me with" on S1b. MAP is S2 with the camera forced off (text and the big map).
 enum class GuideMode { PHONE, GLASSES, MAP }
@@ -253,6 +253,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             Screen.GUIDANCE, Screen.GLASSES -> endGuidance()
             Screen.DESTINATION -> if (_exploreHome.value) go(Screen.EXPLORE) else go(Screen.BUILDINGS)
             Screen.EXPLORE -> if (_exploreBackToS1.value) { _exploreBackToS1.value = false; go(Screen.DESTINATION) }
+            Screen.EDITOR -> buildingEditor(false)
         }
     }
 
@@ -503,6 +504,12 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             app.settings.clearRecents(trip.value.building.id)
         }
         _showSettings.value = false
+    }
+
+    // Building editor (Settings > Edit this building, editor/). Closing clears the selection so S1 re-reads the reloaded building.
+    fun buildingEditor(open: Boolean) {
+        _showSettings.value = false
+        if (open) go(Screen.EDITOR) else { updateSelection { Selection(query = " ") }; updateSelection { Selection() }; go(Screen.DESTINATION) }
     }
 
     fun openSettings() {

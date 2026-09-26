@@ -55,7 +55,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 // The whole app UI. Picks the screen, applies the theme rules from section 3:
 // Redesign: S0, S0b, S1, S1b and Settings are light in the campus colours (CampusTheme.kt); S2, S3, the 3D preview
-// and the debug card are always dark. S4 (add shortcut) still follows the system theme.
+// and the debug card are always dark. S4 (add shortcut) and the building editor still follow the system theme.
 @Composable
 fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutViewModel) {
     val screen by vm.screen.collectAsState()
@@ -114,7 +114,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     val screenDark = when (screen) {
         Screen.GUIDANCE, Screen.GLASSES, Screen.PREVIEW -> true
         Screen.CAMPUS, Screen.BUILDINGS, Screen.DESTINATION, Screen.ROUTES, Screen.EXPLORE -> false
-        Screen.ADD_SHORTCUT -> systemDark
+        Screen.ADD_SHORTCUT, Screen.EDITOR -> systemDark
     }
 
     // Light status bar icons on dark screens, dark icons on light ones.
@@ -137,7 +137,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
 
     BackHandler(enabled = screen != Screen.CAMPUS && (screen != Screen.EXPLORE || exploreBackToS1)) { vm.back() }
 
-    CampusMapsTheme(darkTheme = screenDark && screen == Screen.ADD_SHORTCUT, campus = palette) {
+    CampusMapsTheme(darkTheme = screenDark && (screen == Screen.ADD_SHORTCUT || screen == Screen.EDITOR), campus = palette) {
         Box(Modifier.fillMaxSize()) {
             if (!homeDecided && screen == Screen.DESTINATION) {
                 Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
@@ -218,6 +218,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         )
                     }
                     Screen.ADD_SHORTCUT -> AddShortcutScreen(shortcutVm, onBack = vm::back)
+                    Screen.EDITOR -> com.campusmaps.editor.BuildingEditorScreen(app, trip.building.code, onClose = { vm.buildingEditor(false) })
                     Screen.EXPLORE -> {
                         // A room picked on S1 shows on the map too.
                         LaunchedEffect(trip.building.id, trip.destination?.id) {
@@ -297,6 +298,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onBuilding = vm::selectBuilding,
                             onResetDemo = vm::resetDemo,
                             onDismiss = vm::closeSettings,
+                            onEditBuilding = { vm.buildingEditor(true) },
                         ),
                     )
                 }

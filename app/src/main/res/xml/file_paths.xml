@@ -2,4 +2,6 @@
 <paths>
     <!-- Shortcut photos live in app private storage under files/shortcut_photos. -->
     <files-path name="shortcut_photos" path="shortcut_photos/" />
+    <!-- Building editor: the merged building file shared with "Export merged file". -->
+    <cache-path name="building_exports" path="exports/" />
 </paths>

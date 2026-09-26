@@ -51,6 +51,7 @@ class SettingsActions(
     val onBuilding: (String) -> Unit,
     val onResetDemo: () -> Unit,
     val onDismiss: () -> Unit,
+    val onEditBuilding: (() -> Unit)? = null,
 )
 
 // Settings (section 10, redesign sheet). Team only. Tidy, no extra depth. Rows are 56 dp:
@@ -125,6 +126,13 @@ fun SettingsSheet(settings: AppSettings, tts: TtsStatus, buildings: List<Buildin
             TextButton(onClick = actions.onResetDemo, modifier = Modifier.heightIn(min = 56.dp)) {
                 Icon(AppIcons.restartAlt, contentDescription = null)
                 Text("Reset demo", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 8.dp))
+            }
+
+            if (!settings.demoMode && actions.onEditBuilding != null) {
+                TextButton(onClick = actions.onEditBuilding, modifier = Modifier.heightIn(min = 56.dp).testTag("editBuilding")) {
+                    Icon(AppIcons.addRoad, contentDescription = null)
+                    Text("Edit this building", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 8.dp))
+                }
             }
 
             if (!settings.demoMode) {

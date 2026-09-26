@@ -38,9 +38,18 @@ class AppContainer(context: Context) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val loaded = CoreBridge.load(appContext)
-    val buildings: List<Building> = loaded.buildings
+    @Volatile var buildings: List<Building> = loaded.buildings
+        private set
     // ERROR / WARN validator problems per building code (debug builds). Shown as a count in the debug overlay.
-    val loadProblems: Map<String, List<String>> = loaded.problems
+    @Volatile var loadProblems: Map<String, List<String>> = loaded.problems
+        private set
+
+    /** Re-reads every building file with its editor patch (editor Save), so the next route sees the change. */
+    fun reloadBuildings() {
+        val l = CoreBridge.load(appContext)
+        buildings = l.buildings
+        loadProblems = l.problems
+    }
     val settings = SettingsRepository(appContext)
     val clock = AppClock()
     val router = CoreRouter()
