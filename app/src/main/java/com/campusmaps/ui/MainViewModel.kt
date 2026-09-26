@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -184,6 +185,16 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     // The campus in use: set by the S0 picker, otherwise the campus of the saved building.
     private val _campus = MutableStateFlow(com.campusmaps.data.campus.Campuses.of(settings.value.buildingId).id)
     val campus: StateFlow<com.campusmaps.data.campus.CampusId> = _campus.asStateFlow()
+
+    init {
+        // The campus skin follows the building in use: every building change (S0b, S1 chips, Settings, the Explore map,
+        // and the saved building once it loads) sets the campus. The S0 card and the S0b swap set it on their own.
+        viewModelScope.launch {
+            app.settings.settings.map { it.buildingId }.distinctUntilChanged().collect { id ->
+                _campus.value = com.campusmaps.data.campus.Campuses.of(id).id
+            }
+        }
+    }
 
     fun pickCampus(id: com.campusmaps.data.campus.CampusId) {
         _campus.value = id
