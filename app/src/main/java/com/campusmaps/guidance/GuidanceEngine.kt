@@ -19,6 +19,8 @@ data class Progress(
     val segmentIndex: Int = 0,     // Route segment we are on (points[i] -> points[i + 1])
     val offRouteM: Double = 0.0,   // How far the student is from the route line
     val arrived: Boolean = false,
+    // When the current step became current (caller's clock, ms). Null when the caller passes no time.
+    val stepShownAtMs: Long? = null,
 )
 
 // Pure logic, no Android: matches a pose to the route and decides the current step.
@@ -33,8 +35,15 @@ object GuidanceEngine {
     const val APPROACH_M = 8.0
     // Further than this from the route line means the student went another way.
     const val OFF_ROUTE_M = 6.0
+    // An "Exit toward" step is usually 3 m before a turn (docs/21 open issue 6, docs/22 #16). It stays up until the
+    // student is past its end point, and for at least this long, so it is read instead of flashing.
+    const val EXIT_MIN_SHOW_MS = 2_500L
+    // The step right after an exit (core's "Turn left at Elevator lobby", 1.5 m later on CS) would otherwise be passed
+    // the moment the exit is released. It gets its own short moment; its distance rule is unchanged, so it never stalls.
+    const val AFTER_EXIT_MIN_SHOW_MS = 1_500L
 
-    fun update(route: Route, pose: Pose, previous: Progress): Progress {
+    // nowMs: the caller's clock (ms), only used for the exit step's minimum time on screen. Null skips that rule.
+    fun update(route: Route, pose: Pose, previous: Progress, nowMs: Long? = null): Progress {
         val points = route.points
         if (points.size < 2) {
             return previous.copy(stepIndex = route.steps.lastIndex, arrived = true)
@@ -72,9 +81,19 @@ object GuidanceEngine {
         // 2. Move the step index forward past every step that is complete.
         var stepIndex = previous.stepIndex
         var arrived = previous.arrived
+        var shownAt = if (nowMs == null) null else previous.stepShownAtMs ?: nowMs
         while (stepIndex < route.steps.size) {
             val step = route.steps[stepIndex]
-            val done = bestAlong >= step.completeAtM - COMPLETE_SLACK_M &&
+            val exit = step.kind == StepKind.EXIT_TOWARD
+            val slack = if (exit) 0.0 else COMPLETE_SLACK_M
+            val minShowMs = when {
+                exit -> EXIT_MIN_SHOW_MS
+                route.steps.getOrNull(stepIndex - 1)?.kind == StepKind.EXIT_TOWARD -> AFTER_EXIT_MIN_SHOW_MS
+                else -> 0L
+            }
+            val shownLongEnough = nowMs == null || shownAt == null || nowMs - shownAt >= minShowMs
+            val done = bestAlong >= step.completeAtM - slack - 1e-6 &&
+                shownLongEnough &&
                 pose.floor == step.completeFloor &&
                 bestSegment >= min(step.startIndex, points.size - 2) - 1
             if (!done) break
@@ -83,6 +102,7 @@ object GuidanceEngine {
                 break
             }
             stepIndex++
+            shownAt = nowMs // The next step became current now.
         }
 
         return Progress(
@@ -91,6 +111,7 @@ object GuidanceEngine {
             segmentIndex = bestSegment,
             offRouteM = offRoute,
             arrived = arrived,
+            stepShownAtMs = shownAt,
         )
     }
 
