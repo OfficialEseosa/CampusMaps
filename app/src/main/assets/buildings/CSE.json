@@ -2,383 +2,126 @@
   "code": "CSE",
   "name": "Student Center East",
   "origin": {
-    "description": "Centre of the main entrance doors (estimated)",
-    "lat": 33.75185,
-    "lng": -84.38455,
+    "description": "Main entrance doors (survey export CSE-20260926-1530, averaged GPS), x east, y north",
+    "lat": 33.753006667828835,
+    "lng": -84.38503712295093,
     "headingDeg": 0
   },
   "floorHeightM": 4.0,
   "walkingSpeedMps": 1.3,
   "stairsSecondsPerFloor": 22,
   "stairsDownSecondsPerFloor": 18,
-  "elevators": [
-    {
-      "id": "ELEV-CSE",
-      "avgWaitSec": 35,
-      "worstWaitSec": 70,
-      "secondsPerFloor": 6,
-      "estimated": true
-    }
-  ],
   "nodes": [
     {
       "id": "E-MAIN",
       "type": "entrance",
       "name": "Main entrance",
       "floor": 1,
-      "x": 0,
-      "y": 0,
-      "lat": 33.75185,
-      "lng": -84.38455,
-      "headingDeg": 180,
+      "x": 0.0,
+      "y": 0.0,
+      "lat": 33.753006667828835,
+      "lng": -84.38503712295093,
+      "headingDeg": 307.8,
       "access": [
-        {
-          "days": "Mon-Thu",
-          "open": "08:00",
-          "close": "22:00",
-          "rule": "public"
-        },
-        {
-          "days": "Fri",
-          "open": "08:00",
-          "close": "20:00",
-          "rule": "public"
-        },
-        {
-          "days": "Sat",
-          "open": "12:00",
-          "close": "20:00",
-          "rule": "public"
-        },
-        {
-          "days": "Sun",
-          "open": "14:00",
-          "close": "20:00",
-          "rule": "public"
-        },
-        {
-          "days": "Mon-Sun",
-          "open": "07:00",
-          "close": "23:00",
-          "rule": "card"
-        }
+        { "days": "Mon-Thu", "open": "08:00", "close": "22:00", "rule": "public" },
+        { "days": "Fri", "open": "08:00", "close": "20:00", "rule": "public" },
+        { "days": "Mon-Sun", "open": "00:00", "close": "24:00", "rule": "card" }
       ],
-      "estimated": true,
-      "notes": "Estimated, not surveyed. Hours from engagement.gsu.edu (research/hackgt-and-competitors.md section 5); outside them card-only (PantherCard) until 23:00, then closed (inferred, confirm the posted card hours). lat/lng estimated from the map (GSU downtown); headingDeg 180 = door faces out south (walk in heading 0)."
-    },
-    {
-      "id": "E-WEST",
-      "type": "entrance",
-      "name": "West entrance",
-      "floor": 1,
-      "x": -40,
-      "y": 20,
-      "lat": 33.7520299,
-      "lng": -84.3849827,
-      "headingDeg": 270,
-      "access": [
-        {
-          "days": "Mon-Sun",
-          "open": "07:30",
-          "close": "23:00",
-          "rule": "public"
-        }
-      ],
-      "estimated": true,
-      "notes": "Estimated, not surveyed. Assumed public until 23:00 (redirect target for Demo C); confirm the posted rule. lat/lng = its x/y from the estimated origin; headingDeg 270 = door faces out west (walk in heading 90)."
+      "notes": "Survey export CSE-20260926-1530 obs #3 ('Door 1'), GPS 3 m (11 samples). The STUDENT CENTER EAST doors: a glass vestibule with two sets of double doors. headingDeg 307.8 = facing out as recorded (spread 57 deg, the owner turned round); the walk in (123.2 deg, spread 7) gives 303. The only entrance surveyed. Access (owner, 2026-09-26): public Mon-Thu 08:00-22:00 and Fri 08:00-20:00 (weekday hours from engagement.gsu.edu); PantherCard-only at every other time, all weekend included."
     },
     {
       "id": "H1",
       "type": "intersection",
-      "name": "Main lobby",
+      "name": "the main lobby",
       "floor": 1,
-      "x": 0,
-      "y": 8,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "x": 2.66,
+      "y": -4.68,
+      "notes": "Survey obs #5 ('Speaker's Auditorium Lobby'): the lobby by the elevators, information desk and the September Movies poster. Walk #4 from the door: 7 steps = 5.38 m at 150.4 deg. Its +-42 deg wander is the owner turning round after the facing-out reading plus the start of the right turn here; the video shows one turn only, at this spot (about 150 to 230 deg)."
     },
     {
-      "id": "H2",
-      "type": "intersection",
-      "name": "West corridor",
-      "floor": 1,
-      "x": -20,
-      "y": 20,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "H3",
-      "type": "intersection",
-      "name": "Elevator lobby",
-      "floor": 1,
-      "x": 0,
-      "y": 20,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "EL-1",
-      "type": "elevator",
-      "name": "Elevators, floor 1",
-      "floor": 1,
-      "x": -5,
-      "y": 22,
-      "elevatorId": "ELEV-CSE",
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "EL-2",
-      "type": "elevator",
-      "name": "Elevators, floor 2",
-      "floor": 2,
-      "x": -5,
-      "y": 22,
-      "elevatorId": "ELEV-CSE",
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "ST-1",
-      "type": "stairs",
-      "name": "Stairs, floor 1",
-      "floor": 1,
-      "x": -20,
-      "y": 26,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "ST-2",
-      "type": "stairs",
-      "name": "Stairs, floor 2",
-      "floor": 2,
-      "x": -20,
-      "y": 26,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "H4",
-      "type": "intersection",
-      "name": "Floor 2 corridor",
-      "floor": 2,
-      "x": -5,
-      "y": 28,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "H5",
-      "type": "intersection",
-      "name": "Rooms 210 to 230 corridor",
-      "floor": 2,
-      "x": 9,
-      "y": 28,
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
-    },
-    {
-      "id": "R-220",
+      "id": "R-AUD",
       "type": "room",
-      "name": "Room 220",
-      "floor": 2,
-      "x": 9,
-      "y": 36,
-      "doorFacing": "west",
-      "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "name": "Speaker Auditorium",
+      "floor": 1,
+      "x": -5.64,
+      "y": -11.52,
+      "doorFacing": "southeast",
+      "notes": "Survey obs #7 ('Speaker's Auditorium', doorSide RIGHT). No room number seen. The SPEAKER'S AUDITORIUM lettering is on the end wall ahead; the double doors are in the recess on the right of that wall (video, last seconds), so doorFacing southeast makes the arrival read 'on your right'. Walk #6: 14 steps = 10.76 m at 230.5 deg (GPS says 5 m, indoor fix 7 m: steps win)."
     }
   ],
   "edges": [
     {
       "from": "E-MAIN",
       "to": "H1",
-      "lengthM": 8.0,
+      "lengthM": 5.38,
       "kind": "hallway",
-      "estimated": true
+      "hint": "through both sets of glass doors",
+      "notes": "Walk #4, 7 steps x 0.768 m"
     },
     {
       "from": "H1",
-      "to": "H3",
-      "lengthM": 12.0,
+      "to": "R-AUD",
+      "lengthM": 10.76,
       "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "H3",
-      "to": "EL-1",
-      "lengthM": 5.39,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "H2",
-      "to": "EL-1",
-      "lengthM": 15.13,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "H3",
-      "to": "H2",
-      "lengthM": 20.0,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "H2",
-      "to": "E-WEST",
-      "lengthM": 20.0,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "H2",
-      "to": "ST-1",
-      "lengthM": 6.0,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "EL-1",
-      "to": "EL-2",
-      "lengthM": 0,
-      "kind": "elevator",
-      "floors": 1,
-      "estimated": true
-    },
-    {
-      "from": "ST-1",
-      "to": "ST-2",
-      "lengthM": 0,
-      "kind": "stairs",
-      "floors": 1,
-      "estimated": true
-    },
-    {
-      "from": "EL-2",
-      "to": "H4",
-      "lengthM": 6.0,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "ST-2",
-      "to": "H4",
-      "lengthM": 15.13,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "H4",
-      "to": "H5",
-      "lengthM": 14.0,
-      "kind": "hallway",
-      "estimated": true
-    },
-    {
-      "from": "H5",
-      "to": "R-220",
-      "lengthM": 8.0,
-      "kind": "hallway",
-      "estimated": true
+      "hint": "toward the Speaker's Auditorium sign",
+      "notes": "Walk #6, 14 steps x 0.768 m"
     }
   ],
   "anchors": [
     {
       "id": "CSE-A01",
-      "node": "H1",
+      "node": "R-AUD",
       "kind": "text",
-      "x": 0,
-      "y": 9.5,
+      "x": -5.64,
+      "y": -11.52,
       "floor": 1,
       "heightM": 2.5,
-      "facing": "south",
-      "text": "STUDENT CENTER EAST",
+      "facing": "46.5",
+      "text": "SPEAKER'S AUDITORIUM",
       "aliases": [
-        "STUDENT CENTER"
+        "SPEAKERS AUDITORIUM",
+        "AUDITORIUM",
+        "SPEA ER'S AUDITC RIUM"
       ],
-      "description": "Building name over the lobby desk",
+      "description": "SPEAKER'S AUDITORIUM lettering on the end wall, doors on its right",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
+      "notes": "Survey obs #8, facingDeg 46.5 from the straight-on shot, widthCm 500 (estimated, not taped), centre 250 cm, offset 0 (at the room node; the wall is a few metres further). Thin light letters on a plain wall: OCR reads 'SPEA ER'S AUDITC RIUM' at 136 px per character. Photo anchors/CSE/CSE-A01.jpg is the straight shot (hint only; arcoreimg 0)."
     },
     {
       "id": "CSE-A02",
-      "node": "H3",
-      "kind": "text",
-      "x": -1.5,
-      "y": 21,
+      "node": "H1",
+      "kind": "image",
+      "image": "anchors/CSE/CSE-A02.jpg",
+      "widthM": 1.02,
+      "x": 2.89,
+      "y": -5.12,
       "floor": 1,
-      "heightM": 2.2,
-      "facing": "south",
-      "text": "ELEVATORS",
+      "heightM": 1.0,
+      "facing": "332.2",
+      "text": "FREE FOR STUDENTS",
       "aliases": [
-        "ELEVAT0RS",
-        "ELEVATOR"
+        "SEPTEMBER MOVIES",
+        "CINEFEST",
+        "FILM THEATER",
+        "TOY STORY 5",
+        "MINIONS & MONSTERS"
       ],
-      "description": "Elevator sign in the lobby",
+      "description": "SEPTEMBER MOVIES @ CINEFEST poster tower in the main lobby, facing the entrance",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
-    },
-    {
-      "id": "CSE-A03",
-      "node": "EL-2",
-      "kind": "text",
-      "x": -5,
-      "y": 23.5,
-      "floor": 2,
-      "heightM": 1.8,
-      "facing": "north",
-      "text": "FLOOR 2",
-      "aliases": [
-        "2ND FLOOR",
-        "FL00R 2"
-      ],
-      "description": "Floor number facing the elevator doors",
-      "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
-    },
-    {
-      "id": "CSE-A04",
-      "node": "H5",
-      "kind": "text",
-      "x": 9,
-      "y": 29.5,
-      "floor": 2,
-      "heightM": 2.0,
-      "facing": "south",
-      "text": "210-230",
-      "aliases": [
-        "ROOMS 210-230",
-        "21O-23O"
-      ],
-      "description": "Room range sign",
-      "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
-    },
-    {
-      "id": "CSE-A05",
-      "node": "R-220",
-      "kind": "text",
-      "x": 10,
-      "y": 35,
-      "floor": 2,
-      "heightM": 1.5,
-      "facing": "west",
-      "text": "220",
-      "aliases": [
-        "22O",
-        "Z20"
-      ],
-      "description": "Room plaque beside the door",
-      "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
+      "notes": "Survey obs #9, facingDeg 332.2, widthCm 50 (estimated), recorded height 50 cm (the tower stands on the floor and is about 2 m tall, so heightM 1.0 = estimated centre), offset 0.5 m from the lobby node. Image = straight shot, tower plus a margin of lobby, greyscale equalised, 860x1600, arcoreimg 80; the tower is about 420 of 860 px, so widthM = 0.5 x 860/420 = 1.02. Temporary poster (films to Sept 30): check it is still there before the demo."
     }
   ],
   "demoDestinations": [
-    "R-220"
+    "R-AUD"
   ],
-  "notes": "Student Center East has NOT been surveyed. Plausible placeholder for Demo C; access hours from public sources, per-entrance rules inferred."
+  "startPoints": [
+    {
+      "id": "P1",
+      "name": "Passio Go stop",
+      "lat": 33.75302375639821,
+      "lng": -84.3850687556217,
+      "notes": "Survey START obs #1 ('Passio Go'), GPS 3 m (10 samples). Walk #2 to the door: 9 steps = 6.9 m at 123 deg (GPS gives 3.5 m)."
+    }
+  ],
+  "notes": "Measured 2026-09-26 from the survey export CSE-20260926-1530 (stride 0.768 m, gps-walk) and its video 'Passio Go sign to Speaker Auditorium'. Floor 1 only: Main entrance, main lobby (turn right), Speaker Auditorium. Access hours from the owner. The placeholder's West entrance, elevators, floor 2 and Room 220 were never surveyed and are removed."
 }
