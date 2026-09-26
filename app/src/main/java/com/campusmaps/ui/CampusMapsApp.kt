@@ -325,6 +325,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                 val watchCount by app.watch.connectedCount.collectAsState()
                 val pressure = rememberPressure()
                 val arCore = rememberArCoreAvailability()
+                val yaw by com.campusmaps.loc.ArFeed.yaw.collectAsState()
                 val problems = app.loadProblems[trip.building.code].orEmpty()
                 val lines = buildList {
                     add("screen: ${screen.name.lowercase()}  building: ${trip.building.code}")
@@ -343,6 +344,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         add("step: ${g.progress.stepIndex + 1}/${g.route.steps.size} ${g.step.kind.name.lowercase()}")
                         add("along: ${"%.1f".format(g.progress.alongM)} m  off: ${"%.1f".format(g.progress.offRouteM.coerceAtMost(999.0))} m")
                         add("reroutes: ${g.rerouteCount}  speed: x${vm.debugSpeed().toInt()}")
+                        add("${yaw.debugLine()}  reroute past ${controller?.offRouteLimitM()?.toInt() ?: 6} m")
                     }
                 }
                 val links = buildList {

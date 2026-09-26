@@ -109,6 +109,13 @@ class GuidanceController(
         com.campusmaps.loc.ArFeed.setBuilding(building.core)
     }
 
+    // Reroute tolerance now: 12 m while the camera drives on a compass placement that walking has not refined yet
+    // (loc/YawRefiner), else 6 m.
+    fun offRouteLimitM(): Double {
+        val y = com.campusmaps.loc.ArFeed.yaw.value
+        return if (positionSource.usingAr) GuidanceEngine.offRouteLimitM(y.compassPlaced, y.refined) else GuidanceEngine.OFF_ROUTE_M
+    }
+
     // Barometer floor (loc/baro, docs/03 section 3). Null when the device has no barometer: the simulator's timed rides stay.
     private var baro: com.campusmaps.loc.baro.BarometerFloorTracker? = null
     private var baroFixJob: Job? = null
@@ -174,7 +181,7 @@ class GuidanceController(
         // Reroute when clearly off the path (and not while we are unsure where we are).
         if (!progress.arrived &&
             pose.confidence >= LOCATE_CONFIDENCE &&
-            progress.offRouteM > GuidanceEngine.OFF_ROUTE_M &&
+            progress.offRouteM > offRouteLimitM() &&
             nowMs - lastRerouteAt > 3_000
         ) {
             reroute(pose)
@@ -240,9 +247,12 @@ class GuidanceController(
         if (!b.start(startFloor)) return
         baro = b
         positionSource.barometerFloorKnown(startFloor)
-        // A sign fix or a "Place route here" floor tap puts the student on a known floor: re-zero there.
+        // A sign fix, a "Place route here" floor tap or an automatic placement puts the student on a known floor: re-zero
+        // there. Only on placements (ArFeed.placements): heading refinements and anchor drift also change the transform,
+        // and re-zeroing to the placement floor then would be wrong once the student has climbed.
         baroFixJob = scope.launch {
-            buildingToWorld.collect { t ->
+            com.campusmaps.loc.ArFeed.placements.collect {
+                val t = buildingToWorld.value
                 if (t != null) {
                     b.rezero(t.refFloor, "sign fix / floor tap")
                     positionSource.barometerFloorKnown(t.refFloor)
