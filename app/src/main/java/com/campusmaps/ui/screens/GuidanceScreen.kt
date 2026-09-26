@@ -40,6 +40,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -646,6 +647,8 @@ private fun OutdoorGeoEffect(geo: com.campusmaps.geo.ArCoreGeospatialProvider?, 
     LaunchedEffect(outdoorLeg) {
         if (outdoorLeg && !com.campusmaps.geo.FusedLocationFixes.hasPermission(context)) askLocation.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
+    // Leaving S2 (End route, Done, back) closes the ARCore session: drop it, or the next S2 checks VPS on the dead one.
+    DisposableEffect(geo) { onDispose { geo.stop() } }
     LaunchedEffect(geo, entrance, outdoorLeg) {
         if (outdoorLeg) {
             geo.start()
