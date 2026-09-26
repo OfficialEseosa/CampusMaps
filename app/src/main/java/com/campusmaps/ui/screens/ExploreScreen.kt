@@ -63,6 +63,10 @@ import com.campusmaps.ui.map.rememberExploreCamera
 import com.campusmaps.ui.theme.Sora
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 
 // Design tokens from the style guide (board 02 / 03).
@@ -98,6 +102,19 @@ fun ExploreScreen(vm: ExploreViewModel, actions: ExploreActions) {
 
     val center = state.fix?.point ?: ExploreViewModel.CAMPUS_CENTER
     val camera = rememberExploreCamera(center)
+    // qa-phone N4: the camera opens on the campus centre when there is no fix yet. On the first fix, frame the dot and the
+    // entrance (or the dot alone without a plan) once; after that the camera is the user's.
+    var framedFirstFix by remember { mutableStateOf(state.fix != null) }
+    LaunchedEffect(state.fix != null) {
+        val f = state.fix ?: return@LaunchedEffect
+        if (framedFirstFix) return@LaunchedEffect
+        framedFirstFix = true
+        val dot = LatLng(f.lat, f.lng)
+        val door = state.plan?.entrance
+        val update = if (door == null) CameraUpdateFactory.newLatLngZoom(dot, 17f)
+        else CameraUpdateFactory.newLatLngBounds(LatLngBounds.builder().include(dot).include(LatLng(door.lat, door.lng)).build(), 160)
+        try { camera.animate(update, 600) } catch (_: Exception) { }
+    }
     val sheetDp = if (state.selected != null) 420 else 140
 
     Box(Modifier.fillMaxSize().background(Explore.cream).testTag("explore")) {
