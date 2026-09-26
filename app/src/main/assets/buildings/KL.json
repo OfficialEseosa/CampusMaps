@@ -32,7 +32,7 @@
       "lng": -84.39585,
       "headingDeg": 180,
       "estimated": true,
-      "notes": "Estimated, not surveyed. Glass doors, south side."
+      "notes": "Estimated, not surveyed. Glass doors, south side. lat/lng = building origin guessed from the map (Klaus, Georgia Tech); headingDeg 180 = door faces out south, so you walk in heading 0 (north). Replace with the survey's ENTRANCE fix."
     },
     {
       "id": "H1",
@@ -188,7 +188,7 @@
       "lng": -84.3957202,
       "headingDeg": 0,
       "estimated": true,
-      "notes": "Estimated, not surveyed."
+      "notes": "Estimated, not surveyed. lat/lng = its x/y from the guessed origin; headingDeg 0 = door faces out north, so you walk in heading 180 (south). Replace with the survey's ENTRANCE fix."
     },
     {
       "id": "H7",
@@ -348,7 +348,8 @@
       "text": "KLAUS ADVANCED COMPUTING BUILDING",
       "description": "Building directory board, atrium centre",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
+      "notes": "Placeholder, not surveyed; photo pending (imagePending: rule 7 is a warning until anchors/KL/KL-A01.jpg exists). Photograph straight-on and measure the width at the Klaus survey.",
+      "imagePending": true
     },
     {
       "id": "KL-A02",
@@ -363,7 +364,8 @@
       "facing": "south",
       "description": "Event poster on the north atrium wall",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
+      "notes": "Placeholder, not surveyed; photo pending (imagePending: rule 7 is a warning until anchors/KL/KL-A02.jpg exists). Photograph straight-on and measure the width at the Klaus survey.",
+      "imagePending": true
     },
     {
       "id": "KL-A03",
@@ -415,7 +417,8 @@
       "facing": "west",
       "description": "Sign at the foot of the glass staircase",
       "estimated": true,
-      "notes": "Placeholder, not surveyed; capture and measure on site."
+      "notes": "Placeholder, not surveyed; photo pending (imagePending: rule 7 is a warning until anchors/KL/KL-A05.jpg exists). Photograph straight-on and measure the width at the Klaus survey.",
+      "imagePending": true
     },
     {
       "id": "KL-A06",

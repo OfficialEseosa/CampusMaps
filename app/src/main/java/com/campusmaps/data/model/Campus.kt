@@ -39,6 +39,11 @@ data class GraphNode(
     val signText: String? = null,
     // Optional extra words for the instruction, e.g. "doors on the left".
     val hint: String? = null,
+    // Outdoor entrances only (null elsewhere): where the door is on Earth, and the compass bearing you face when walking IN
+    // through it (0 = north, clockwise). Filled by CoreBridge from core's entrance lat / lng / headingDeg (which is facing OUT).
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val headingDeg: Double? = null,
 ) {
     val isOutdoor: Boolean get() = kind == NodeKind.OUTDOOR
 }

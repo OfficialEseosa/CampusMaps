@@ -691,6 +691,99 @@
       "description": "CLASSROOM SOUTH canopy sign over the floor-2 main entrance",
       "estimated": true,
       "notes": "CS-20260925-1238 obs #38, facingDeg 34.7, widthCm 200 (estimated), no offset. Image = straight shot cropped to the canopy sign, greyscale, 1600x329; the sign is 1454 of 1600 px, so widthM = 2.0 x 1600/1454 = 2.20 (inherits the estimated 200 cm). Outdoors. Same wording as CS-A01 (the stains on this one differ). Not yet scored."
+    },
+    {
+      "id": "CS-A92",
+      "node": "H10",
+      "kind": "text",
+      "x": 46.23,
+      "y": -36.38,
+      "floor": 2,
+      "heightM": 1.6,
+      "facing": "southwest",
+      "text": "EXIT",
+      "aliases": [
+        "EXlT",
+        "EX1T"
+      ],
+      "description": "Exit sign over the inside of the Classroom South main (floor 2) doors",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Every exterior door has one; closes the rule 8 gap E-LM2 to H4 on the P1 608 route. Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    },
+    {
+      "id": "CS-A93",
+      "node": "H4",
+      "kind": "text",
+      "x": 34.06,
+      "y": -26.03,
+      "floor": 2,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "ELEVATORS",
+      "aliases": [
+        "ELEVATOR",
+        "ELEVAT0RS"
+      ],
+      "description": "Direction sign at the floor 2 T junction (guessed wording)",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Wording is a guess; read the real sign. Closes the rule 8 gap H10 to H5 on the P1 608 route. Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    },
+    {
+      "id": "CS-A94",
+      "node": "H9",
+      "kind": "text",
+      "x": 22.03,
+      "y": -38.05,
+      "floor": 1,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "FLOOR 1",
+      "aliases": [
+        "1",
+        "1ST FLOOR",
+        "LEVEL 1"
+      ],
+      "description": "Floor number plaque, floor 1 elevator lobby",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Elevator lobby anchor (docs/22). Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    },
+    {
+      "id": "CS-A95",
+      "node": "H5",
+      "kind": "text",
+      "x": 22.03,
+      "y": -38.05,
+      "floor": 2,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "FLOOR 2",
+      "aliases": [
+        "2",
+        "2ND FLOOR",
+        "LEVEL 2"
+      ],
+      "description": "Floor number plaque, floor 2 elevator lobby",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Elevator lobby anchor (docs/22); closes the rule 8 gap H4 to EL-2. Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    },
+    {
+      "id": "CS-A96",
+      "node": "H6",
+      "kind": "text",
+      "x": 22.03,
+      "y": -38.05,
+      "floor": 6,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "FLOOR 6",
+      "aliases": [
+        "6",
+        "6TH FLOOR",
+        "LEVEL 6"
+      ],
+      "description": "Floor number plaque, floor 6 elevator lobby",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Elevator lobby anchor (docs/22); first sign after leaving the elevator on 6. Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
     }
   ],
   "demoDestinations": [

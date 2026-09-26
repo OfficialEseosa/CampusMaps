@@ -2,7 +2,9 @@
 
 **Owner:** core library. **Files:** `app/src/main/assets/buildings/{KL,CS,CSE}.json`. **Code:** `core/` (`com.campusmaps.data`, `.routing`, `.survey`).
 
-All three files load, pass the validator with no ERROR or WARN (rules 1 to 6 and 9; rule 7 file check is a hook the app wires to its assets, and a test checks CS's two image files) and pass the routing tests. Rule 10 reports every entrance without posted hours as INFO (5 in CS, both of KL's, none in CSE); that is expected until the hours are photographed. Rule 8 (anchor spacing on demo routes) is not wired to a test and fails on the CS routes (see below). **Measured so far: CS only** (survey CS-20260925-1238: 4 entrance fixes, 7 edges, elevator, stairs-down, walking speed, floor height, 2 image anchors). KL and CSE are entirely estimated. Everything else carries `"estimated": true` and a `notes` string. Search the files for `estimated` before trusting a number.
+**Validator counts (2026-09-25 late, `ValidatorReportTest`: rule 7 against the real asset folder, rule 8 on the router's top demo routes):** KL 0 errors, 3 warnings (photos pending), 2 info; CS 1 error (known, rule 8 on the P2 route, see below), 0 warnings, 5 info; CSE 0, 0, 0. Before this pass: KL 3 errors, CS 3 errors.
+
+All three files load, pass the validator with no ERROR or WARN (rules 1 to 6, 9 and 11; rule 7 file check is a hook the app wires to its assets, and a test checks CS's two image files) and pass the routing tests. Rule 10 reports every entrance without posted hours as INFO (5 in CS, both of KL's, none in CSE); that is expected until the hours are photographed. Rule 8 (anchor spacing on demo routes) is not wired to a test and fails on the CS routes (see below). **Measured so far: CS only** (survey CS-20260925-1238: 4 entrance fixes, 7 edges, elevator, stairs-down, walking speed, floor height, 2 image anchors). KL and CSE are entirely estimated. Everything else carries `"estimated": true` and a `notes` string. Search the files for `estimated` before trusting a number.
 
 ## Conventions used in the files
 
@@ -11,6 +13,8 @@ All three files load, pass the validator with no ERROR or WARN (rules 1 to 6 and
 - Access: windows are matched on the day they open; a window whose close is not after its open runs into the next morning. If any `public` window covers `now` the door is public, otherwise card-only. No `access` at all means always public.
 - Extensions to the docs/02 schema (ignored by anything that does not know them): `estimated`, `notes` on nodes, edges, anchors, elevators; `demoDestinations` (rule 6 input); `startPoints` (P1, P2 as lat/lng); `stairsDownSecondsPerFloor` (default 18); `stairsId` on stairs nodes (family for rule 4, defaults to the id minus its trailing `-<floor>`).
 - Placeholder anchors use ids `<code>-A9x` so they never collide with survey anchors (`A01` upward).
+- **Entrance geo (outdoor leg):** every outdoor entrance carries `lat`, `lng` and `headingDeg`. In the files `headingDeg` is the bearing the door **faces out** (0 = north, clockwise), because that is what CampusSurvey records (standing on the threshold facing out). The heading you face when **walking in** is that plus 180: core `Node.walkInHeadingDeg`, app `GraphNode.headingDeg`, and `CoreBridge.entranceGeo(...)` (`headingDeg` = walk in, `facingOutDeg` = file value). Rule 11 (WARN) fires for an outdoor entrance missing any of the three. CS entrances are survey fixes (Walters side placed by hand); KL and CSE entrances are map guesses flagged `estimated`.
+- `imagePending: true` on an image anchor = the photo is not taken yet; its missing file is a rule 7 WARN instead of an ERROR. Remove the flag when the photo lands in `assets/anchors/<code>/`.
 
 ## Classroom South (CS.json), Demo B
 
@@ -46,7 +50,15 @@ Source: survey `CS-20260925-1238` (CampusSurvey 0.3, Friday 12:38 to 13:12, stri
 | CS-A07 | R-608 | text | 608 | small plaque (replaces placeholder CS-A91) | none |
 | CS-A08 | E-CSM2 | image, widthM 2.20 | CLASSROOM SOUTH | flat canopy sign; same wording as A01 (its stains differ) | 1600×329, 58 KB |
 
-Both image anchors are outdoors: they confirm an entrance at the hand-off, they cannot localize anyone indoors. Rule 8 (an anchor every 20 m on a demo route) fails: 68 m without an anchor from `E-LM2` to `R-608`, 45 m `E-WM` to `H2` and 31 m `H2` to `R-608`. There is no anchor at any elevator lobby.
+| CS-A92 | H10 | text, PLACEHOLDER | EXIT | exit sign inside the Classroom South main floor-2 doors (every exterior door has one) | none |
+| CS-A93 | H4 | text, PLACEHOLDER | ELEVATORS | floor-2 T junction; **wording guessed**, read the real sign | none |
+| CS-A94 | H9 | text, PLACEHOLDER | FLOOR 1 | floor 1 elevator lobby, floor-number plaque (aliases 1, 1ST FLOOR, LEVEL 1) | none |
+| CS-A95 | H5 | text, PLACEHOLDER | FLOOR 2 | floor 2 elevator lobby, floor-number plaque | none |
+| CS-A96 | H6 | text, PLACEHOLDER | FLOOR 6 | floor 6 elevator lobby, floor-number plaque | none |
+
+A92 to A96 were added 2026-09-25 late without a survey (the 0.3 log has no sign at any lobby or on the floor-2 hallway): sign text inferred, position at the node, `estimated: true`, notes say PLACEHOLDER. Replace them on the next CS visit (item 3 below).
+
+Both image anchors are outdoors: they confirm an entrance at the hand-off, they cannot localize anyone indoors. **Rule 8 (an anchor every 20 m on a demo route):** the P1 route to 608 (`E-LM2 > H10 > H4 > H5 > EL-2 > EL-6 > H6 > H11 > R-608`) now passes (longest stretch 17.0 m, H4 to H5); every elevator lobby has an anchor. Still failing, and left on purpose: the P2 route, 45 m `E-WM > H7 > H1 > H2` with no sign logged along the 30 m main hallway `H1`–`H2`. Fix it on the next visit with a room plaque half way along that hallway (a node there plus a text anchor); `ValidatorReportTest` lists it as the one known error.
 
 **Resolved from the 09-24 contradiction:** two entrances are on floor 2 (`E-LM2`, `E-CSM2`), confirmed by pressure (0.5 hPa above floor 1). `E-LM2` is Library South's own door: routes through it cross the library, so library hours apply (not photographed). The 09-24 "Library South entrance" and "LibSo main entrance" street doors are not in the new survey and were dropped.
 
@@ -85,6 +97,18 @@ Not in 15 minutes: posted hours at all five doors (and Library South's hours), S
 ## Klaus (KL.json), Demo A
 
 **Nothing measured.** A plausible 17-node atrium graph: south entrance `E-S`, expo table `T` with starts `S1` and `S2` 4 m either side, atrium spine `H1`–`H2`–`H3`, west hallway `H4`–`W1` to destination `R-1116` (number made up), glass staircase `ST-1/ST-2`, elevator `EL-1/EL-2`, north entrance `E-N`. Six placeholder anchors (`KL-A01` to `A06`, three image, three text) spaced so rule 8 passes. Hand-checked routes: `S1 > H2 > H3 > H4 > W1 > R-1116` (44 m, 1 turn) and `S2 > H2 > H3 > H4 > W1 > R-1116` (48 m, 2 turns).
+
+**To photograph at the Klaus survey** (image anchors with no photo anywhere: not in the CS zip, not in `assets/`; marked `imagePending: true`, rule 7 WARN):
+
+| Anchor | Node | What | Measure |
+|---|---|---|---|
+| KL-A01 | H2 | Building directory board, atrium centre | width of the board |
+| KL-A02 | H3 | Poster on the north atrium wall | width |
+| KL-A05 | ST-1 | Sign at the foot of the glass staircase | width |
+
+Straight-on photo, then crop to the flat sign, greyscale, 1600 px long side, JPEG 85, save as `app/src/main/assets/anchors/KL/KL-A0n.jpg`, set `widthM`, remove `imagePending`. If the survey picks other signs, drop these three instead.
+
+Entrance geo: `E-S` (origin, facing out 180) and `E-N` (facing out 0) are guesses near Klaus on the Georgia Tech campus. The survey's ENTRANCE fixes (10 s facing out) replace them.
 
 ### What the Klaus survey must capture (Hour 0 to 2)
 
@@ -136,9 +160,41 @@ The draft is never copied over `CS.json` wholesale: merge the measured nodes, ed
 
 Fixes from the real 0.3 log (2026-09-25): a walk with 0 steps (walk #33) gets its length from the GPS straight line between its end nodes (fixes ≤ 10 m) or else duration × this session's median survey pace, is flagged estimated and is never dead-reckoned; a walk with heading spread over 45° is noted "probably a turn inside the walk; split it with an intersection node"; an anchor logged twice (CS-A02) is kept once; an `offsetFromNodeM` over 20 m (CS-A04's 300) is ignored; `widthEstimated` sets the anchor's `estimated`; `strideMethod` goes into the draft notes; a ride's EL nodes are placed 3 m from a same-floor node named like "elevator lobby" (along the heading saved there) and joined to it by an estimated edge; the report lists the walkthrough videos. The converter still cannot use the videos: their legs were rebuilt by hand (see the CS section).
 
+## Klaus refresh, step by step
+
+For the owner, right after the Klaus survey. About 20 minutes. Nothing here needs the phone.
+
+**At Klaus, in CampusSurvey, name things so the merge can find them:** the two start spots by our table as Places of type waypoint named exactly **S1** and **S2**, the table as **T**, the demo room as **Room <number>** (it becomes `R-<number>`). Every door: Place → Door, facing out, 10 s (this gives `lat`, `lng`, `headingDeg`).
+
+1. **Export** from CampusSurvey (Review → Export → Drive). Download the zip, for example `KL-20260926-0930.zip`, and put it in the repo root `C:\Users\rapha\CampusMaps\` (zips there are gitignored). No need to unzip it.
+2. **Convert**, in PowerShell from the repo root:
+
+   ```powershell
+   .\gradlew.bat :core:classes
+   $G = "$env:USERPROFILE\.gradle\caches\modules-2\files-2.1"
+   $cp = @("core\build\classes\kotlin\main",
+     (Get-ChildItem "$G\org.jetbrains.kotlin\kotlin-stdlib\2.4.10\*\kotlin-stdlib-2.4.10.jar").FullName,
+     (Get-ChildItem "$G\org.jetbrains.kotlinx\kotlinx-serialization-core-jvm\1.11.0\*\kotlinx-serialization-core-jvm-1.11.0.jar").FullName,
+     (Get-ChildItem "$G\org.jetbrains.kotlinx\kotlinx-serialization-json-jvm\1.11.0\*\kotlinx-serialization-json-jvm-1.11.0.jar").FullName) -join ";"
+   java -cp $cp com.campusmaps.survey.ConvertMain KL-20260926-0930.zip draft-KL.json --keep app\src\main\assets\buildings\KL.json
+   ```
+
+   It reads `survey.json` out of the zip, writes `draft-KL.json` and prints three blocks: the gap report ("Missing versus docs/02 target"), **"Kept from KL.json"**, and **"Validator on the merged draft"**. (Tried 2026-09-25 on the real `CS-20260925-1238.zip` with `--keep CS.json`: works.)
+3. **What `--keep` carries over from the old KL.json** (the survey cannot know these): node ids the app uses (a draft node of the same type named `S1`, `S2`, `T`, or with the old node's name, takes the old id), `demoDestinations` (only if the room exists in the draft), `startPoints` (if the survey has no START node), and `access` windows per entrance (matched by id, then by name). Everything else (positions, lengths, anchors, timings) comes from the survey.
+4. **Check the printout:**
+   - "Kept from": you want `renamed ... to S1`, `to S2`, `kept demo destination R-...`. A line `DEMO DESTINATION ... IS NOT IN THE SURVEY` means the room was named differently: rename that node in the draft by hand and add it to `demoDestinations`.
+   - "Validator on the merged draft": no `rule 1` to `rule 6` lines. A `rule 5` line (cannot reach) means a walk is missing between two places: add the edge by hand (length = steps × stride) or re-walk it.
+   - "Missing versus docs/02 target": fewer than 8 anchors is fine for a first pass if rule 8 passes on S1 → room.
+5. **Replace the file:** copy `draft-KL.json` over `app\src\main\assets\buildings\KL.json`. Then hand-fix only: `name` fields you want nicer, a `hint` on an edge, `doorFacing` on the room if missing. Measured things carry no `estimated` flag; leave them that way.
+6. **Photos:** for every image anchor in the draft, crop the survey's `KL-Axx-straight.jpg` (in the zip) as described under Klaus above and save it as `app\src\main\assets\anchors\KL\KL-Axx.jpg`.
+7. **Test:** `.\gradlew.bat :core:test :app:testDebugUnitTest`. Expect failures in tests that hard-code the guessed Klaus layout (`RouterTest.klausRoutesFromBothStartsMatchTheHandCheckedLists`, `BuildingDataTest.everyGuessIsFlagged` and `anchorSpacingRule8` for KL, `CoreBridgeTest` checks on `R-1116`, `KlausRefreshTest` if `R-1116` is gone). Update their node lists to the new route; do not bend the data to the tests. `ValidatorReportTest` prints the new counts.
+8. Commit `KL.json` and the photos in one commit ("data: KL from survey KL-...").
+
+`KlausRefreshTest` is the regression for this path: it zips the CS 0.3 log the way CampusSurvey exports it, runs `ConvertMain` with `--keep`, and relabels the same log as a Klaus session to check the S1 / demo room merge. What the CS log shows the converter still cannot do: legs walked only in videos are not converted (the raw CS draft fails rule 5 until they are added by hand), and a room reached only in a video (608) is not a node. Nothing is missing from the log format itself.
+
 ## Tests
 
-`./gradlew :core:test` (45 tests: 44 pass, 1 skipped, the 60 s gap above). `SurveyConverterTest` runs on both real logs (`CS-20260924-1614`, `CS-20260925-1238`). The building JSON directory is a declared input of the test task, so data-only edits re-run the tests.
+`./gradlew :core:test` (52 tests: 51 pass, 1 skipped, the 60 s gap above). `ValidatorReportTest` runs the full validator (images, demo routes) and prints the counts; `KlausRefreshTest` covers the refresh path. `SurveyConverterTest` runs on both real logs (`CS-20260924-1614`, `CS-20260925-1238`). The building JSON directory is a declared input of the test task, so data-only edits re-run the tests.
 
 ## CampusSurvey 0.3 log additions (2026-09-25)
 

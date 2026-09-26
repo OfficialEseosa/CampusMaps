@@ -70,14 +70,21 @@ data class Node(
     val stairsId: String? = null,
     /** Compass word in the building frame (north = +y): which way the door faces, out of the room. */
     val doorFacing: String? = null,
+    /** Outdoor entrances: where the door is on Earth (Geospatial hand-off). Validator rule 11 warns when missing. */
     val lat: Double? = null,
     val lng: Double? = null,
+    /**
+     * Outdoor entrances: compass bearing (0 = north, clockwise) the door faces OUT, as CampusSurvey records it (standing on the
+     * threshold facing out). The heading you face when walking IN is [walkInHeadingDeg] (this + 180).
+     */
     val headingDeg: Double? = null,
     val indoor: Boolean = false,
     val estimated: Boolean = false,
     val notes: String? = null,
 ) {
     val isOutdoorEntrance: Boolean get() = type == NodeType.ENTRANCE && !indoor
+    /** Compass bearing you face when walking IN through this door: [headingDeg] (facing out) turned 180 degrees. */
+    val walkInHeadingDeg: Double? get() = headingDeg?.let { ((it + 180.0) % 360.0 + 360.0) % 360.0 }
     /** Vertical family: elevatorId for elevators, stairsId or id prefix for stairs. */
     val family: String get() = elevatorId ?: stairsId ?: id.replace(Regex("-\\d+$"), "")
 }
@@ -122,6 +129,8 @@ data class Anchor(
     val aliases: List<String> = emptyList(),
     val description: String? = null,
     val estimated: Boolean = false,
+    /** Image anchor whose photo is not taken yet (placeholder): a missing file is a rule 7 WARN instead of an ERROR. */
+    val imagePending: Boolean = false,
     val notes: String? = null,
 )
 

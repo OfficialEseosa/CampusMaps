@@ -10,7 +10,7 @@ object BuildingLoader {
     fun toJson(b: Building): String = json.encodeToString(Building.serializer(), b)
 }
 
-/** ERROR breaks routing or a demo (rules 0 to 8); WARN is suspicious data (rule 9); INFO is worth a log line (rule 10). */
+/** ERROR breaks routing or a demo (rules 0 to 8); WARN is suspicious data (rules 9, 11, pending rule 7 photos); INFO is worth a log line (rule 10). */
 enum class Severity { ERROR, WARN, INFO }
 
 data class Problem(val rule: Int, val message: String, val severity: Severity = Severity.ERROR) {
@@ -20,7 +20,8 @@ data class Problem(val rule: Int, val message: String, val severity: Severity = 
 /**
  * Rules 1 to 6 and 8 of docs/02 (ERROR). Rule 7 is only the file-exists part, through [imageExists].
  * Extensions: rule 9 (WARN) two nodes closer than [MIN_NODE_GAP_M] on one floor; rule 10 (INFO) an entrance without access windows
- * (treated as always public). Callers that fail fast should look at ERROR only.
+ * (treated as always public); rule 11 (WARN) an outdoor entrance without lat, lng or headingDeg; rule 7 is a WARN for an anchor
+ * marked imagePending. Callers that fail fast should look at ERROR only.
  */
 object BuildingValidator {
     const val MAX_ANCHOR_GAP_M = 20.0
@@ -61,13 +62,19 @@ object BuildingValidator {
         }
         for (a in b.anchors.filter { it.kind == AnchorKind.IMAGE }) {
             if (a.widthM == null) p += Problem(7, "image anchor ${a.id} has no widthM")
-            if (a.image == null || !imageExists(a.image)) p += Problem(7, "image anchor ${a.id} file missing: ${a.image}")
+            if (a.image == null || !imageExists(a.image))
+                p += if (a.imagePending) Problem(7, "image anchor ${a.id} photo pending (imagePending): ${a.image}", Severity.WARN)
+                else Problem(7, "image anchor ${a.id} file missing: ${a.image}")
         }
         demoRoutes.forEach { p += checkAnchorSpacing(b, it) }
         for (floor in b.nodes.groupBy { it.floor }.values) for (i in floor.indices) for (j in i + 1 until floor.size) {
             val a = floor[i]; val c = floor[j]
             if (a.id != c.id && hypot(a.x - c.x, a.y - c.y) < MIN_NODE_GAP_M)
                 p += Problem(9, "nodes ${a.id} and ${c.id} are %.2f m apart on floor ${a.floor}".format(hypot(a.x - c.x, a.y - c.y)), Severity.WARN)
+        }
+        for (e in b.nodes.filter { it.isOutdoorEntrance }) {
+            val missing = listOfNotNull("lat".takeIf { e.lat == null }, "lng".takeIf { e.lng == null }, "headingDeg".takeIf { e.headingDeg == null })
+            if (missing.isNotEmpty()) p += Problem(11, "outdoor entrance ${e.id} has no ${missing.joinToString("/")} (Geospatial hand-off)", Severity.WARN)
         }
         for (e in b.nodes.filter { it.type == NodeType.ENTRANCE && it.access.isNullOrEmpty() })
             p += Problem(10, "entrance ${e.id} has no access windows (treated as always public)", Severity.INFO)
