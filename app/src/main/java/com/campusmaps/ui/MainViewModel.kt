@@ -306,8 +306,8 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     // Search field on the Explore top bar.
     fun openSearchFromExplore() = go(Screen.DESTINATION)
 
-    // "Start AR navigation" on Explore: same building, room and entrance as the map, started from the outdoor start point
-    // nearest the student, then the same S2 path S1b uses (startSession).
+    // "Start AR navigation" on Explore: same building, room and entrance as the map, started from a "Your location" node at
+    // the real fix (ui/ExploreStart.kt; falls back to the nearest fixed start point without a fix), then the same S2 path S1b uses.
     // [fromCard]: the "Almost there" card (tap or its own timer) is not a stray tap, so the tap guard does not apply.
     fun startFromExplore(buildingId: String, destinationId: String, entranceId: String, lat: Double?, lng: Double?, fromCard: Boolean = false) {
         if (!fromCard && !settled()) return
