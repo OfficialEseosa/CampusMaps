@@ -70,5 +70,10 @@ object OutdoorArrowGate {
     }
 
     /** Text of the chip at the top of S2 on the outdoor leg (board 04). */
-    fun chipText(s: GeoState): String = if (shouldDrawArrows(s)) "AR tracking on" else "Finding your position"
+    // While converging, the chip shows how far off the position still is, so the user can see VPS tightening.
+    fun chipText(s: GeoState): String = when {
+        shouldDrawArrows(s) -> "AR tracking on"
+        s.tracking == EarthTracking.TRACKING && s.horizontalAccuracyM != null -> "Finding your position, ${s.horizontalAccuracyM.toInt()} m"
+        else -> "Finding your position"
+    }
 }
