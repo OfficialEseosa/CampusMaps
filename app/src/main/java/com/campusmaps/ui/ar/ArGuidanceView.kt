@@ -43,6 +43,9 @@ import com.campusmaps.loc.BuildingToWorld
 import com.campusmaps.loc.CameraSample
 import com.campusmaps.loc.ImageFix
 import com.campusmaps.loc.Vec3
+import com.campusmaps.loc.PathPoint
+import com.campusmaps.loc.YawRefiner
+import com.campusmaps.loc.YawSource
 import androidx.compose.ui.platform.LocalContext
 import com.google.ar.core.Anchor
 import com.google.ar.core.AugmentedImage
@@ -117,6 +120,13 @@ private class FrameBox {
     var trackingSinceMs: Long? = null
     /** True once this view drew an outdoor leg: the next placement is at the entrance snap (door heading). */
     var sawOutdoor = false
+    /** Heading self-correction after a compass placement (loc/YawRefiner). */
+    val yaw = YawRefiner()
+    /** Route polyline for [yaw], rebuilt when the route changes. */
+    var yawRouteOf: List<RoutePoint>? = null
+    var yawRoute: List<PathPoint> = emptyList()
+    /** Last transform this view set: the host's copy (latestT) catches up only on recomposition. */
+    var lastSet: BuildingToWorld? = null
 }
 
 private const val IMAGE_FIX_EVERY_MS = 1500L
@@ -170,6 +180,7 @@ fun ArGuidanceView(
     DisposableEffect(Unit) {
         onDispose {
             box.anchor?.detach(); box.anchor = null
+            box.yaw.reset(); box.lastSet = null
             ArFeed.viewGone()
             onBuildingToWorld(null)
         }
@@ -188,7 +199,10 @@ fun ArGuidanceView(
     // ARScene may keep the first onSessionUpdated lambda: read inputs through these.
     val latestInput by rememberUpdatedState(input)
     val latestT by rememberUpdatedState(buildingToWorld)
-    val setT by rememberUpdatedState(onBuildingToWorld)
+    val hostSetT by rememberUpdatedState(onBuildingToWorld)
+    val setT: (BuildingToWorld?) -> Unit = { v -> box.lastSet = v; hostSetT(v) }
+    /** The transform now: what this view set last, unless the host has cleared it. */
+    fun currentT(): BuildingToWorld? = latestT?.let { box.lastSet ?: it }
 
     fun onFrame(session: Session, frame: Frame) {
         val cam = frame.camera
@@ -240,8 +254,22 @@ fun ArGuidanceView(
             box.anchorRef = Vec3(cp.tx().toDouble(), cp.ty().toDouble(), cp.tz().toDouble())
             setT(t)
             box.gate.override(); autoPlaced = false
+            box.yaw.stop(YawSource.SIGN); ArFeed.setYaw(box.yaw.status); ArFeed.placed()
             message = "Located from sign ${anchor.id}"
             Log.i(TAG, "sign fix ${anchor.id} floor ${anchor.floor}: centre=(%.2f, %.2f, %.2f) yaw=%.1f deg".format(cp.tx(), cp.ty(), cp.tz(), t.yawDeg))
+        }
+
+        // Compass placement: turn the route to match the direction the user walks (loc/YawRefiner).
+        val inp = latestInput
+        val tNow = currentT()
+        if (inp != null && tNow != null) {
+            if (box.yawRouteOf !== inp.points) { box.yawRouteOf = inp.points; box.yawRoute = inp.points.map { PathPoint(it.x, it.y, it.floor) } }
+            box.yaw.onCamera(p.tx().toDouble(), p.tz().toDouble(), tNow, box.yawRoute, inp.floor)?.let { r ->
+                setT(r.transform)
+                ArFeed.setYaw(box.yaw.status)
+                Log.i(AUTO_TAG, "yaw refined by %.0f deg after %.1f m (%s, measured %.0f deg, total %.0f deg)".format(
+                    r.deltaDeg, r.travelM, if (r.first) "first" else "slow filter", r.residualDeg, box.yaw.status.correctionDeg))
+            }
         }
 
         // Follow ARCore's corrections to the anchor (translation only; yaw stays from the tap).
@@ -250,7 +278,7 @@ fun ArGuidanceView(
             box.lastAnchorCheckMs = now
             val ap = a.pose
             val dx = ap.tx() - ref.x; val dy = ap.ty() - ref.y; val dz = ap.tz() - ref.z
-            val t = latestT
+            val t = currentT()
             if (t != null && hypot(hypot(dx, dy), dz) > 0.03) {
                 box.anchorRef = Vec3(ap.tx().toDouble(), ap.ty().toDouble(), ap.tz().toDouble())
                 setT(t.copy(tx = t.tx + dx, ty = t.ty + dy, tz = t.tz + dz))
@@ -413,6 +441,8 @@ private fun autoPlace(
     box.anchor = try { session.createAnchor(floorPose) } catch (e: Exception) { Log.w(AUTO_TAG, "no anchor for auto-place", e); null }
     box.anchorRef = Vec3(cp.tx().toDouble(), floorY, cp.tz().toDouble())
     setT(t)
+    box.yaw.startCompass(pl.x, pl.y, cp.tx().toDouble(), cp.tz().toDouble())
+    ArFeed.setYaw(box.yaw.status); ArFeed.placed()
     val buildingYaw = AutoPlace.buildingBearingDeg(bearing, ArFeed.originHeadingDeg)
     Log.i(AUTO_TAG, "auto-placed at ${pl.label}, ${if (atEntrance) "door %.0f deg (compass %s)".format(pl.walkInDeg, cameraCompass?.let { "%.0f deg".format(it) } ?: "none") else "compass %.0f deg".format(bearing)}, " +
         "building yaw %.0f deg; floor %s %.2f m below camera, after %d ms of tracking".format(
@@ -440,6 +470,7 @@ private fun placeAt(frame: Frame, tap: Offset, input: ArRouteInput?, setT: (Buil
     box.anchorRef = world
     setT(t)
     box.gate.override()
+    box.yaw.stop(YawSource.TAP); ArFeed.setYaw(box.yaw.status); ArFeed.placed()
     Log.i(TAG, "placed at ${pl.label} floor ${pl.floor}: hit=$world heading=(%.2f, %.2f) yaw=%.1f deg".format(fx, fz, t.yawDeg))
     return "Route placed at ${pl.label}"
 }
