@@ -24,6 +24,8 @@ playServicesLocation = "21.4.0"
 mapsCompose = "8.2.2"
 # Meta Wearables Device Access Toolkit. 0.7.0, not 0.9/1.0: the test glasses report DWA 0.7.0 (docs/06).
 mwdat = "0.7.0"
+# On-device OCR for glasses stills (bundled model, no download). Same pin as docs/14.
+mlkitTextRecognition = "16.0.1"
 wearComposeMaterial3 = "1.6.2"
 wearComposeFoundation = "1.6.2"
 wear = "1.3.0"
@@ -64,6 +66,7 @@ sceneview-arsceneview = { group = "io.github.sceneview", name = "arsceneview", v
 mwdat-core = { group = "com.meta.wearable", name = "mwdat-core", version.ref = "mwdat" }
 mwdat-camera = { group = "com.meta.wearable", name = "mwdat-camera", version.ref = "mwdat" }
 mwdat-mockdevice = { group = "com.meta.wearable", name = "mwdat-mockdevice", version.ref = "mwdat" }
+mlkit-text-recognition = { module = "com.google.mlkit:text-recognition", version.ref = "mlkitTextRecognition" }
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }

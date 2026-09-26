@@ -70,6 +70,21 @@
             </intent-filter>
         </activity>
 
+        <!-- Glasses setup helper (registration with the Meta AI app, glasses camera permission). The Meta AI app
+             returns here through the campusmaps:// link. See glasses/GlassesSetupActivity.kt. -->
+        <activity
+            android:name=".glasses.GlassesSetupActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="campusmaps" />
+            </intent-filter>
+        </activity>
+
         <!-- Shares a file location with the camera app when taking shortcut photos. -->
         <provider
             android:name="androidx.core.content.FileProvider"
