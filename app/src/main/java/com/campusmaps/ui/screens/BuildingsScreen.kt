@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -106,7 +107,11 @@ private fun BuildingsHeader(campus: Campus, otherName: String, p: CampusPalette,
             .background(p.accent)
             .drawBehind { drawCampusRings(Offset(size.width, 0f), 38.dp, 39.5.dp, p.ring) },
     ) {
-        CampusGhostMark(campus.markRes, color = p.ghost, x = 10.dp, y = 22.dp, sizing = Modifier.height(150.dp))
+        if (campus.id == CampusId.GT) {
+            CampusGhostMark(campus.markRes, color = p.ghost, x = 14.dp, y = 12.dp, sizing = Modifier.wrapContentSize(Alignment.BottomEnd, unbounded = true).height(210.dp))
+        } else {
+            CampusGhostMark(campus.markRes, color = p.ghost, x = 10.dp, y = 22.dp, sizing = Modifier.height(150.dp))
+        }
 
         Column(
             Modifier

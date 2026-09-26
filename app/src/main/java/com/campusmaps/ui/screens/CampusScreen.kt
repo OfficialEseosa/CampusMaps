@@ -157,7 +157,13 @@ private fun ColumnScope.CampusCard(campus: Campus, mapped: Int, onClick: () -> U
             .testTag("campus_${campus.code}"),
     ) {
         // Big faded mascot in the bottom right corner, cut by the card edge (was the campus code in letters).
-        CampusGhostMark(campus.markRes, color = p.ghost, x = 18.dp, y = 30.dp, sizing = Modifier.fillMaxHeight(0.66f))
+        // Buzz is tall and narrow, so he gets nearly the full card height with his head in the top right; the
+        // panther head is wide and sits lower.
+        if (campus.id == CampusId.GT) {
+            CampusGhostMark(campus.markRes, color = p.ghost, x = 12.dp, y = 10.dp, sizing = Modifier.fillMaxHeight(0.93f))
+        } else {
+            CampusGhostMark(campus.markRes, color = p.ghost, x = 18.dp, y = 30.dp, sizing = Modifier.fillMaxHeight(0.66f))
+        }
 
         Column(
             Modifier.fillMaxSize().padding(22.dp),
@@ -222,6 +228,7 @@ private fun DeviceChip(icon: ImageVector, bg: Color, tint: Color) {
 
 // The campus mascot as a faded watermark: pinned to the bottom right, pushed past the edge by (x, y), tinted with
 // the palette's ghost colour (the same colour and alpha the letters used). `sizing` sets its height; width follows.
+// A fixed height taller than the parent needs `wrapContentSize(BottomEnd, unbounded = true)` in front of it.
 @Composable
 internal fun androidx.compose.foundation.layout.BoxScope.CampusGhostMark(
     @DrawableRes markRes: Int,
@@ -232,17 +239,19 @@ internal fun androidx.compose.foundation.layout.BoxScope.CampusGhostMark(
 ) {
     val painter = painterResource(markRes)
     val ratio = painter.intrinsicSize.let { if (it.height > 0f) it.width / it.height else 1f }
-    Image(
-        painter,
-        contentDescription = null,
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .offset(x = x, y = y)
-            .then(sizing)
-            .aspectRatio(ratio, matchHeightConstraintsFirst = true),
-        contentScale = ContentScale.Fit,
-        colorFilter = ColorFilter.tint(color),
-    )
+    // matchParentSize: the mark never makes the card or header taller, whatever its size.
+    Box(Modifier.matchParentSize(), contentAlignment = Alignment.BottomEnd) {
+        Image(
+            painter,
+            contentDescription = null,
+            modifier = Modifier
+                .offset(x = x, y = y)
+                .then(sizing)
+                .aspectRatio(ratio, matchHeightConstraintsFirst = true),
+            contentScale = ContentScale.Fit,
+            colorFilter = ColorFilter.tint(color),
+        )
+    }
 }
 
 // Concentric rings like the mock's repeating-radial-gradient: a 1.5 dp ring every `step`, the first one `gap` out.
