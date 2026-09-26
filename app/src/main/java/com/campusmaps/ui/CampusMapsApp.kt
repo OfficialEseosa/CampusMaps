@@ -14,6 +14,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -53,6 +56,14 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     val settings by vm.settings.collectAsState()
     val showSettings by vm.showSettings.collectAsState()
     val debugVisible by vm.debugVisible.collectAsState()
+    // Debug card fold state, kept here (outside the screen switch) so a folded card stays folded on S1b and S2.
+    // A long-press that shows the card again opens it unfolded.
+    var debugFolded by rememberSaveable { mutableStateOf(false) }
+    var debugWasVisible by remember { mutableStateOf(debugVisible) }
+    if (debugVisible != debugWasVisible) {
+        if (debugVisible) debugFolded = false
+        debugWasVisible = debugVisible
+    }
     val arOverride by vm.arOverride.collectAsState()
     val controller by vm.guidance.collectAsState()
     val guidance: GuidanceState? by (controller?.state ?: NoGuidance).collectAsState()
@@ -283,7 +294,8 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                     add(DebugLink("Reject my pending shortcuts") { vm.debugReview(approve = false) })
                 }
                 val here = g?.route?.points?.getOrNull(g.progress.segmentIndex)?.node ?: trip.start
-                DebugOverlay(guidance = g, lines = lines, links = links, onClose = vm::hideDebug) {
+                DebugOverlay(guidance = g, lines = lines, links = links, onClose = vm::hideDebug,
+                    collapsed = debugFolded, onCollapsedChange = { debugFolded = it }) {
                     DebugControls(
                         clock = clockMode,
                         walk = walk,

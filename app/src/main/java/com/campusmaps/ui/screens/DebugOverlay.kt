@@ -53,6 +53,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.ViewConfiguration
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.sp
 import com.campusmaps.data.AppClock
 import com.campusmaps.data.ClockMode
@@ -131,7 +135,16 @@ fun DebugOverlay(
                 lines.forEach { Text(it, style = AppTextStyles.debugMono, color = ArOverlayColors.text) }
                 controls()
                 // No gap between link rows: each row is its own 44 dp touch target on a 44 dp pitch.
-                Column { links.forEach { LinkText(it.label, it.onClick) } }
+                // The platform pads every touch target to 48 dp; here 44 dp, so the touch areas no longer overlap.
+                val base = LocalViewConfiguration.current
+                val vc = remember(base) {
+                    object : ViewConfiguration by base {
+                        override val minimumTouchTargetSize: DpSize get() = DpSize(44.dp, 44.dp)
+                    }
+                }
+                CompositionLocalProvider(LocalViewConfiguration provides vc) {
+                    Column { links.forEach { LinkText(it.label, it.onClick) } }
+                }
             }
         }
     }
