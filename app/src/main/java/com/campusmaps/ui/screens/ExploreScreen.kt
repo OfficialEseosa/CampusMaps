@@ -31,8 +31,6 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ViewInAr
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,7 +58,14 @@ import com.campusmaps.outdoor.RouteSource
 import com.campusmaps.route.Formats
 import com.campusmaps.ui.map.GoogleOutdoorMap
 import com.campusmaps.ui.map.rememberExploreCamera
+import com.campusmaps.ui.theme.LocalCampusPalette
+import com.campusmaps.ui.theme.CampusMapsTheme
+import com.campusmaps.ui.theme.CampusPalettes
+import com.campusmaps.data.campus.Campuses
+import androidx.compose.ui.layout.onSizeChanged
 import com.campusmaps.ui.theme.Sora
+import com.campusmaps.ui.components.PrimaryPillButton
+import androidx.compose.foundation.BorderStroke
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -69,14 +74,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 
-// Design tokens from the style guide (board 02 / 03).
+// Campus skin (CampusTheme.kt), same tokens as S1 and S1b: accent for the primary button and the selected chip,
+// card / cardBorder for tiles, line for step numbers, surface for the sheet.
 private object Explore {
-    val clayDeep = Color(0xFFA85F33)
-    val sand = Color(0xFFEDD6C8)
-    val ink = Color(0xFF313131)
-    val cream = Color(0xFFF9F2ED)
-    val mist = Color(0xFFE3E3E3)
-    val muted = Color(0xFF6E6A67)
+    val accent @Composable get() = LocalCampusPalette.current.accent
+    val onAccent @Composable get() = LocalCampusPalette.current.onAccent
+    val line @Composable get() = LocalCampusPalette.current.line
+    val soft @Composable get() = LocalCampusPalette.current.soft
+    val card @Composable get() = LocalCampusPalette.current.card
+    val cardBorder @Composable get() = LocalCampusPalette.current.cardBorder
+    val ink @Composable get() = LocalCampusPalette.current.ink
+    val surface @Composable get() = LocalCampusPalette.current.surface
+    val muted @Composable get() = LocalCampusPalette.current.muted
 }
 
 data class ExploreActions(
@@ -115,9 +124,16 @@ fun ExploreScreen(vm: ExploreViewModel, actions: ExploreActions) {
         else CameraUpdateFactory.newLatLngBounds(LatLngBounds.builder().include(dot).include(LatLng(door.lat, door.lng)).build(), 160)
         try { camera.animate(update, 600) } catch (_: Exception) { }
     }
-    val sheetDp = if (state.selected != null) 420 else 140
+    // The sheet's real height (it grows with the steps, up to 460 dp plus the nav bar); the map padding and the
+    // round buttons sit above it so the AR button is never covered.
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    var sheetPx by remember { mutableStateOf(0) }
+    val sheetDp = if (sheetPx > 0) with(density) { sheetPx.toDp().value.toInt() } else if (state.selected != null) 420 else 140
 
-    Box(Modifier.fillMaxSize().background(Explore.cream).testTag("explore")) {
+    // Skin follows the picked room's campus (KL = Georgia Tech, CS / CSE = Georgia State), like S0b and S1.
+    val skin = state.selected?.let { CampusPalettes.of(Campuses.of(it.buildingId).id) } ?: LocalCampusPalette.current
+    CampusMapsTheme(darkTheme = false, campus = skin) {
+    Box(Modifier.fillMaxSize().background(Explore.surface).testTag("explore")) {
         GoogleOutdoorMap(
             camera = camera,
             user = state.fix,
@@ -145,7 +161,7 @@ fun ExploreScreen(vm: ExploreViewModel, actions: ExploreActions) {
         }
 
         Column(
-            Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = (sheetDp + 16).dp).navigationBarsPadding(),
+            Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = (sheetDp + 16).dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.End,
         ) {
@@ -157,7 +173,8 @@ fun ExploreScreen(vm: ExploreViewModel, actions: ExploreActions) {
             state.plan?.let { plan -> ArFab { actions.onStartAr(plan) } }
         }
 
-        Sheet(state, actions, Modifier.align(Alignment.BottomCenter))
+        Sheet(state, actions, Modifier.align(Alignment.BottomCenter).onSizeChanged { sheetPx = it.height })
+    }
     }
 }
 
@@ -186,20 +203,25 @@ private fun TopSearch(onSearch: () -> Unit, onSettings: () -> Unit) {
 private fun Chip(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = if (selected) Explore.clayDeep else Color.White,
+        shape = CircleShape,
+        color = if (selected) Explore.accent else Color.White,
+        border = if (selected) null else BorderStroke(1.dp, Explore.cardBorder),
         shadowElevation = 2.dp,
+        modifier = Modifier.heightIn(min = 40.dp),
     ) {
-        Text(label, Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-            style = text(13, FontWeight.SemiBold, if (selected) Color.White else Explore.ink))
+        Box(contentAlignment = Alignment.Center) {
+            Text(label, Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                style = text(13, FontWeight.Bold, if (selected) Explore.onAccent else Explore.ink))
+        }
     }
 }
 
 @Composable
 private fun HintCard(message: String, onClick: () -> Unit) {
-    Surface(onClick = onClick, shape = RoundedCornerShape(16.dp), color = Explore.sand, modifier = Modifier.fillMaxWidth()) {
+    Surface(onClick = onClick, shape = RoundedCornerShape(16.dp), color = Explore.soft,
+        border = BorderStroke(1.dp, Explore.cardBorder), modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.MyLocation, contentDescription = null, tint = Explore.clayDeep)
+            Icon(Icons.Filled.MyLocation, contentDescription = null, tint = Explore.line)
             Spacer(Modifier.width(10.dp))
             Text(message, style = text(14, FontWeight.SemiBold, Explore.ink))
         }
@@ -215,11 +237,11 @@ private fun RoundButton(icon: ImageVector, description: String, onClick: () -> U
 
 @Composable
 private fun ArFab(onClick: () -> Unit) {
-    Surface(onClick = onClick, shape = CircleShape, color = Explore.clayDeep, shadowElevation = 6.dp,
+    Surface(onClick = onClick, shape = CircleShape, color = Explore.accent, shadowElevation = 6.dp,
         modifier = Modifier.size(56.dp).testTag("explore-ar-fab")) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Icon(Icons.Filled.ViewInAr, contentDescription = "Start AR navigation", tint = Color.White, modifier = Modifier.size(22.dp))
-            Text("AR", style = text(11, FontWeight.Bold, Color.White))
+            Icon(Icons.Filled.ViewInAr, contentDescription = "Start AR navigation", tint = Explore.onAccent, modifier = Modifier.size(22.dp))
+            Text("AR", style = text(11, FontWeight.Bold, Explore.onAccent))
         }
     }
 }
@@ -229,14 +251,14 @@ private fun Sheet(state: ExploreUiState, actions: ExploreActions, modifier: Modi
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        color = Explore.cream,
+        color = Explore.surface,
         shadowElevation = 12.dp,
     ) {
         Column(
             Modifier.navigationBarsPadding().heightIn(max = 460.dp).verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 12.dp),
         ) {
-            Box(Modifier.align(Alignment.CenterHorizontally).size(40.dp, 4.dp).background(Explore.mist, CircleShape))
+            Box(Modifier.align(Alignment.CenterHorizontally).size(40.dp, 4.dp).background(Explore.cardBorder, CircleShape))
             Spacer(Modifier.height(12.dp))
             val sel = state.selected
             val plan = state.plan
@@ -251,7 +273,7 @@ private fun Sheet(state: ExploreUiState, actions: ExploreActions, modifier: Modi
             Text("$building$floor · ${state.destinationKind}", style = text(14, FontWeight.Normal, Explore.muted))
             state.noRoute?.let {
                 Spacer(Modifier.height(8.dp))
-                Text(it, style = text(14, FontWeight.SemiBold, Color(0xFFB3261E)))
+                Text(it, style = text(14, FontWeight.SemiBold, androidx.compose.material3.MaterialTheme.colorScheme.error))
                 return@Column
             }
             if (plan == null) return@Column
@@ -272,30 +294,33 @@ private fun Sheet(state: ExploreUiState, actions: ExploreActions, modifier: Modi
             Spacer(Modifier.height(12.dp))
             state.steps.forEachIndexed { i, s -> StepRow(i + 1, s) }
             Spacer(Modifier.height(14.dp))
-            Button(
+            PrimaryPillButton(
+                text = "Start AR navigation",
                 onClick = { actions.onStartAr(plan) },
-                colors = ButtonDefaults.buttonColors(containerColor = Explore.clayDeep, contentColor = Color.White),
-                shape = RoundedCornerShape(28.dp),
-                modifier = Modifier.fillMaxWidth().height(56.dp).testTag("explore-start-ar"),
-            ) { Text("Start AR navigation", style = text(16, FontWeight.Bold, Color.White)) }
+                height = 56.dp,
+                icon = Icons.Filled.ViewInAr,
+                modifier = Modifier.testTag("explore-start-ar"),
+            )
         }
     }
 }
 
 @Composable
 private fun Tile(value: String, label: String, modifier: Modifier) {
-    Column(modifier.background(Explore.sand.copy(alpha = 0.55f), RoundedCornerShape(16.dp)).padding(vertical = 12.dp),
+    // Same card as S1b's route cards: card fill, 1 dp cardBorder, 18 dp corners.
+    val shape = RoundedCornerShape(18.dp)
+    Column(modifier.background(Explore.card, shape).border(1.dp, Explore.cardBorder, shape).padding(horizontal = 6.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, style = text(17, FontWeight.ExtraBold, Explore.ink), textAlign = TextAlign.Center)
-        Text(label, style = text(12, FontWeight.Normal, Explore.muted))
+        Text(value, style = text(17, FontWeight.ExtraBold, Explore.ink), textAlign = TextAlign.Center, maxLines = 1)
+        Text(label, style = text(12, FontWeight.Medium, Explore.muted), maxLines = 1)
     }
 }
 
 @Composable
 private fun StepRow(n: Int, text: String) {
     Row(Modifier.padding(vertical = 5.dp), verticalAlignment = Alignment.Top) {
-        Box(Modifier.size(24.dp).border(1.5.dp, Explore.clayDeep, CircleShape), contentAlignment = Alignment.Center) {
-            Text("$n", style = text(12, FontWeight.Bold, Explore.clayDeep))
+        Box(Modifier.size(24.dp).border(1.5.dp, Explore.line, CircleShape), contentAlignment = Alignment.Center) {
+            Text("$n", style = text(12, FontWeight.Bold, Explore.line))
         }
         Spacer(Modifier.width(12.dp))
         Text(text, style = text(15, FontWeight.Normal, Explore.ink), modifier = Modifier.padding(top = 2.dp))
