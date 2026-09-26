@@ -204,6 +204,10 @@ class GuidanceController(
             if (!OutdoorGps.isOutdoor(route.steps.getOrNull(next))) {
                 runCatching { android.util.Log.i("Outdoor", "entrance reached: indoor steps from ${route.points.getOrNull(prevStep.startIndex)?.node?.id}") }
                 simulation.jumpToPoint(prevStep.startIndex)
+                // Stand at the entrance for this tick's banner and watch too (the jump reaches the pose on the next tick).
+                val at = prevStep.startIndex.coerceIn(0, route.points.lastIndex)
+                progress = progress.copy(alongM = maxOf(progress.alongM, route.points[at].cumulativeM),
+                    segmentIndex = maxOf(progress.segmentIndex, (at).coerceAtMost(route.points.size - 2).coerceAtLeast(0)))
             }
         }
     }

@@ -231,7 +231,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         startSession(options.first().route, glasses = true)
     }
 
-    private fun startSession(route: Route, glasses: Boolean) {
+    private fun startSession(route: Route, glasses: Boolean, seedFix: com.campusmaps.geo.LocationFix? = null) {
         _guidance.value?.stop()
         val t = trip.value
         val controller = GuidanceController(
@@ -250,6 +250,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         controller.glassesMode = glasses
         controller.simulation.lowConfidence = _walk.value.lowConfidence
         _walk.update { it.copy(paused = false) }
+        seedFix?.let(controller::onFix)
         controller.start()
         _guidance.value = controller
         // Explore start: the outdoor steps are followed by FusedLocation (guidance/OutdoorGps.kt).
@@ -352,9 +353,9 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
                     android.util.Log.i("Outdoor", "S2 outdoor steps: ${route.steps.count { it.outdoorEnd != null }} by GPS " +
                         "(${streets.size} from Directions${if (!sameDoor) ", map door differs: none" else ""}): " +
                         route.steps.filter { it.outdoorEnd != null }.joinToString(" | ") { it.text })
-                    startSession(route, glasses = false)
                     // The map's fix (seconds old) until FusedLocation's first one, so the first banner is already a GPS distance.
-                    if (gps != null) _guidance.value?.onFix(com.campusmaps.geo.LocationFix(gps.lat, gps.lng, 10.0, System.currentTimeMillis()))
+                    startSession(route, glasses = false,
+                        seedFix = gps?.let { com.campusmaps.geo.LocationFix(it.lat, it.lng, 10.0, System.currentTimeMillis()) })
                     handoff.startHandoff() // plays the 900 ms map-to-AR transition (no jump cut)
                 }
                 is RoutePlan.AlreadyHere -> startSession(plan.route, glasses = false)
