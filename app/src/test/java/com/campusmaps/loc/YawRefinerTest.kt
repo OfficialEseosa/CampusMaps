@@ -112,16 +112,45 @@ class YawRefinerTest {
         assertEquals(first[0].deltaDeg + slow[0].deltaDeg, r.status.correctionDeg, 1e-9)
     }
 
-    @Test fun floorTapOrSignFixStopsRefining() {
+    @Test fun signFixStopsRefining() {
         val r = YawRefiner(); val t0 = placed(0.0, 20.0)
         r.startCompass(0.0, 0.0, 0.0, 0.0)
-        r.stop(YawSource.TAP)
+        r.stop(YawSource.SIGN)
         val (_, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 5.0)
         assertTrue(res.isEmpty())
         assertFalse(r.status.compassPlaced)
-        assertEquals("yaw: floor tap", r.status.debugLine())
-        r.startCompass(0.0, 0.0, 0.0, 0.0); r.stop(YawSource.SIGN)
         assertEquals("yaw: sign fix", r.status.debugLine())
+        r.startTap(0.0, 0.0, 0.0, 0.0); r.stop(YawSource.SIGN)
+        assertTrue(walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 5.0).second.isEmpty())
+    }
+
+    @Test fun floorTapHeadingIsRefinedByWalking() {
+        // The phone pointed 10 degrees off the hallway at the tap; the first straight 3 m takes it all out.
+        val r = YawRefiner(); val t0 = placed(0.0, 10.0)
+        r.startTap(0.0, 0.0, 0.0, 0.0)
+        assertEquals("yaw: floor tap", r.status.debugLine())
+        assertFalse(r.status.compassPlaced) // the reroute tolerance stays at 6 m
+        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 3.5)
+        assertEquals(1, res.size)
+        assertEquals(-10.0, res[0].deltaDeg, 0.5)
+        assertEquals(0.0, t.yawDeg, 0.5)
+        val p = t.toWorld(0.0, 0.0); assertEquals(0.0, hypot(p.x, p.z), 1e-9)
+        assertEquals("yaw: floor tap, refined -10 deg", r.status.debugLine())
+    }
+
+    @Test fun floorTapCorrectionIsCappedAt15Degrees() {
+        // A sideways walk right after a good tap (or a very bad tap) moves the heading at most 15 degrees in total.
+        val r = YawRefiner(); val t0 = placed(0.0, 30.0)
+        r.startTap(0.0, 0.0, 0.0, 0.0)
+        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 3.5)
+        assertEquals(1, res.size)
+        assertEquals(-30.0, res[0].residualDeg, 0.5)
+        assertEquals(-YawRefiner.MAX_TAP_CORRECTION_DEG, res[0].deltaDeg, 1e-9)
+        assertEquals(15.0, t.yawDeg, 0.5)
+        // The total never goes past 15: the remaining 15 degrees can add nothing.
+        val (_, more) = walk(r, t, north, 0.0, -3.5, trueNorthWorldYaw, 6.5)
+        assertTrue(more.all { it.deltaDeg == 0.0 })
+        assertEquals(-15.0, r.status.correctionDeg, 1e-9)
     }
 
     @Test fun routeTurnInsideTheWindowIsSkipped() {

@@ -259,7 +259,7 @@ fun ArGuidanceView(
             Log.i(TAG, "sign fix ${anchor.id} floor ${anchor.floor}: centre=(%.2f, %.2f, %.2f) yaw=%.1f deg".format(cp.tx(), cp.ty(), cp.tz(), t.yawDeg))
         }
 
-        // Compass placement: turn the route to match the direction the user walks (loc/YawRefiner).
+        // Compass or floor-tap placement: turn the route to match the direction the user walks (loc/YawRefiner).
         val inp = latestInput
         val tNow = currentT()
         if (inp != null && tNow != null) {
@@ -272,7 +272,7 @@ fun ArGuidanceView(
             }
         }
 
-        // Follow ARCore's corrections to the anchor (translation only; yaw stays from the tap).
+        // Follow ARCore's corrections to the anchor (translation only; yaw comes from the placement and YawRefiner).
         val a = box.anchor; val ref = box.anchorRef; val now = System.currentTimeMillis()
         if (a != null && ref != null && a.trackingState == TrackingState.TRACKING && now - box.lastAnchorCheckMs > 1000) {
             box.lastAnchorCheckMs = now
@@ -470,7 +470,8 @@ private fun placeAt(frame: Frame, tap: Offset, input: ArRouteInput?, setT: (Buil
     box.anchorRef = world
     setT(t)
     box.gate.override()
-    box.yaw.stop(YawSource.TAP); ArFeed.setYaw(box.yaw.status); ArFeed.placed()
+    val cam = frame.camera.pose
+    box.yaw.startTap(pl.x, pl.y, cam.tx().toDouble(), cam.tz().toDouble()); ArFeed.setYaw(box.yaw.status); ArFeed.placed()
     Log.i(TAG, "placed at ${pl.label} floor ${pl.floor}: hit=$world heading=(%.2f, %.2f) yaw=%.1f deg".format(fx, fz, t.yawDeg))
     return "Route placed at ${pl.label}"
 }

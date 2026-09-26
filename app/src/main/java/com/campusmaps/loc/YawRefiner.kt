@@ -21,7 +21,7 @@ data class YawStatus(
 
     fun debugLine(): String = when (source) {
         YawSource.NONE -> "yaw: not placed"
-        YawSource.TAP -> "yaw: floor tap"
+        YawSource.TAP -> if (refined) "yaw: floor tap, refined %.0f deg".format(correctionDeg) else "yaw: floor tap"
         YawSource.SIGN -> "yaw: sign fix"
         YawSource.COMPASS -> if (refined) "yaw: compass, refined %.0f deg".format(correctionDeg) else "yaw: compass, unrefined"
     }
@@ -35,8 +35,11 @@ data class YawStatus(
  * (every point within [MAX_CHORD_DEV_M] of the line between the ends), the direction they walked is the direction the route
  * goes there. The building is turned by the difference, around the placement point (the start node stays under the spot
  * where the user started). The first time it takes the whole difference (at most [MAX_CORRECTION_DEG]); after that it
- * takes [SLOW_GAIN] of the difference per straight 3 m, so one detour round a pillar cannot swing the route. It stops for
- * good after a floor tap or a sign fix ([stop]); those are better than walking.
+ * takes [SLOW_GAIN] of the difference per straight 3 m, so one detour round a pillar cannot swing the route.
+ *
+ * A floor tap ([startTap]) is refined the same way with a tighter cap ([MAX_TAP_CORRECTION_DEG]): the phone's heading at
+ * the tap is often 5 to 10 degrees off the hallway, which puts the route 1 to 3 m sideways 15 m on. A sign fix stops it for
+ * good ([stop]); a sign is better than walking.
  *
  * Angles: yaw as in [BuildingToWorld] (Ry, radians); log and status in degrees.
  */
@@ -61,17 +64,27 @@ class YawRefiner {
     private var pivotY = 0.0
     private val window = ArrayDeque<Pair<Double, Double>>()
     private var travelM = 0.0
+    /** Largest total correction for the current placement, degrees. */
+    private var maxDeg = MAX_CORRECTION_DEG
 
     /** A compass (or door heading) placement put building point ([pivotX], [pivotY]) under the camera at ([camX], [camZ]). */
-    fun startCompass(pivotX: Double, pivotY: Double, camX: Double, camZ: Double) {
+    fun startCompass(pivotX: Double, pivotY: Double, camX: Double, camZ: Double) =
+        start(YawSource.COMPASS, MAX_CORRECTION_DEG, pivotX, pivotY, camX, camZ)
+
+    /** A floor tap put building point ([pivotX], [pivotY]) at the tapped spot; the camera is at ([camX], [camZ]). */
+    fun startTap(pivotX: Double, pivotY: Double, camX: Double, camZ: Double) =
+        start(YawSource.TAP, MAX_TAP_CORRECTION_DEG, pivotX, pivotY, camX, camZ)
+
+    private fun start(source: YawSource, maxDeg: Double, pivotX: Double, pivotY: Double, camX: Double, camZ: Double) {
         this.pivotX = pivotX; this.pivotY = pivotY
+        this.maxDeg = maxDeg
         active = true
         window.clear(); window.addLast(camX to camZ)
         travelM = 0.0
-        status = YawStatus(YawSource.COMPASS)
+        status = YawStatus(source)
     }
 
-    /** A floor tap or a sign fix set the transform: no more refining. */
+    /** A sign fix (or anything better than walking) set the transform: no more refining. */
     fun stop(source: YawSource) {
         active = false
         window.clear()
@@ -116,11 +129,11 @@ class YawRefiner {
         val residual = Math.toDegrees(BuildingToWorld.wrapPi(
             BuildingToWorld.yawOf(b.first - a.first, b.second - a.second) - BuildingToWorld.yawOf(ex, ez)))
         val first = !status.refined
-        val wanted = if (first) residual.coerceIn(-MAX_CORRECTION_DEG, MAX_CORRECTION_DEG) else {
-            if (abs(residual) > MAX_CORRECTION_DEG) return null // walked another way (a detour): ignore
+        val wanted = if (first) residual.coerceIn(-maxDeg, maxDeg) else {
+            if (abs(residual) > maxDeg) return null // walked another way (a detour): ignore
             residual * SLOW_GAIN
         }
-        val total = (status.correctionDeg + wanted).coerceIn(-MAX_CORRECTION_DEG, MAX_CORRECTION_DEG)
+        val total = (status.correctionDeg + wanted).coerceIn(-maxDeg, maxDeg)
         val delta = total - status.correctionDeg
         status = status.copy(refined = true, correctionDeg = total)
         return Result(rotateAbout(t, Math.toRadians(delta), pivotX, pivotY), delta, travelM, first, residual)
@@ -138,6 +151,8 @@ class YawRefiner {
         const val MAX_CHORD_DEV_M = 1.0
         /** Largest total correction of the compass heading, degrees. */
         const val MAX_CORRECTION_DEG = 45.0
+        /** Largest total correction of a floor tap's heading, degrees (a tap is closer than the compass to start with). */
+        const val MAX_TAP_CORRECTION_DEG = 15.0
         /** After the first correction, this fraction of each new difference is applied (per straight 3 m). */
         const val SLOW_GAIN = 0.1
         /** Camera positions closer than this to the previous one are skipped, metres. */
