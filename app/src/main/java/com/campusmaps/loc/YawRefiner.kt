@@ -66,6 +66,8 @@ class YawRefiner {
     private var travelM = 0.0
     /** Largest total correction for the current placement, degrees. */
     private var maxDeg = MAX_CORRECTION_DEG
+    private var startCamX = 0.0
+    private var startCamZ = 0.0
 
     /** A compass (or door heading) placement put building point ([pivotX], [pivotY]) under the camera at ([camX], [camZ]). */
     fun startCompass(pivotX: Double, pivotY: Double, camX: Double, camZ: Double) =
@@ -77,6 +79,7 @@ class YawRefiner {
 
     private fun start(source: YawSource, maxDeg: Double, pivotX: Double, pivotY: Double, camX: Double, camZ: Double) {
         this.pivotX = pivotX; this.pivotY = pivotY
+        startCamX = camX; startCamZ = camZ
         this.maxDeg = maxDeg
         active = true
         window.clear(); window.addLast(camX to camZ)
@@ -112,6 +115,7 @@ class YawRefiner {
         if (span() < MIN_TRAVEL_M) return null
 
         val a = window.first(); val b = window.last()
+        if (hypot(a.first - startCamX, a.second - startCamZ) < DOOR_SKIP_M) { window.removeFirst(); return null } // still in the doorway
         window.clear(); window.addLast(b) // next measurement starts here
         val chordLen = hypot(b.first - a.first, b.second - a.second)
 
@@ -128,11 +132,12 @@ class YawRefiner {
 
         val residual = Math.toDegrees(BuildingToWorld.wrapPi(
             BuildingToWorld.yawOf(b.first - a.first, b.second - a.second) - BuildingToWorld.yawOf(ex, ez)))
+        // No one-shot jump (2026-09-26, Classroom South: the first 3 m through a door are never the hallway direction and
+        // a 32 degree "correction" bent the route into the wall). Every correction is a fraction of the residual, so a
+        // consistent hallway walk converges in a few windows and one odd window cannot swing the route.
         val first = !status.refined
-        val wanted = if (first) residual.coerceIn(-maxDeg, maxDeg) else {
-            if (abs(residual) > maxDeg) return null // walked another way (a detour): ignore
-            residual * SLOW_GAIN
-        }
+        if (abs(residual) > MAX_RESIDUAL_DEG) return null // walked another way (a detour, a doorway): ignore
+        val wanted = residual * GAIN
         val total = (status.correctionDeg + wanted).coerceIn(-maxDeg, maxDeg)
         val delta = total - status.correctionDeg
         status = status.copy(refined = true, correctionDeg = total)
@@ -150,11 +155,15 @@ class YawRefiner {
         /** Every point of a "straight" walk stays this close to the line between its ends, metres. */
         const val MAX_CHORD_DEV_M = 1.0
         /** Largest total correction of the compass heading, degrees. */
-        const val MAX_CORRECTION_DEG = 45.0
+        const val MAX_CORRECTION_DEG = 25.0
         /** Largest total correction of a floor tap's heading, degrees (a tap is closer than the compass to start with). */
         const val MAX_TAP_CORRECTION_DEG = 15.0
         /** After the first correction, this fraction of each new difference is applied (per straight 3 m). */
-        const val SLOW_GAIN = 0.1
+        const val GAIN = 0.35
+        /** A window whose direction differs more than this from the route is a detour, not a heading error. */
+        const val MAX_RESIDUAL_DEG = 60.0
+        /** Windows starting closer than this to the placement point are the doorway, not the hallway. */
+        const val DOOR_SKIP_M = 2.5
         /** Camera positions closer than this to the previous one are skipped, metres. */
         const val SAMPLE_STEP_M = 0.25
 

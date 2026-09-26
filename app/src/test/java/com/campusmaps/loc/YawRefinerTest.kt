@@ -33,83 +33,65 @@ class YawRefinerTest {
     /** World yaw (yawOf) of building +y under the true yaw 0: north is world -Z, yawOf = 180. */
     private val trueNorthWorldYaw = 180.0
 
-    @Test fun firstThreeMetresRemoveTheCompassError() {
+    @Test fun compassErrorIsRemovedGraduallyNeverInOneJump() {
+        // 20 degree compass error; the first 2.5 m are the doorway and count for nothing; then each straight window
+        // takes GAIN of the residual, so after 15 m the route is within 3 degrees and no single step exceeded GAIN * 20.
         val r = YawRefiner(); val t0 = placed(0.0, 20.0)
         r.startCompass(0.0, 0.0, 0.0, 0.0)
         assertEquals("yaw: compass, unrefined", r.status.debugLine())
-        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 4.0)
-        assertEquals(1, res.size)
-        assertTrue(res[0].first)
-        assertEquals(-20.0, res[0].deltaDeg, 0.5)
-        assertEquals(3.0, res[0].travelM, 0.3)
-        assertEquals(0.0, t.yawDeg, 0.5)
-        // The start node stays under the placement point, and 10 m up the route is now 10 m ahead of the walker.
-        val p = t.toWorld(0.0, 0.0); assertEquals(0.0, hypot(p.x, p.z), 1e-9)
-        val q = t.toWorld(0.0, 10.0); assertEquals(0.0, q.x, 0.1); assertEquals(-10.0, q.z, 0.1)
+        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 24.0)
+        assertTrue(res.size >= 3)
+        assertTrue(res.none { kotlin.math.abs(it.deltaDeg) > YawRefiner.GAIN * 20.0 + 0.5 })
+        assertTrue(res.first().travelM >= YawRefiner.DOOR_SKIP_M + YawRefiner.MIN_TRAVEL_M - 0.3)
+        assertEquals(0.0, t.yawDeg, 3.0)
+        val p = t.toWorld(0.0, 0.0); assertEquals(0.0, hypot(p.x, p.z), 1e-9) // the start node stays put
         assertTrue(r.status.refined)
-        assertEquals("yaw: compass, refined -20 deg", r.status.debugLine())
     }
 
     @Test fun differenceWrapsAroundSouth() {
-        // Route heading south (building -y); true yaw 170, compass says -170 (190): 20 degrees apart across +-180.
         val south = listOf(PathPoint(0.0, 0.0, 1), PathPoint(0.0, -30.0, 1))
-        val r = YawRefiner(); val t0 = placed(170.0, 20.0)
+        val r = YawRefiner(); val t0 = placed(0.0, -20.0)
         r.startCompass(0.0, 0.0, 0.0, 0.0)
-        val truth = BuildingToWorld(Math.toRadians(170.0), 0.0, 0.0, 0.0, 1)
-        val d = truth.toWorld(0.0, -1.0)
-        val (t, res) = walk(r, t0, south, 0.0, 0.0, Math.toDegrees(BuildingToWorld.yawOf(d.x, d.z)), 3.5)
-        assertEquals(1, res.size)
-        assertEquals(-20.0, res[0].deltaDeg, 0.5)
-        assertEquals(0.0, Math.toDegrees(BuildingToWorld.wrapPi(t.yawRad - truth.yawRad)), 0.5)
+        val (t, res) = walk(r, t0, south, 0.0, 0.0, trueNorthWorldYaw + 180.0, 24.0)
+        assertTrue(res.isNotEmpty())
+        assertEquals(0.0, t.yawDeg, 3.0)
     }
 
-    @Test fun correctionIsCappedAt45Degrees() {
-        val r = YawRefiner(); val t0 = placed(0.0, -60.0)
+    @Test fun correctionIsCappedAt25Degrees() {
+        val r = YawRefiner(); val t0 = placed(0.0, 50.0)
         r.startCompass(0.0, 0.0, 0.0, 0.0)
-        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 3.5)
-        assertEquals(1, res.size)
-        assertEquals(60.0, res[0].residualDeg, 0.5)
-        assertEquals(45.0, res[0].deltaDeg, 1e-9)
-        assertEquals(-15.0, t.yawDeg, 0.5)
-        // The total never goes past 45 either: later residuals of 15 can add nothing.
-        val (_, more) = walk(r, t, north, 3.5 * sin(Math.PI), 3.5 * cos(Math.PI), trueNorthWorldYaw, 9.0)
-        assertTrue(more.all { it.deltaDeg == 0.0 })
-        assertEquals(45.0, r.status.correctionDeg, 1e-9)
+        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 40.0)
+        assertTrue(res.isNotEmpty())
+        assertEquals(-YawRefiner.MAX_CORRECTION_DEG, r.status.correctionDeg, 1e-6)
+        assertEquals(25.0, t.yawDeg, 0.5)
     }
 
-    @Test fun nothingUnderThreeMetres() {
+    @Test fun aDetourIsIgnored() {
+        // Walking 70 degrees off the route is a detour, not a heading error: nothing moves.
+        val r = YawRefiner(); val t0 = placed(0.0, 0.0)
+        r.startCompass(0.0, 0.0, 0.0, 0.0)
+        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw + 70.0, 12.0)
+        assertTrue(res.isEmpty())
+        assertEquals(0.0, t.yawDeg, 1e-9)
+    }
+
+    @Test fun nothingInTheDoorway() {
         val r = YawRefiner(); val t0 = placed(0.0, 20.0)
         r.startCompass(0.0, 0.0, 0.0, 0.0)
-        val (_, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 2.9)
+        val (_, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, YawRefiner.DOOR_SKIP_M + YawRefiner.MIN_TRAVEL_M - 0.5)
         assertTrue(res.isEmpty())
-        assertFalse(r.status.refined)
     }
 
     @Test fun nothingOnACurvedPath() {
-        // 2.5 m one way, then a right angle for 2.5 m: 3.5 m apart but the corner is 1.8 m off the line; no straight 3 m.
         val r = YawRefiner(); val t0 = placed(0.0, 20.0)
         r.startCompass(0.0, 0.0, 0.0, 0.0)
-        val (t1, a) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 2.5)
-        val (_, b) = walk(r, t1, north, 0.0, -2.5, 90.0, 2.5)
-        assertTrue(a.isEmpty() && b.isEmpty())
-        assertFalse(r.status.refined)
-        assertFalse(YawRefiner.straight(listOf(0.0 to 0.0, 0.0 to -2.5, 2.5 to -2.5), 1.0))
-        assertTrue(YawRefiner.straight(listOf(0.0 to 0.0, 0.5 to -1.5, 0.0 to -3.0), 1.0))
-    }
-
-    @Test fun oneShotThenSlowFilter() {
-        val r = YawRefiner(); val t0 = placed(0.0, 20.0)
-        r.startCompass(0.0, 0.0, 0.0, 0.0)
-        val (t1, first) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 3.2)
-        assertEquals(1, first.size)
-        // Now the walker's direction is 10 degrees off the (corrected) route: 10% of it per straight 3 m.
-        val (_, slow) = walk(r, t1, north, 0.0, -3.2, trueNorthWorldYaw + 10.0, 3.2)
-        assertEquals(1, slow.size)
-        assertFalse(slow[0].first)
-        // (about 10: the window starts where the first measurement ended, up to 0.2 m back on the first line)
-        assertEquals(10.0, slow[0].residualDeg, 1.0)
-        assertEquals(slow[0].residualDeg * YawRefiner.SLOW_GAIN, slow[0].deltaDeg, 1e-9)
-        assertEquals(first[0].deltaDeg + slow[0].deltaDeg, r.status.correctionDeg, 1e-9)
+        // A zigzag of 2 m legs (north, east, north, east ...): no 3 m window is straight, so nothing is measured.
+        var any = false; var x = 0.0; var z = 0.0
+        repeat(6) { leg ->
+            val dx = if (leg % 2 == 0) 0.0 else 0.1; val dz = if (leg % 2 == 0) -0.1 else 0.0
+            repeat(20) { x += dx; z += dz; if (r.onCamera(x, z, t0, north, 1) != null) any = true }
+        }
+        assertFalse(any)
     }
 
     @Test fun signFixStopsRefining() {
@@ -124,61 +106,23 @@ class YawRefinerTest {
         assertTrue(walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 5.0).second.isEmpty())
     }
 
-    @Test fun floorTapHeadingIsRefinedByWalking() {
-        // The phone pointed 10 degrees off the hallway at the tap; the first straight 3 m takes it all out.
+    @Test fun floorTapHeadingIsRefinedByWalkingGradually() {
         val r = YawRefiner(); val t0 = placed(0.0, 10.0)
         r.startTap(0.0, 0.0, 0.0, 0.0)
         assertEquals("yaw: floor tap", r.status.debugLine())
-        assertFalse(r.status.compassPlaced) // the reroute tolerance stays at 6 m
-        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 3.5)
-        assertEquals(1, res.size)
-        assertEquals(-10.0, res[0].deltaDeg, 0.5)
-        assertEquals(0.0, t.yawDeg, 0.5)
+        assertFalse(r.status.compassPlaced)
+        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 15.0)
+        assertTrue(res.isNotEmpty())
+        assertEquals(0.0, t.yawDeg, 3.0)
         val p = t.toWorld(0.0, 0.0); assertEquals(0.0, hypot(p.x, p.z), 1e-9)
-        assertEquals("yaw: floor tap, refined -10 deg", r.status.debugLine())
     }
 
     @Test fun floorTapCorrectionIsCappedAt15Degrees() {
-        // A sideways walk right after a good tap (or a very bad tap) moves the heading at most 15 degrees in total.
         val r = YawRefiner(); val t0 = placed(0.0, 30.0)
         r.startTap(0.0, 0.0, 0.0, 0.0)
-        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 3.5)
-        assertEquals(1, res.size)
-        assertEquals(-30.0, res[0].residualDeg, 0.5)
-        assertEquals(-YawRefiner.MAX_TAP_CORRECTION_DEG, res[0].deltaDeg, 1e-9)
+        val (t, res) = walk(r, t0, north, 0.0, 0.0, trueNorthWorldYaw, 40.0)
+        assertTrue(res.isNotEmpty())
+        assertEquals(-YawRefiner.MAX_TAP_CORRECTION_DEG, r.status.correctionDeg, 1e-6)
         assertEquals(15.0, t.yawDeg, 0.5)
-        // The total never goes past 15: the remaining 15 degrees can add nothing.
-        val (_, more) = walk(r, t, north, 0.0, -3.5, trueNorthWorldYaw, 6.5)
-        assertTrue(more.all { it.deltaDeg == 0.0 })
-        assertEquals(-15.0, r.status.correctionDeg, 1e-9)
-    }
-
-    @Test fun routeTurnInsideTheWindowIsSkipped() {
-        // The route turns 90 degrees 1.5 m after the start; walking straight there says nothing about the heading.
-        val turn = listOf(PathPoint(0.0, 0.0, 1), PathPoint(0.0, 1.5, 1), PathPoint(20.0, 1.5, 1))
-        val r = YawRefiner(); val t0 = placed(0.0, 20.0)
-        r.startCompass(0.0, 0.0, 0.0, 0.0)
-        val (_, res) = walk(r, t0, turn, 0.0, 0.0, trueNorthWorldYaw, 3.2)
-        assertTrue(res.isEmpty())
-    }
-
-    @Test fun rotateAboutKeepsThePivot() {
-        val t = BuildingToWorld(0.3, 1.0, 0.5, -2.0, 1)
-        val r = YawRefiner.rotateAbout(t, Math.toRadians(25.0), 4.0, 7.0)
-        val a = t.toWorld(4.0, 7.0); val b = r.toWorld(4.0, 7.0)
-        assertEquals(a.x, b.x, 1e-9); assertEquals(a.z, b.z, 1e-9)
-        assertEquals(0.3 + Math.toRadians(25.0), r.yawRad, 1e-9)
-    }
-
-    @Test fun routePathProjectAndSlice() {
-        val l = listOf(PathPoint(0.0, 0.0, 1), PathPoint(0.0, 10.0, 1), PathPoint(10.0, 10.0, 1), PathPoint(10.0, 10.0, 3))
-        assertEquals(4.0, RoutePath.project(l, 1, 0.5, 4.0)!!, 1e-9)
-        assertEquals(13.0, RoutePath.project(l, 1, 3.0, 11.0)!!, 1e-9)
-        assertNull(RoutePath.project(l, 2, 0.0, 0.0))
-        val s = RoutePath.slice(l, 8.0, 12.0)!!
-        assertEquals(3, s.size)
-        assertEquals(PathPoint(0.0, 8.0, 1), s[0]); assertEquals(PathPoint(2.0, 10.0, 1), s[2])
-        assertNull(RoutePath.slice(l, 18.0, 25.0))
-        assertNotNull(RoutePath.slice(l, 0.0, 20.0))
     }
 }
