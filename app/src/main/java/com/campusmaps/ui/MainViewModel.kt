@@ -381,6 +381,11 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         if (_screen.value in setOf(Screen.CAMPUS, Screen.DESTINATION) && selection.value.destinationId == null) go(Screen.EXPLORE)
     }
 
+    // Demo mode at start: S1 ("Where to?") is home, not the campus picker (docs/22 rule, kept through the redesign).
+    fun showDemoHome() {
+        if (_screen.value == Screen.CAMPUS) go(Screen.DESTINATION)
+    }
+
     // Explore opened from S1 (the map row or the debug link) while S1 is home: Back returns to S1 and S1 stays home.
     private val _exploreBackToS1 = MutableStateFlow(false)
     val exploreBackToS1: StateFlow<Boolean> = _exploreBackToS1.asStateFlow()
