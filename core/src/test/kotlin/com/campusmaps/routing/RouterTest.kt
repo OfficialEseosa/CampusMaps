@@ -1,6 +1,7 @@
 package com.campusmaps.routing
 
 import com.campusmaps.TestData
+import com.campusmaps.data.Access
 import com.campusmaps.data.Building
 import com.campusmaps.data.Geo
 import com.campusmaps.data.Node
@@ -134,6 +135,38 @@ class RouterTest {
         show("CSE Sat 14:00", afternoon)
         assertNull(afternoon.first().notice)
         assertEquals("E-MAIN", afternoon.first().entrance)
+    }
+
+    @Test fun panthercardOpensTheCardOnlyEntrance() {
+        val main = cse.node("E-MAIN")
+        val (lat, lng) = Geo.offset(main.lat!!, main.lng!!, 0.0, -15.0)
+        val start = Start.Outside(lat, lng)
+        val sat21 = TestData.saturday(21)
+
+        val noCard = Router.route(cse, start, "R-220", Prefs(now = sat21))
+        assertEquals("E-WEST", noCard.first().entrance)
+        assertTrue("card-only" in assertNotNull(noCard.first().notice))
+        assertTrue(noCard.none { it.cardNeeded })
+
+        val card = Router.route(cse, start, "R-220", Prefs(now = sat21, hasCard = true))
+        show("CSE Sat 21:00 with card", card)
+        assertEquals("E-MAIN", card.first().entrance)
+        assertTrue(card.first().cardNeeded)
+        assertNull(card.first().notice)
+        assertTrue(card.none { it.instructions.any { i -> i.type == InstructionType.LOCKED_NOTICE } })
+
+        // Daytime: Main is public, so no card is needed even for a card holder.
+        val day = Router.route(cse, start, "R-220", Prefs(now = TestData.saturday(14), hasCard = true))
+        assertEquals("E-MAIN", day.first().entrance)
+        assertTrue(day.none { it.cardNeeded })
+
+        // 23:30: every door is closed; the card opens nothing.
+        assertTrue(Router.route(cse, start, "R-220", Prefs(now = TestData.saturday(23, 30))).isEmpty())
+        assertTrue(Router.route(cse, start, "R-220", Prefs(now = TestData.saturday(23, 30), hasCard = true)).isEmpty())
+
+        // "after 8 pm": the Saturday public window closed at 20:00.
+        assertEquals(20 * 60, Access.cardOnlySince(main, sat21))
+        assertNull(Access.cardOnlySince(main, TestData.saturday(14)))
     }
 
     @Test fun instructionsAreShortAndEndWithArrival() {

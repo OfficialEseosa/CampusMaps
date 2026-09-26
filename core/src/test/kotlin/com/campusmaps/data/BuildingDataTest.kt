@@ -128,7 +128,11 @@ class BuildingDataTest {
         assertTrue(Access.covers(AccessWindow("Sat-Sun", "00:00", "24:00", AccessRule.CARD), TestData.saturday(23, 59)))
         val door = Node("E", NodeType.ENTRANCE, "door", 1, 0.0, 0.0, access = listOf(night))
         assertEquals(AccessRule.PUBLIC, Access.ruleAt(door, fri))
-        assertEquals(AccessRule.CARD, Access.ruleAt(door, fri.minusHours(5)))
+        assertEquals(AccessRule.CLOSED, Access.ruleAt(door, fri.minusHours(5)))   // no window covers it: closed, not card
+        val carded = door.copy(access = listOf(night, AccessWindow("Fri", "12:00", "22:00", AccessRule.CARD)))
+        assertEquals(AccessRule.CARD, Access.ruleAt(carded, fri.minusHours(5)))
+        assertEquals(AccessRule.PUBLIC, Access.ruleAt(carded, fri))
+        assertEquals(AccessRule.CLOSED, Access.ruleAt(carded.copy(access = carded.access!! + AccessWindow("Fri", "18:00", "19:00", AccessRule.CLOSED)), fri.minusHours(5)))
         assertEquals(AccessRule.PUBLIC, Access.ruleAt(door.copy(access = null), fri.minusHours(5)))
     }
 

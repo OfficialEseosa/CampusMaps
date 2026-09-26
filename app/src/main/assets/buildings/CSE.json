@@ -55,10 +55,16 @@
           "open": "14:00",
           "close": "20:00",
           "rule": "public"
+        },
+        {
+          "days": "Mon-Sun",
+          "open": "07:00",
+          "close": "23:00",
+          "rule": "card"
         }
       ],
       "estimated": true,
-      "notes": "Estimated, not surveyed. Hours from engagement.gsu.edu (research/hackgt-and-competitors.md section 5); outside them card-only (inferred). lat/lng estimated from the map (GSU downtown); headingDeg 180 = door faces out south (walk in heading 0)."
+      "notes": "Estimated, not surveyed. Hours from engagement.gsu.edu (research/hackgt-and-competitors.md section 5); outside them card-only (PantherCard) until 23:00, then closed (inferred, confirm the posted card hours). lat/lng estimated from the map (GSU downtown); headingDeg 180 = door faces out south (walk in heading 0)."
     },
     {
       "id": "E-WEST",
