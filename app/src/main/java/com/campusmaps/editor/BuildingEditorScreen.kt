@@ -221,8 +221,10 @@ private fun PlanCanvas(vm: EditorViewModel, modifier: Modifier) {
     var pan by remember(vm.code) { mutableStateOf(Offset.Zero) }
     val measurer = rememberTextMeasurer()
     val label = TextStyle(fontFamily = Sora, fontSize = 10.sp, color = Ink, fontWeight = FontWeight.SemiBold)
-    // Fit every floor's points once (plan coordinates: x east, y down = -core y), so switching floors keeps the frame.
-    val xs = b.nodes.map { it.x }; val ys = b.nodes.map { -it.y }
+    // Fit the shown floor's points (plan coordinates: x east, y down = -core y), at least 20 m across.
+    val shown = b.nodes.filter { it.floor == vm.floor }.ifEmpty { b.nodes }
+    val cx = (shown.minOf { it.x } + shown.maxOf { it.x }) / 2; val cy = (shown.minOf { -it.y } + shown.maxOf { -it.y }) / 2
+    val xs = shown.map { it.x } + listOf(cx - 10, cx + 10); val ys = shown.map { -it.y } + listOf(cy - 10, cy + 10)
     val minX = (xs.minOrNull() ?: 0.0) - 3; val maxX = (xs.maxOrNull() ?: 10.0) + 3
     val minY = (ys.minOrNull() ?: 0.0) - 3; val maxY = (ys.maxOrNull() ?: 10.0) + 3
 
