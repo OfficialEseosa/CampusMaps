@@ -183,3 +183,15 @@ Owner concern: S1 asked "Where are you?" although the plan was automatic positio
 - **GPS start** (`reports/w5-gpsstart.md`): S1 opened outdoors with a fresh fix (under 30 s, better than 50 m, more than 25 m from every entrance, demo mode off) starts from "Outside: Your location" with a hint "From your location (GPS, N m)"; a manual pick is never overwritten; at the building or in demo mode the default start stays (Start 1 at the expo table).
 - **VPS entrance snap** (same report): on the outdoor leg of S2, the Geospatial position (TRACKING, under 10 m) drives the banner distance and the 40 m trigger; within 15 m of any entrance of the building it snaps to that door and reroutes from it if it is not the planned one (logcat `Geo`: "VPS snap to E-WM, 6.2 m"). JVM-tested; needs the real walk.
 - **Find me** (`reports/w5-findme.md`): a camera sheet from S1 that reads sign text and room numbers (ML Kit, frames scaled 2x), matches room numbers in one frame and anchor texts by a 2-of-3 vote, sets the start automatically ("You are at Room 1116W"). Verified on the emulator with the app's own sign photos (E-RWD, R-1116W, E-LM2, R-608). Owner: hold the phone an arm's length from the 1116W plaque, then at the Research Wing sign.
+
+## Later on 2026-09-26 (afternoon walks at Klaus and Classroom South)
+
+Fixed from the owner's walks (logs now survive in `files/logs/campusmaps.log` on the phone, debug builds):
+- Auto-placement indoors from the compass; at a door the measured door heading always wins (a compass by a steel frame read 74 degrees off).
+- Heading refiner: no one-shot jump, the first 2.5 m after a placement are ignored (doorway), 35 percent of the residual per straight 3 m, 25 degree cap, detours over 60 degrees ignored. Reroute needs 12 m off route until the first refinement.
+- Elevator rides snap to their target floor once within 0.75 of it.
+- VPS snap: the planned door wins within 15 m; another door only within 10 m with the planned one out of range.
+- Classroom South Walters lobby geometry from the owner's on-site edits (side door, Room 150, junction on the straight corridor, "down the short steps on your left" from the main door). Klaus: one stairs edge 1 to 3, "1116W is ahead", COEUS as a demo destination.
+- Crashes: Filament abort when the destination label texture was re-created (label now stays in the scene); ConcurrentModificationException on End route in glasses mode (thread-safe job list); a capture timeout used to kill the glasses loop.
+- Bigger arrows (0.9 m), smaller banner (22 sp), outdoor chip shows the remaining accuracy, mascots on the campus cards.
+- Automatic start: GPS "Your location" on S1 outdoors, "Find me" sign reader, PantherCard prompt (`reports/w7-panthercard.md`; Student Center East's card window is a guess until surveyed).
