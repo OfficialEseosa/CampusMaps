@@ -59,7 +59,7 @@ fun WatchFace(step: WatchStep?, ambient: Boolean) {
         Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .padding(horizontal = 22.dp, vertical = 18.dp),
+            .padding(horizontal = 34.dp, vertical = 20.dp), // round screen: keep text inside the circle
         contentAlignment = Alignment.Center,
     ) {
         if (step == null) {
@@ -74,19 +74,19 @@ fun WatchFace(step: WatchStep?, ambient: Boolean) {
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.semantics { contentDescription = "${step.label}, ${step.bigText}" },
         ) {
-            StepArrow(step.type, ambient, Modifier.size(104.dp))
+            StepArrow(step.type, ambient, Modifier.size(84.dp))
             BasicText(
                 step.bigText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = TextStyle(color = Color.White, fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, textAlign = TextAlign.Center),
+                style = TextStyle(color = Color.White, fontFamily = Sora, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, textAlign = TextAlign.Center),
                 modifier = Modifier.fillMaxWidth(),
             )
             BasicText(
                 step.label,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                style = TextStyle(color = WatchColors.muted, fontFamily = Sora, fontSize = 14.sp, textAlign = TextAlign.Center),
+                style = TextStyle(color = WatchColors.muted, fontFamily = Sora, fontSize = 12.sp, textAlign = TextAlign.Center),
                 modifier = Modifier.fillMaxWidth(),
             )
         }

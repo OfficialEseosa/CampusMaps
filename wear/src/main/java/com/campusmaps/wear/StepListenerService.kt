@@ -48,8 +48,13 @@ class StepListenerService : WearableListenerService() {
             }
             if (path != WatchProtocol.STEP_PATH) return
             val step = WatchProtocol.decode(data) ?: return
+            val firstOfRoute = WatchStepStore.step.value == null
             // Distance ticking down ("12 m" -> "11 m") updates the face without buzzing again.
             if (WatchStepStore.update(step)) Haptics.play(context, step)
+            // First step of a route: bring the face to the wrist so the student does not have to open the app.
+            if (firstOfRoute) runCatching {
+                context.startActivity(android.content.Intent(context, WatchActivity::class.java).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+            }.onFailure { android.util.Log.w("StepListener", "cannot open the watch face: $it") }
         }
     }
 }
