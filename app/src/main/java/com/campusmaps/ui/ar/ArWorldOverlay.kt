@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.campusmaps.data.model.Point
 import com.campusmaps.guidance.GuidanceState
-import com.campusmaps.routing.Route
-import com.campusmaps.routing.Side
-import com.campusmaps.routing.StepKind
+import com.campusmaps.route.Route
+import com.campusmaps.route.Side
+import com.campusmaps.route.StepKind
 import com.campusmaps.ui.theme.ArOverlayColors
 import com.campusmaps.ui.theme.Sora
 import kotlin.math.ceil
