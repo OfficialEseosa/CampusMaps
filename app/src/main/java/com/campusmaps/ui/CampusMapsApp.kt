@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.campusmaps.AppContainer
@@ -129,7 +130,9 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     SideEffect {
         val window = (view.context as? Activity)?.window ?: return@SideEffect
         WindowCompat.getInsetsController(window, view).apply {
-            isAppearanceLightStatusBars = !screenDark
+            // S0b draws the campus accent under the status bar: light icons on a dark accent (Georgia State blue).
+            val darkHeader = screen == Screen.BUILDINGS && palette.headerText.luminance() > 0.5f
+            isAppearanceLightStatusBars = !screenDark && !darkHeader
             isAppearanceLightNavigationBars = !screenDark
         }
     }
