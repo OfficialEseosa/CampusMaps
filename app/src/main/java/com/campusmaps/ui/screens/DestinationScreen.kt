@@ -175,6 +175,7 @@ fun DestinationScreen(state: TripUiState, campus: Campus, buildings: List<Buildi
 
             DesignLabel("Where are you?")
             StartPicker(state.start, state.startOptions, actions.onStart)
+            state.gpsHint?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp, start = 4.dp)) }
 
             AvoidStairsSwitchRow(checked = state.settings.avoidStairs, onChange = actions.onAvoidStairs)
 
