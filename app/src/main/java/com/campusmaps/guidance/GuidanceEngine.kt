@@ -1,11 +1,11 @@
 package com.campusmaps.guidance
 
 import com.campusmaps.data.model.Point
-import com.campusmaps.routing.Formats
-import com.campusmaps.routing.LockedNotice
-import com.campusmaps.routing.Route
-import com.campusmaps.routing.RouteStep
-import com.campusmaps.routing.StepKind
+import com.campusmaps.route.Formats
+import com.campusmaps.route.LockedNotice
+import com.campusmaps.route.Route
+import com.campusmaps.route.RouteStep
+import com.campusmaps.route.StepKind
 import com.campusmaps.shared.WatchStep
 import com.campusmaps.shared.WatchStepType
 import kotlin.math.hypot

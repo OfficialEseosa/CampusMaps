@@ -27,7 +27,8 @@ interface GlassesLink {
     val seen: StateFlow<String?>          // Last sign text read, e.g. "ELEVATORS"
     val lastStill: StateFlow<ImageBitmap?> // Last camera still from the glasses
 
-    fun start(currentInstruction: () -> String, currentSign: () -> String?)
+    // [finished] true ends the cycle (after the arrival sentence has been said once); Repeat still speaks.
+    fun start(currentInstruction: () -> String, currentSign: () -> String?, finished: () -> Boolean = { false })
     fun stop()
 }
 
@@ -51,11 +52,16 @@ class SimulatedGlassesLink(
 
     private var job: Job? = null
 
-    override fun start(currentInstruction: () -> String, currentSign: () -> String?) {
+    override fun start(currentInstruction: () -> String, currentSign: () -> String?, finished: () -> Boolean) {
         job?.cancel()
         _seen.value = null
         job = scope.launch {
             while (isActive) {
+                // Arrived and said so: stop cycling. It re-spoke "Room 220 is on your right" every 5 s until Stop (docs/22 #6).
+                if (finished()) {
+                    _phase.value = GlassesPhase.LOOKING
+                    break
+                }
                 if (!connectedFlag.value) {
                     _phase.value = GlassesPhase.LOOKING
                     delay(500)

@@ -30,6 +30,9 @@ class ShortcutRepository(
     private val online: StateFlow<Boolean>,
     private val notifier: ShortcutNotifier,
     private val scope: CoroutineScope,
+    // Building codes of the loaded files (KL, CS, CSE). Approved shortcuts are fetched per code, the same id
+    // S4 stores on a submission (Building.id = core code).
+    private val buildingIds: Collection<String> = listOf("KL", "CS", "CSE"),
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     private val file = File(context.filesDir, "shortcuts.json")
@@ -60,7 +63,7 @@ class ShortcutRepository(
     }
 
     // Upload anything queued, refresh statuses, and refresh approved shortcuts.
-    suspend fun sync(buildingIds: Collection<String> = listOf("cs", "klaus", "sce")) {
+    suspend fun sync() {
         if (!online.value) return
         val me = submitterIdProvider.currentId()
         try {

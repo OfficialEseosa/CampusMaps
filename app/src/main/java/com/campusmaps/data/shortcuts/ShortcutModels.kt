@@ -75,8 +75,10 @@ object ShortcutRules {
         hasWalk: Boolean,
         photoCount: Int,
         walkConnects: Boolean = true,
+        sameFloor: Boolean = true,
     ): String? = when {
         !hasFrom || !hasTo -> "Pick From and To to submit"
+        !sameFloor -> "From and To must be on the same floor"
         !hasWalk -> "Record your walk to submit"
         !walkConnects -> "Walk all the way from From to To to submit"
         photoCount < MIN_PHOTOS -> {

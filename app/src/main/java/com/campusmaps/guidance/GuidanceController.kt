@@ -1,16 +1,18 @@
 package com.campusmaps.guidance
 
 import com.campusmaps.data.model.Building
+import com.campusmaps.data.model.EdgeKind
 import com.campusmaps.data.model.GraphEdge
 import com.campusmaps.data.model.GraphNode
 import com.campusmaps.data.model.NodeKind
 import com.campusmaps.platform.Speaker
 import com.campusmaps.platform.WatchBridge
-import com.campusmaps.routing.LockedNotice
-import com.campusmaps.routing.Route
-import com.campusmaps.routing.RouteStep
-import com.campusmaps.routing.Router
-import com.campusmaps.routing.StepKind
+import com.campusmaps.route.LockedNotice
+import com.campusmaps.route.Route
+import com.campusmaps.route.RouteStep
+import com.campusmaps.route.CoreRouter
+import com.campusmaps.route.FloorChange
+import com.campusmaps.route.StepKind
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -47,7 +49,7 @@ class GuidanceController(
     private val building: Building,
     firstRoute: Route,
     private val lockedNotice: LockedNotice?,
-    private val router: Router,
+    private val router: CoreRouter,
     private val now: () -> LocalDateTime,
     private val avoidStairs: () -> Boolean,
     private val extraEdges: () -> List<GraphEdge>,
@@ -80,6 +82,10 @@ class GuidanceController(
     )
     val position: PositionProvider = simulator
     val simulation: SimulationControls = simulator
+
+    // Building -> ARCore world transform for this session (docs/05): set by ArGuidanceView's "Place route here" flow,
+    // later by a real localizer. Null = not aligned yet. Cleared when the AR view leaves.
+    val buildingToWorld = MutableStateFlow<com.campusmaps.loc.BuildingToWorld?>(null)
 
     private val _state = MutableStateFlow(buildState(position.pose.value))
     val state: StateFlow<GuidanceState> = _state.asStateFlow()
@@ -132,10 +138,13 @@ class GuidanceController(
         _state.value = state
 
         // Say each new instruction once (S2 only; S3's glasses cycle speaks on its own).
+        // The first one is prefixed with core's locked-entrance notice (Demo C: "Heads up: ... Using West entrance instead.").
         if (state.progress.stepIndex != lastSpokenStep && pose.confidence >= LOCATE_CONFIDENCE) {
+            val first = lastSpokenStep == -1 && rerouteCount == 0
             lastSpokenStep = state.progress.stepIndex
             if (speakEnabled() && !glassesMode) {
-                speaker.speak(if (state.arrived) state.step.text else state.bannerText)
+                val text = if (state.arrived) state.step.text else state.bannerText
+                speaker.speak(if (first && lockedNotice != null) "Heads up: ${lockedNotice.text} $text" else text)
             }
         }
 
@@ -146,6 +155,8 @@ class GuidanceController(
 
     private fun reroute(pose: Pose) {
         val start = nearestNode(pose) ?: return
+        // The route node walked from last: core turns it into "Turn left/right toward X" (Start.AtNode.cameFrom).
+        val cameFrom = route.points.getOrNull(progress.segmentIndex)?.node?.takeIf { !it.isOutdoor && it.id != start.id }?.id
         val newRoute = router.bestRoute(
             building = building,
             startId = start.id,
@@ -153,8 +164,49 @@ class GuidanceController(
             time = now(),
             avoidStairs = avoidStairs(),
             extraEdges = extraEdges(),
-            startHeadingRad = pose.headingRad,
+            cameFromId = cameFrom,
+            preferMethod = methodOf(route),
         ) ?: return
+        adopt(newRoute)
+    }
+
+    // Debug "jump to node / start point" (Raphael's FakeLocalizer.jumpTo): on the route, move along it;
+    // off the route (inside or outside), put the student there and reroute from that node.
+    fun jumpTo(nodeId: String) {
+        val node = building.nodes[nodeId] ?: return
+        val onRoute = route.points.indexOfFirst { it.node.id == nodeId }
+        if (onRoute >= 0) {
+            simulation.jumpToPoint(onRoute)
+            return
+        }
+        simulation.placeAt(node.position, node.floor)
+        val newRoute = router.bestRoute(
+            building = building,
+            startId = nodeId,
+            destinationId = route.destination.id,
+            time = now(),
+            avoidStairs = avoidStairs(),
+            extraEdges = extraEdges(),
+            cameFromId = route.points.getOrNull(progress.segmentIndex)?.node?.takeIf { !it.isOutdoor }?.id,
+            preferMethod = methodOf(route),
+        ) ?: return
+        lastRerouteAt = System.currentTimeMillis()
+        adopt(newRoute)
+    }
+
+    // Debug fake walk "Step": move to the next node of the route (Raphael's one-node step).
+    fun stepToNextNode() {
+        val next = (progress.segmentIndex + 1).coerceAtMost(route.points.lastIndex)
+        simulation.jumpToPoint(next)
+    }
+
+    private fun methodOf(r: Route): FloorChange = when {
+        r.points.any { it.arrivedBy == EdgeKind.ELEVATOR } -> FloorChange.ELEVATOR
+        r.points.any { it.arrivedBy == EdgeKind.STAIRS } -> FloorChange.STAIRS
+        else -> FloorChange.LEVEL
+    }
+
+    private fun adopt(newRoute: Route) {
         route = newRoute
         progress = Progress()
         rerouteCount++

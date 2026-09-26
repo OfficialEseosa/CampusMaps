@@ -1,14 +1,12 @@
 package com.campusmaps.data.model
 
-import java.time.DayOfWeek
 import java.time.LocalDateTime
-import java.time.LocalTime
-import kotlin.math.cos
 import kotlin.math.hypot
 
 // A position on a floor plan, in metres.
 // x grows to the east (right on the map) and y grows to the south (down on the map),
 // the same way screen pixels work, so drawing a floor plan needs no flipping.
+// NOTE: core building files use y growing NORTH. CoreBridge converts with y = -y (x unchanged).
 data class Point(val x: Double, val y: Double) {
     fun distanceTo(other: Point): Double = hypot(other.x - x, other.y - y)
     operator fun minus(other: Point) = Point(x - other.x, y - other.y)
@@ -62,66 +60,32 @@ data class GraphEdge(
     val shortcutName: String? = null,
 )
 
-// A time window when an entrance only opens with a card.
-// If "to" is earlier than "from" the window runs past midnight (e.g. 22:00 to 07:00).
-data class CardOnlyWindow(
-    val days: Set<DayOfWeek>,
-    val from: LocalTime,
-    val to: LocalTime,
-) {
-    fun contains(time: LocalDateTime): Boolean {
-        val t = time.toLocalTime()
-        return if (from <= to) {
-            time.dayOfWeek in days && t >= from && t < to
-        } else {
-            // Wraps midnight: the late part belongs to "today", the early part to "yesterday".
-            val lateToday = time.dayOfWeek in days && t >= from
-            val earlyFromYesterday = time.dayOfWeek.minus(1) in days && t < to
-            lateToday || earlyFromYesterday
-        }
-    }
+// A place outside the building where a trip can start (core StartPoint, or the building origin when the file has none).
+// Routing from it uses core's Start.Outside(lat, lng).
+data class OutdoorStart(val lat: Double, val lng: Double)
 
-    companion object {
-        val EVERY_DAY: Set<DayOfWeek> = DayOfWeek.entries.toSet()
-        val WEEKDAYS: Set<DayOfWeek> = setOf(
-            DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY,
-        )
-        val WEEKEND: Set<DayOfWeek> = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
-    }
-}
-
-// Ties the floor plan (metres) to real world coordinates, so a Google map can be drawn later.
-// origin is where plan point (0, 0) is on Earth.
-data class GeoAnchor(val originLat: Double, val originLng: Double) {
-    // Converts plan metres to latitude and longitude. Good enough over a few hundred metres.
-    fun toLatLng(p: Point): Pair<Double, Double> {
-        val metresPerDegLat = 111_320.0
-        val metresPerDegLng = 111_320.0 * cos(Math.toRadians(originLat))
-        val lat = originLat - p.y / metresPerDegLat // y grows south
-        val lng = originLng + p.x / metresPerDegLng
-        return lat to lng
-    }
-}
-
-// Everything the app knows about one building. This is the "building file".
+// Everything the screens know about one building: a drawing-friendly view of a core building file
+// (app/src/main/assets/buildings/<code>.json), built by data/campus/CoreBridge.kt.
+// The core Building stays the source of truth for routing and access rules.
 data class Building(
-    val id: String,
+    val id: String,          // The building code, e.g. "CS" (same as core Building.code)
     val code: String,        // Short tag shown in the app bar, e.g. "CS"
-    val name: String,        // Full name, e.g. "Classroom South"
+    val name: String,        // Name on the S1 selector, e.g. "Classroom South"
     val floors: IntRange,
     val nodes: Map<String, GraphNode>,
     val edges: List<GraphEdge>,
-    val cardOnly: Map<String, List<CardOnlyWindow>>, // entrance id -> card-only windows
     val demoDestinationIds: List<String>,
-    val startIds: List<String>,                      // Choices for "Where are you?"
+    val startIds: List<String>,                      // Choices for "Where are you?": outdoor start points first
     val defaultStartId: String,
-    val geo: GeoAnchor,
+    val outdoorStarts: Map<String, OutdoorStart>,    // OUTDOOR node id -> where it is on Earth
+    val core: com.campusmaps.data.Building,
 ) {
     fun node(id: String): GraphNode = nodes.getValue(id)
 
     val rooms: List<GraphNode> get() = nodes.values.filter { it.kind == NodeKind.ROOM }
     val entrances: List<GraphNode> get() = nodes.values.filter { it.kind == NodeKind.ENTRANCE }
 
+    // Card-only right now? Uses core's access windows (public if any public window covers now).
     fun isCardOnly(entranceId: String, time: LocalDateTime): Boolean =
-        cardOnly[entranceId].orEmpty().any { it.contains(time) }
+        core.nodeOrNull(entranceId)?.let { com.campusmaps.data.Access.isLocked(it, time) } ?: false
 }

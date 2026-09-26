@@ -2,7 +2,7 @@ package com.campusmaps.guidance
 
 import com.campusmaps.data.model.EdgeKind
 import com.campusmaps.data.model.Point
-import com.campusmaps.routing.Route
+import com.campusmaps.route.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -37,6 +37,8 @@ class SimulatedPositionProvider(
     override val pose: StateFlow<Pose> = _pose.asStateFlow()
 
     override var speedMultiplier: Double = 1.0
+    override var paused: Boolean = false
+    override var lowConfidence: Boolean = false
 
     private var waypoints: List<Waypoint> = emptyList()
     private var index = 0           // Next waypoint we are heading to
@@ -79,6 +81,11 @@ class SimulatedPositionProvider(
         // Keep walking toward the same next waypoint from the new spot.
     }
 
+    override fun placeAt(position: Point, floor: Int) {
+        rideTimer = 0.0
+        _pose.value = _pose.value.copy(position = position, floor = floor)
+    }
+
     // index is a Route.points index.
     override fun jumpToPoint(index: Int) {
         val target = (index + leadIn).coerceIn(0, waypoints.lastIndex.coerceAtLeast(0))
@@ -111,7 +118,15 @@ class SimulatedPositionProvider(
             }
             return // Standing still while pointing at a sign
         }
-        if (p.confidence < 0.9f || p.sign != null) p = p.copy(confidence = 0.92f, sign = null)
+        if (lowConfidence) {
+            p = p.copy(confidence = 0.2f, sign = SignSighting(signText(), 0.06f, 0.19f, 0.94f, 0.26f))
+        } else if (p.confidence < 0.9f || p.sign != null) {
+            p = p.copy(confidence = 0.92f, sign = null)
+        }
+        if (paused) {
+            _pose.value = p
+            return
+        }
 
         if (waypoints.isEmpty() || index >= waypoints.size || (index == waypoints.lastIndex && atWaypoint(p, waypoints.last()))) {
             _pose.value = p

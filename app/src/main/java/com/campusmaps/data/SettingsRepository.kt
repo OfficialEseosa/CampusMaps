@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.campusmaps.data.campus.DemoBuildings
+import com.campusmaps.data.campus.CoreBridge
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -21,7 +21,7 @@ data class AppSettings(
     val speakInstructions: Boolean = true,
     val avoidStairs: Boolean = false,
     val demoMode: Boolean = false,
-    val buildingId: String = DemoBuildings.DEFAULT_BUILDING_ID,
+    val buildingId: String = CoreBridge.DEFAULT_BUILDING_ID,
 )
 
 // Saves settings on the phone so they survive restarts ("Avoid stairs" is persisted, per the handoff).
@@ -41,7 +41,7 @@ class SettingsRepository(private val context: Context) {
             speakInstructions = p[Keys.speak] ?: true,
             avoidStairs = p[Keys.avoidStairs] ?: false,
             demoMode = p[Keys.demoMode] ?: false,
-            buildingId = p[Keys.building] ?: DemoBuildings.DEFAULT_BUILDING_ID,
+            buildingId = p[Keys.building] ?: CoreBridge.DEFAULT_BUILDING_ID,
         )
     }
 

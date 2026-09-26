@@ -17,17 +17,23 @@ class WatchBridge(context: Context, private val scope: CoroutineScope) {
     private val messageClient = Wearable.getMessageClient(context)
     private var lastSent: WatchStep? = null
 
+    // Connected watch count seen on the last send (-1 = not asked yet). Shown in the debug overlay.
+    val connectedCount = kotlinx.coroutines.flow.MutableStateFlow(-1)
+
     fun send(step: WatchStep) {
         if (step == lastSent) return // Same step, no need to buzz the watch again
         lastSent = step
         scope.launch {
             try {
                 val bytes = WatchProtocol.encode(step)
-                for (node in nodeClient.connectedNodes.await()) {
+                val nodes = nodeClient.connectedNodes.await()
+                connectedCount.value = nodes.size
+                for (node in nodes) {
                     messageClient.sendMessage(node.id, WatchProtocol.STEP_PATH, bytes).await()
                 }
             } catch (e: Exception) {
                 // No Play services or no watch: the phone works fine without it.
+                connectedCount.value = 0
                 Log.i(TAG, "Watch not reachable: ${e.message}")
             }
         }
