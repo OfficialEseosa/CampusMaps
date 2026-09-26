@@ -84,7 +84,7 @@ class CoreRouterTest {
     fun everyEntranceLockedSaysSo() {
         val cse = TestBuildings.cse
         val plan = router.plan(cse, cse.defaultStartId, "R-220", LocalDateTime.of(2026, 9, 26, 23, 30), avoidStairs = false)
-        assertEquals("No route to Room 220: every entrance is card-only at Sat 23:30.", (plan as RoutePlan.NoRoute).message)
+        assertEquals("No route to Room 220: every entrance is closed at Sat 23:30.", (plan as RoutePlan.NoRoute).message)
     }
 
     @Test

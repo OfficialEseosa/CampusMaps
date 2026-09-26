@@ -159,6 +159,11 @@ private fun DestinationContent(state: TripUiState, campus: Campus, buildings: Li
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             CampusPill("${campus.name} · ${state.building.name}", actions.onBuildings)
+            // After hours: some door is card-only now and the user has not said they carry the card (route/CardAccess.kt).
+            state.cardHint?.let { hint ->
+                Text(hint, style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp), color = palette.muted,
+                    modifier = Modifier.padding(top = 0.dp).then(Modifier.testTag("cardHint")))
+            }
 
             Text(
                 "Where to?",

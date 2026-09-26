@@ -114,8 +114,9 @@ class ExploreViewModel(private val app: AppContainer, context: Context) : ViewMo
         directionsJob?.cancel()
         directionsJob = viewModelScope.launch {
             val avoidStairs = app.settings.settings.first().avoidStairs
+            val hasCard = app.settings.settings.first().hasCard
             val plan = withContext(Dispatchers.Default) {
-                OutdoorRoutes.plan(building, sel.nodeId, from, app.clock.now(), avoidStairs)
+                OutdoorRoutes.plan(building, sel.nodeId, from, app.clock.now(), avoidStairs, hasCard)
             }
             if (plan == null) {
                 _state.update { it.copy(plan = null, route = null, steps = emptyList(), noRoute = "No way in to ${sel.name} right now") }

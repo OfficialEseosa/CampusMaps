@@ -97,10 +97,10 @@ object OutdoorRoutes {
     fun shortName(name: String): String = name.replace(Regex("\\s*\\(.*\\)\\s*$"), "").trim()
 
     // Asks core which entrance to use from (lat, lng). Null when core finds no route (for example every door locked).
-    fun plan(building: Building, destinationId: String, from: LatLngPoint, now: LocalDateTime, avoidStairs: Boolean): EntrancePlan? {
+    fun plan(building: Building, destinationId: String, from: LatLngPoint, now: LocalDateTime, avoidStairs: Boolean, hasCard: Boolean = false): EntrancePlan? {
         val core = building.core
         val destination = core.nodeOrNull(destinationId) ?: return null
-        val option = Router.route(core, Start.Outside(from.lat, from.lng), destinationId, Prefs(avoidStairs, now)).firstOrNull()
+        val option = Router.route(core, Start.Outside(from.lat, from.lng), destinationId, Prefs(avoidStairs, now, hasCard)).firstOrNull()
             ?: return null
         val entranceId = option.entrance ?: return null
         val entrance = core.nodeOrNull(entranceId) ?: return null

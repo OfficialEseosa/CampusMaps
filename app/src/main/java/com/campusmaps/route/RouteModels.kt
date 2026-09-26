@@ -69,6 +69,9 @@ data class RouteStep(
     // Outdoor steps of an Explore start: where the step ends (lat/lng). The step is then done by GPS, not by the walker
     // (guidance/OutdoorGps.kt). Null for every indoor step and for routes from S1b's fixed start points.
     val outdoorEnd: com.campusmaps.outdoor.LatLngPoint? = null,
+    // Only for WALK_TO_ENTRANCE: the entrance is card-only now and the user carries this card ("PantherCard"); S2 shows
+    // "Tap your PantherCard at this door" and the watch a LOCKED-style face.
+    val cardName: String? = null,
 )
 
 // A full route from start to destination, ready for guidance.
@@ -99,13 +102,15 @@ data class RouteOption(
     val route: Route,
     // The core option this card was built from (node ids, ETA breakdown, core instructions). For debug and the AR layer.
     val core: com.campusmaps.routing.RouteOption? = null,
+    // The entrance is card-only now; the user said they carry the card (core RouteOption.cardNeeded). S1b tags it.
+    val cardNeeded: Boolean = false,
 )
 
 // The "Heads up" banner on S1b. Information, never an error.
 // Built from core's RouteOption.notice ("Heads up: Main entrance is card-only now. Using West entrance instead.").
 data class LockedNotice(val lockedEntrance: String, val usingEntrance: String?, val text: String) {
     companion object {
-        private val PATTERN = Regex("""^(?:Heads up: )?(.+?) is card-only now\. (?:Using (.+) instead\.|Taking another way\.)$""")
+        private val PATTERN = Regex("""^(?:Heads up: )?(.+?) is (?:card-only|closed) now\. (?:Using (.+) instead\.|Taking another way\.)$""")
 
         fun fromCore(notice: String): LockedNotice {
             val text = notice.removePrefix("Heads up: ").trim()
