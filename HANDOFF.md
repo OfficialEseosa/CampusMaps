@@ -21,6 +21,10 @@ Written 2026-09-26, about 00:40 EDT, Hour 5 of HackGT 13 (hacking Fri 8 PM to Su
 - **Fixes**: WHATS-LEFT 2 to 6, docs/22 bugs 9, 10, 12, 14, 15, 16, and the wave 2 list W1 to W9 in docs/22.
 - **Data**: entrance lat/lng/heading exposed via `CoreBridge.entranceGeo`; KL pending photos are warnings; CS lobby anchors (estimated); Klaus refresh path in docs/19 ("Klaus refresh, step by step").
 
+## Also built after the hand tests (wave 3, 2026-09-26 morning)
+
+Street steps in S2 and on the watch, glasses polish, Directions cache, S1 map icon, debug card fixes, and the in-app building editor (Settings, "Edit this building"). Details: docs/22 "Wave 3" and `reports/w3-*.md`. The glasses and the watch are verified end to end on the real devices; the watch app is installed on the Galaxy Watch (Wi-Fi ADB, port changes each time).
+
 ## Open, in priority order
 
 1. **Anchor photos**: both CS sign photos fail ARCore's quality check (`assets/anchors/SCORES.md`), so there is no image database. Photograph high-texture targets at Klaus (directory boards, posters), score with `C:\Users\rapha\tools\arcoreimg\arcoreimg.exe`, build `anchors.imgdb`.
