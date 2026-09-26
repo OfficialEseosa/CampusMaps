@@ -13,12 +13,12 @@ All three files load, pass the validator with no ERROR or WARN (rules 1 to 6, 9 
 - Access: windows are matched on the day they open; a window whose close is not after its open runs into the next morning. If any `public` window covers `now` the door is public, otherwise card-only. No `access` at all means always public.
 - Extensions to the docs/02 schema (ignored by anything that does not know them): `estimated`, `notes` on nodes, edges, anchors, elevators; `demoDestinations` (rule 6 input); `startPoints` (P1, P2 as lat/lng); `stairsDownSecondsPerFloor` (default 18); `stairsId` on stairs nodes (family for rule 4, defaults to the id minus its trailing `-<floor>`).
 - Placeholder anchors use ids `<code>-A9x` so they never collide with survey anchors (`A01` upward).
-- **Entrance geo (outdoor leg):** every outdoor entrance carries `lat`, `lng` and `headingDeg`. In the files `headingDeg` is the bearing the door **faces out** (0 = north, clockwise), because that is what CampusSurvey records (standing on the threshold facing out). The heading you face when **walking in** is that plus 180: core `Node.walkInHeadingDeg`, app `GraphNode.headingDeg`, and `CoreBridge.entranceGeo(...)` (`headingDeg` = walk in, `facingOutDeg` = file value). Rule 11 (WARN) fires for an outdoor entrance missing any of the three. CS entrances are survey fixes (Walters side placed by hand); KL and CSE entrances are map guesses flagged `estimated`.
+- **Entrance geo (outdoor leg):** every outdoor entrance carries `lat`, `lng` and `headingDeg`. In the files `headingDeg` is the bearing the door **faces out** (0 = north, clockwise), because that is what the survey tool records (standing on the threshold facing out). The heading you face when **walking in** is that plus 180: core `Node.walkInHeadingDeg`, app `GraphNode.headingDeg`, and `CoreBridge.entranceGeo(...)` (`headingDeg` = walk in, `facingOutDeg` = file value). Rule 11 (WARN) fires for an outdoor entrance missing any of the three. CS entrances are survey fixes (Walters side placed by hand); KL and CSE entrances are map guesses flagged `estimated`.
 - `imagePending: true` on an image anchor = the photo is not taken yet; its missing file is a rule 7 WARN instead of an ERROR. Remove the flag when the photo lands in `assets/anchors/<code>/`.
 
 ## Classroom South (CS.json), Demo B
 
-Source: survey `CS-20260925-1238` (CampusSurvey 0.3, Friday 12:38 to 13:12, stride 0.768 m calibrated by `gps-walk`: 12 places, 7 walks, 2 elevator rides, 2 stair descents, 8 sign photos, 5 walkthrough videos with 5 Hz sensor logs). Converted with `ConvertMain` (test fixture `core/src/test/resources/CS-20260925-1238.survey.json`), then laid out by hand: the survey has 581 steps outside any walk and five walks with a turn inside, so the missing legs were rebuilt from the step counts in the videos' `sensors.json` (and their frames, to see where doors and turns are). The 2026-09-24 survey is superseded; only its "150" plaque (as `CS-A03`) and its Walters-side door spacing are carried over.
+Source: survey `CS-20260925-1238` (the survey tool 0.3, Friday 12:38 to 13:12, stride 0.768 m calibrated by `gps-walk`: 12 places, 7 walks, 2 elevator rides, 2 stair descents, 8 sign photos, 5 walkthrough videos with 5 Hz sensor logs). Converted with `ConvertMain` (test fixture `core/src/test/resources/CS-20260925-1238.survey.json`), then laid out by hand: the survey has 581 steps outside any walk and five walks with a turn inside, so the missing legs were rebuilt from the step counts in the videos' `sensors.json` (and their frames, to see where doors and turns are). The 2026-09-24 survey is superseded; only its "150" plaque (as `CS-A03`) and its Walters-side door spacing are carried over.
 
 **Frame:** origin = Walters main GPS fix (obs #1), x east, y north. The Decatur Street facade runs along bearing 120/300; every entrance faces out north-east.
 
@@ -164,9 +164,9 @@ Fixes from the real 0.3 log (2026-09-25): a walk with 0 steps (walk #33) gets it
 
 For the owner, right after the Klaus survey. About 20 minutes. Nothing here needs the phone.
 
-**At Klaus, in CampusSurvey, name things so the merge can find them:** the two start spots by our table as Places of type waypoint named exactly **S1** and **S2**, the table as **T**, the demo room as **Room <number>** (it becomes `R-<number>`). Every door: Place → Door, facing out, 10 s (this gives `lat`, `lng`, `headingDeg`).
+**At Klaus, in the survey tool, name things so the merge can find them:** the two start spots by our table as Places of type waypoint named exactly **S1** and **S2**, the table as **T**, the demo room as **Room <number>** (it becomes `R-<number>`). Every door: Place → Door, facing out, 10 s (this gives `lat`, `lng`, `headingDeg`).
 
-1. **Export** from CampusSurvey (Review → Export → Drive). Download the zip, for example `KL-20260926-0930.zip`, and put it in the repo root `C:\Users\rapha\CampusMaps\` (zips there are gitignored). No need to unzip it.
+1. **Export** from the survey tool (Review → Export → Drive). Download the zip, for example `KL-20260926-0930.zip`, and put it in the repo root `C:\Users\rapha\CampusMaps\` (zips there are gitignored). No need to unzip it.
 2. **Convert**, in PowerShell from the repo root:
 
    ```powershell
@@ -190,12 +190,12 @@ For the owner, right after the Klaus survey. About 20 minutes. Nothing here need
 7. **Test:** `.\gradlew.bat :core:test :app:testDebugUnitTest`. Expect failures in tests that hard-code the guessed Klaus layout (`RouterTest.klausRoutesFromBothStartsMatchTheHandCheckedLists`, `BuildingDataTest.everyGuessIsFlagged` and `anchorSpacingRule8` for KL, `CoreBridgeTest` checks on `R-1116`, `KlausRefreshTest` if `R-1116` is gone). Update their node lists to the new route; do not bend the data to the tests. `ValidatorReportTest` prints the new counts.
 8. Commit `KL.json` and the photos in one commit ("data: KL from survey KL-...").
 
-`KlausRefreshTest` is the regression for this path: it zips the CS 0.3 log the way CampusSurvey exports it, runs `ConvertMain` with `--keep`, and relabels the same log as a Klaus session to check the S1 / demo room merge. What the CS log shows the converter still cannot do: legs walked only in videos are not converted (the raw CS draft fails rule 5 until they are added by hand), and a room reached only in a video (608) is not a node. Nothing is missing from the log format itself.
+`KlausRefreshTest` is the regression for this path: it zips the CS 0.3 log the way the survey tool exports it, runs `ConvertMain` with `--keep`, and relabels the same log as a Klaus session to check the S1 / demo room merge. What the CS log shows the converter still cannot do: legs walked only in videos are not converted (the raw CS draft fails rule 5 until they are added by hand), and a room reached only in a video (608) is not a node. Nothing is missing from the log format itself.
 
 ## Tests
 
 `./gradlew :core:test` (52 tests: 51 pass, 1 skipped, the 60 s gap above). `ValidatorReportTest` runs the full validator (images, demo routes) and prints the counts; `KlausRefreshTest` covers the refresh path. `SurveyConverterTest` runs on both real logs (`CS-20260924-1614`, `CS-20260925-1238`). The building JSON directory is a declared input of the test task, so data-only edits re-run the tests.
 
-## CampusSurvey 0.3 log additions (2026-09-25)
+## Survey 0.3 log additions (2026-09-25)
 
-Format stays `campussurvey-log` v2. Two optional keys: `session.strideMethod` (`gps-walk`, `known-distance`, `typed`) and `anchor.widthEstimated` (true when the width was estimated with a phone or A4 sheet rather than taped). Both are read since 2026-09-25: `widthEstimated` sets the anchor's `estimated`, `strideMethod` is copied into the draft notes.
+Format stays `survey-log` v2. Two optional keys: `session.strideMethod` (`gps-walk`, `known-distance`, `typed`) and `anchor.widthEstimated` (true when the width was estimated with a phone or A4 sheet rather than taped). Both are read since 2026-09-25: `widthEstimated` sets the anchor's `estimated`, `strideMethod` is copied into the draft notes.

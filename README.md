@@ -7,7 +7,7 @@ The app shell, screens, design system, shortcuts feature and watch app are by Uy
 ## Modules
 
 - `app/` phone app (`com.campusmaps`), sources in `app/src/main/java`. Building files in `app/src/main/assets/buildings/{KL,CS,CSE}.json`.
-- `core/` pure Kotlin/JVM: building model, loader, validator, router, CampusSurvey converter. `./gradlew :core:test`.
+- `core/` pure Kotlin/JVM: building model, loader, validator, router, survey converter. `./gradlew :core:test`.
 - `shared/` pure Kotlin: watch step format and haptic patterns shared by `app` and `wear`.
 - `wear/` Galaxy Watch app (same applicationId as `app`, so the Wear Data Layer pairs them).
 
@@ -16,7 +16,6 @@ The app shell, screens, design system, shortcuts feature and watch app are by Uy
 - Plan and module docs: [docs/README.md](docs/README.md)
 - Design handoff: [CampusMaps-Design-Handoff (1).md](CampusMaps-Design-Handoff%20(1).md)
 - Status and open items: [WHATS-LEFT.md](WHATS-LEFT.md)
-- Field survey tool (separate repository, not submitted): `survey-app/` (gitignored)
 
 ## Build
 

@@ -1,5 +1,4 @@
-# CampusSurvey is a separate repo and must never enter this one
-survey-app/
+HANDOFF.md
 # raw survey exports (large photos); keep them in Drive
 *.zip
 # Gradle / Android

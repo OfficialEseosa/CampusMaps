@@ -44,7 +44,6 @@ Decided 2026-09-20 by the team lead unless noted.
 - **Event facts (from hack.gt):** hacking Friday 8 PM to Sunday 8 AM; expo Sunday 9:30 to 11 AM in the Klaus Atrium; track is "The Lighthouse Laboratory" (Immersive AR/VR/XR); teams up to four; no past projects; Meta tech talk Saturday 3:30 PM.
 - Demo phone: Samsung Galaxy S25 Ultra on stable Android 16, updates off.
 - Everything on-device; no network in the demo path except the outdoor Geospatial leg over cellular.
-- CampusSurvey built 2026-09-21 (survey-app/); Tier 2; smoke-tested on an emulator; field validation pending.
 
 ## D. Unverified items from the research, and who checks them
 

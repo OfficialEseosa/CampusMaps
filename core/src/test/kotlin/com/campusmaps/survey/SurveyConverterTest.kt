@@ -81,7 +81,7 @@ class SurveyConverterTest {
     }
 
     @Test fun verticalFieldsAreReadLeniently() {
-        // survey-app/README.md names no elevator/stairs fields; accept arrivalFloor, the observation floor as departure,
+        // Format specification names no elevator/stairs fields; accept arrivalFloor, the observation floor as departure,
         // Called/Boarded/Doors-opened timestamps, numbers as strings, and ignore junk instead of failing the log.
         val log = """{"session":{"building":"CS"},"observations":[
           {"kind":"node","id":1,"floor":1,"nodeType":"ENTRANCE","name":"Door","outdoor":true,"snapshot":{"gps":{"lat":33.75,"lng":-84.38}}},
@@ -98,7 +98,7 @@ class SurveyConverterTest {
         assertEquals(22.0, d.stairsSecondsPerFloor) // no duration: default kept
     }
 
-    // ---- CampusSurvey 0.3, session CS-20260925-1238 (real elevator/stairs fields, 0-step walk, duplicate anchor) ----
+    // ---- survey 0.3, session CS-20260925-1238 (real elevator/stairs fields, 0-step walk, duplicate anchor) ----
     private val json03 = TestData.resource("CS-20260925-1238.survey.json")
     private val b03 = SurveyConverter.convert(json03)
 

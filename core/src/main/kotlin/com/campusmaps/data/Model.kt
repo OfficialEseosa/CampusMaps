@@ -74,7 +74,7 @@ data class Node(
     val lat: Double? = null,
     val lng: Double? = null,
     /**
-     * Outdoor entrances: compass bearing (0 = north, clockwise) the door faces OUT, as CampusSurvey records it (standing on the
+     * Outdoor entrances: compass bearing (0 = north, clockwise) the door faces OUT, as survey records it (standing on the
      * threshold facing out). The heading you face when walking IN is [walkInHeadingDeg] (this + 180).
      */
     val headingDeg: Double? = null,

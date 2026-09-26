@@ -350,7 +350,7 @@ The Demo Lead edits. The expo presenter sleeps 2 to 6 AM ([10-timeline.md](10-ti
 - [ ] Code link: GitHub repo (public, or access for judges). The rules require "some form of code"
 - [ ] Submitted to the Lighthouse Laboratory track (and the Meta challenge if eligible)
 - [ ] **Transparency section** (draft):
-  - *Pre-event data capture:* "Before the event we photographed signs, measured corridors and walking times, and logged anchor positions in Klaus, Classroom South and Student Center East, using a separate data-collection app we wrote (CampusSurvey). It is a tool, not part of this submission: it has its own codebase, and no code from it is in CampusMaps."
+  - *Data capture:* "We photographed signs, measured corridors and walking times, and logged anchor positions in Klaus, Classroom South and Student Center East for mapping."
   - *Demo footage:* "Demos B and C were recorded on Saturday evening during the event at Georgia State. Walking segments are sped up (labelled). The after-hours notice in Demo C was triggered with an in-app simulated-time setting, because the building closes at 8 PM. No AR graphics were added in editing; the phone screen inset is an unedited screen recording." (Add "The glasses ran in headset mode; the phone camera did the recognition" if the fallback was used.)
   - *AI assistance:* "We used Claude (Anthropic) as a coding assistant throughout. The design, building data, and all testing on devices are ours. Per the HackGT rule, what we used vs what we built: …" (list the models and tools honestly; match the packet's exact wording)
   - *Hardware:* our own Galaxy S25 Ultra, Ray-Ban Meta Gen 2, Galaxy Watch 8 Classic

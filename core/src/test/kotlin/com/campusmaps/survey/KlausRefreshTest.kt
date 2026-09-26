@@ -15,13 +15,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Regression for the converter path the Klaus refresh uses (docs/19 "Klaus refresh, step by step"): a CampusSurvey 0.3 export
+ * Regression for the converter path the Klaus refresh uses (docs/19 "Klaus refresh, step by step"): a survey 0.3 export
  * zip in, a building file out, hand-tuned fields kept. There is no Klaus log yet, so the real CS 0.3 log stands in.
  */
 class KlausRefreshTest {
     private val cs03 = TestData.resource("CS-20260925-1238.survey.json")
 
-    /** Same layout as a CampusSurvey export: `<session>/survey.json` next to photos and a README. */
+    /** Same layout as a survey export: `<session>/survey.json` next to photos and a README. */
     private fun zipOf(json: String, folder: String): File {
         val dir = Files.createTempDirectory("survey").toFile()
         val zip = File(dir, "$folder.zip")

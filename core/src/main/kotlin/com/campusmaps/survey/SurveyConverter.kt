@@ -8,7 +8,7 @@ import kotlin.math.hypot
 import kotlin.math.sin
 
 /**
- * CampusSurvey log to a draft [Building]. Frame: origin at the first ENTRANCE (else START) GPS fix, heading 0, so x = east, y = north.
+ * survey log to a draft [Building]. Frame: origin at the first ENTRANCE (else START) GPS fix, heading 0, so x = east, y = north.
  * Outdoor nodes come from GPS; indoor nodes are dead-reckoned along edges (steps x stride, walking heading), falling back to GPS
  * when the heading spread is over [MAX_SPREAD_DEG]. Anchor and door facings are rounded to 8 compass words. Anything not measured
  * is flagged estimated=true with a note.
@@ -202,7 +202,7 @@ object SurveyConverter {
         return Building(code, NAMES[code] ?: code, origin,
             stairsSecondsPerFloor = stairsUp?.let(::r) ?: 22.0, stairsDownSecondsPerFloor = stairsDown?.let(::r) ?: 18.0,
             elevators = elevators, nodes = nodes, edges = edges, anchors = anchors, startPoints = startPoints,
-            notes = "DRAFT from CampusSurvey session ${log.session.id} (${log.session.startedAt}), stride ${stride ?: "unknown"} m" +
+            notes = "DRAFT from survey session ${log.session.id} (${log.session.startedAt}), stride ${stride ?: "unknown"} m" +
                 (if (log.session.strideCalibrated) " (calibrated${log.session.strideMethod?.let { " by $it" } ?: ""})" else " (NOT calibrated)") +
                 ". Walking speed is the default; stairs up ${stairsUp?.let { "%.1f s per floor measured".format(it) } ?: "default"}, " +
                 "down ${stairsDown?.let { "%.1f s per floor measured".format(it) } ?: "default"}. Anything marked estimated is a guess.")
@@ -330,7 +330,7 @@ object HandTuned {
 
 /**
  * `ConvertMain <survey.json | export.zip> <out.json> [--keep <current building.json>]`: writes the draft building and prints the
- * gap report. A CampusSurvey export zip is read directly (its `survey.json`). With `--keep`, hand-tuned fields of the current file
+ * gap report. A survey export zip is read directly (its `survey.json`). With `--keep`, hand-tuned fields of the current file
  * (node ids such as S1/S2/T, demoDestinations, startPoints, access windows) are carried over, see [HandTuned].
  */
 object ConvertMain {

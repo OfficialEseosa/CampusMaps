@@ -1,5 +1,5 @@
 {
-    "format": "campussurvey-log",
+    "format": "survey-log",
     "formatVersion": 2,
     "session": {
         "id": "CS-20260925-1238",

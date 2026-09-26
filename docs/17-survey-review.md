@@ -1,6 +1,6 @@
 # 17. Review of survey session CS-20260924-1614
 
-**Session:** Classroom South, Thursday 2026-09-24, 16:14 to 16:31 (17 min), Raphael, CampusSurvey 0.2 on the S25 Ultra. **Captured:** 6 nodes, 2 edges, 2 anchors (6 photos). **Not captured:** elevator, stairs, notes, videos, start points, floors 2 and 6. **Reviewed:** 2026-09-25 from `survey.json`, `README.txt` and all six photos.
+**Session:** Classroom South, Thursday 2026-09-24, 16:14 to 16:31 (17 min), Raphael, survey collection on the S25 Ultra. **Captured:** 6 nodes, 2 edges, 2 anchors (6 photos). **Not captured:** elevator, stairs, notes, videos, start points, floors 2 and 6. **Reviewed:** 2026-09-25 from `survey.json`, `README.txt` and all six photos.
 
 ## Verdict
 
@@ -186,9 +186,8 @@ $crop.Save("$survey\CS-A01-crop.jpg", [System.Drawing.Imaging.ImageFormat]::Jpeg
 
 **Threshold: 75** (validation rule 7 in [02-building-data.md](02-building-data.md)). **If the building sign scores under 75:** (1) try a crop that keeps the logo with a little façade margin, since more corners help. (2) Do not spend time on it anyway: it is outdoors and Demo B's outdoor leg is Geospatial. It is not needed for indoor localization. (3) Replace it with the **lobby directory board** just inside the door as the entrance's first indoor image anchor. (4) As a last resort, use a printed high-texture poster from the HIVE (Saturday 3 to 9 PM), placed only with permission and disclosed on Devpost. Don't score A02: the door is not a candidate, and the plaque is a text anchor.
 
-## 6. CampusSurvey 0.3 suggestions (only those that change tomorrow's data)
+## 6. Survey suggestions (only those that change tomorrow's data)
 
-CampusSurvey is a separate tool with its own repo and application id, disclosed as a tool and not submitted ([16-survey-app.md](16-survey-app.md)). It can be edited before or during the event without touching the CampusMaps submission, as long as no code moves between them. Ranked by value divided by effort; do the top four if there is an hour before the visit.
 
 | Rank | Change | Fixes finding | Effort |
 |---|---|---|---|

@@ -4,7 +4,7 @@ Tests: `:core:test` 52 (51 pass, 1 skipped, the known 60 s gap), `:app:testDebug
 
 ## Entrance geo: one thing to know first
 
-The files already had `lat`, `lng`, `headingDeg` on every outdoor entrance (CS from the survey, KL and CSE estimated). **In the files `headingDeg` means the door faces OUT**, which is what CampusSurvey records and what the converter writes. So the file values stay as they are, and the walk-in heading is worked out from them (+180):
+The files already had `lat`, `lng`, `headingDeg` on every outdoor entrance (CS from the survey, KL and CSE estimated). **In the files `headingDeg` means the door faces OUT**, which is what field survey records and what the converter writes. So the file values stay as they are, and the walk-in heading is worked out from them (+180):
 - core `Node.walkInHeadingDeg`
 - app `GraphNode.lat`, `GraphNode.lng`, `GraphNode.headingDeg` (walk-in; filled only on outdoor entrances, null elsewhere)
 - `CoreBridge.entranceGeo(...)`, where `headingDeg` = walk-in and `facingOutDeg` = the file value
@@ -49,7 +49,7 @@ The one CS error left is on purpose: on the P2 route (E-WM > H7 > H1 > H2) there
 
 ## Klaus refresh (full steps in docs/19 "Klaus refresh, step by step")
 
-`ConvertMain` now reads the CampusSurvey export zip directly and has `--keep` to carry over:
+`ConvertMain` now reads the field survey export zip directly and has `--keep` to carry over:
 - the ids S1, S2, T and other old ids, matched by node name
 - `demoDestinations`
 - `startPoints`

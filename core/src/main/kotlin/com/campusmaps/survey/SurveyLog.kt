@@ -9,8 +9,8 @@ import kotlinx.serialization.json.doubleOrNull
 import java.time.OffsetDateTime
 
 /**
- * Reader for the CampusSurvey raw observation log (format "campussurvey-log", v2, v1 tolerated).
- * Written from the format documentation in survey-app/README.md only. Every field is optional except kind and id.
+ * Reader for the survey raw observation log (format "survey-log", v2, v1 tolerated).
+ * Written from the survey format documentation. Every field is optional except kind and id.
  */
 @Serializable
 data class SurveyLog(val format: String? = null, val formatVersion: Int = 1, val session: SurveySession, val observations: List<Observation> = emptyList()) {
@@ -24,7 +24,7 @@ data class SurveyLog(val format: String? = null, val formatVersion: Int = 1, val
 data class SurveySession(
     val id: String? = null, val building: String, val surveyor: String? = null, val startedAt: String? = null,
     val strideM: Double? = null, val strideCalibrated: Boolean = false, val device: String? = null,
-    /** CampusSurvey 0.3: how the stride was calibrated (`gps-walk`, `known-distance`, `typed`). */
+    /** survey 0.3: how the stride was calibrated (`gps-walk`, `known-distance`, `typed`). */
     val strideMethod: String? = null, val appVersion: String? = null,
 )
 
@@ -51,12 +51,12 @@ data class Observation(
     val anchorId: String? = null, val photos: List<String> = emptyList(), val widthCm: Double? = null, val text: String? = null,
     val ocr: Ocr? = null, val ocrFar: Ocr? = null, val nearestNodeId: Int? = null, val heightCm: Double? = null,
     val offsetFromNodeM: Double? = null, val facingDeg: Double? = null,
-    /** CampusSurvey 0.3: true when the width was estimated (phone or A4 sheet) rather than taped. */
+    /** survey 0.3: true when the width was estimated (phone or A4 sheet) rather than taped. */
     val widthEstimated: Boolean? = null,
     // edge
     val fromNodeId: Int? = null, val toNodeId: Int? = null, val steps: Int? = null, val durationSec: Double? = null,
     val strideM: Double? = null, val distanceM: Double? = null,
-    // elevator, stairs. CampusSurvey 0.3 (session CS-20260925-1238) writes fromFloor, toFloor, waitSec, rideSec (elevator),
+    // elevator, stairs. survey 0.3 (session CS-20260925-1238) writes fromFloor, toFloor, waitSec, rideSec (elevator),
     // durationSec and steps (stairs), plus a pressureTrace; the observation's own `floor` is the floor selector AFTER the ride,
     // i.e. the arrival floor. Older names (arrivalFloor, Called/Boarded/Doors-opened timestamps) are still read leniently:
     // any may be missing, a number may arrive as a string, and junk is ignored instead of failing the whole log.

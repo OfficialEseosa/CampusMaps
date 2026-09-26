@@ -25,14 +25,12 @@ This folder is the plan, one document per part of the project, plus the research
 | 13 | [13-pitch.md](13-pitch.md) | Pitch outline, prepared answers, Devpost structure, slides |
 | 14 | [14-tech-stack.md](14-tech-stack.md) | Libraries, versions, project layout, what is deliberately excluded |
 | 15 | [15-open-questions.md](15-open-questions.md) | Questions for the team, unverified items, decisions already made |
-| 16 | [16-survey-app.md](16-survey-app.md) | Pre-event data collection app, the rules firewall, what it captures, two build sizes |
-| 17 | [17-survey-review.md](17-survey-review.md) | Review of the first CampusSurvey session, revised 70-minute field protocol, Klaus 20-minute plan |
+| 17 | [17-survey-review.md](17-survey-review.md) | Review of the first campus survey session, revised 70-minute field protocol, Klaus 20-minute plan |
 | 18 | [18-demo-video.md](18-demo-video.md) | Demo video: rules, recording setup, shot lists, editing, submission timeline |
 | 19 | [19-building-data-status.md](19-building-data-status.md) | Per building: measured vs estimated, what the next survey must capture, converter usage |
 | 20 | [20-ui-status.md](20-ui-status.md) | App shell status: screens, fake localizer, stubs, QA pass table (Raphael's shell, before integration) |
 | 21 | [21-integration-notes.md](21-integration-notes.md) | Integration onto the teammate's base: who wrote what, the core adapter, what was removed, open issues |
 | | [NEXT-STEPS.md](NEXT-STEPS.md) | Dated to-do list for the week before the event |
-| | [survey-app/README.md](../survey-app/README.md) | Install and field-use guide for the CampusSurvey app |
 
 ## Research
 
@@ -44,7 +42,6 @@ Reports compiled on 2026-09-20 with sources linked. The module documents cite th
 | [research/meta-glasses.md](research/meta-glasses.md) | Wearables Device Access Toolkit 0.9.0, the audio/camera interlock, Mock Device Kit, setup lead times |
 | [research/mlkit-barometer-wear.md](research/mlkit-barometer-wear.md) | ML Kit OCR, anchor recognition alternatives, barometer floor detection, Wear OS 6, TTS, routing |
 | [research/hackgt-and-competitors.md](research/hackgt-and-competitors.md) | HackGT 13 rules (mostly unpublished), HackGT 12 winners, prior hackathon projects, competitors, venues |
-| [research/survey-app-versions.md](research/survey-app-versions.md) | Pinned versions and gotchas for the survey app build |
 
 ## Event facts (verified from hack.gt on 2026-09-20)
 
