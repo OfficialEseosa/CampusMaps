@@ -52,7 +52,6 @@ const val HANDOFF_MS = 900
 /** How long the "Almost there" card stays before the hand-off plays by itself (a tap starts it at once). */
 const val CARD_MS = 1600L
 
-private val ClayDeep = Color(0xFFA85F33)
 
 /**
  * The map-to-AR hand-off, no jump cut (LEG 2). At [progress] 0 only the map shows; at 1 only AR. In between, the AR layer
@@ -127,24 +126,25 @@ fun rememberHandoffProgress(phase: HandoffPhase, onDone: () -> Unit): Float {
     return anim.value
 }
 
-/** "Almost there. Point your camera ahead": Clay Deep card, white Sora text. Tap to go now; advances by itself after [CARD_MS]. */
+/** "Almost there. Point your camera ahead": campus accent card (same as the primary button), Sora text. Tap to go now; advances by itself after [CARD_MS]. */
 @Composable
 fun HandoffCard(onGo: () -> Unit, modifier: Modifier = Modifier, entranceName: String? = null) {
     val go by rememberUpdatedState(onGo)
+    val palette = com.campusmaps.ui.theme.LocalCampusPalette.current
     LaunchedEffect(Unit) { delay(CARD_MS); go() }
     Column(
         modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(ClayDeep)
+            .background(palette.accent)
             .clickable { go() }
             .padding(horizontal = 20.dp, vertical = 18.dp)
             .testTag("handoffCard"),
     ) {
-        Text("Almost there. Point your camera ahead", color = Color.White, fontFamily = Sora, fontSize = 20.sp,
+        Text("Almost there. Point your camera ahead", color = palette.onAccent, fontFamily = Sora, fontSize = 20.sp,
             lineHeight = 25.sp, fontWeight = FontWeight.ExtraBold)
         if (entranceName != null) {
-            Text(entranceName, color = Color.White.copy(alpha = 0.8f), fontFamily = Sora, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
+            Text(entranceName, color = palette.onAccent.copy(alpha = 0.8f), fontFamily = Sora, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
         }
     }
 }

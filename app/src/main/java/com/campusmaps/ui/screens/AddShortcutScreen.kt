@@ -395,14 +395,14 @@ private fun WalkRecorder(draft: ShortcutDraft, onStart: () -> Unit, onStop: () -
                     .fillMaxWidth()
                     .height(56.dp),
             ) {
-                Icon(AppIcons.stop, contentDescription = null, tint = colors.primary)
-                Text("Stop recording", style = MaterialTheme.typography.labelLarge, color = colors.primary, modifier = Modifier.padding(start = 8.dp))
+                Icon(AppIcons.stop, contentDescription = null, tint = colors.secondary)
+                Text("Stop recording", style = MaterialTheme.typography.labelLarge, color = colors.secondary, modifier = Modifier.padding(start = 8.dp))
             }
         }
         else -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (draft.hasWalk) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(AppIcons.checkCircle, contentDescription = null, tint = colors.primary, modifier = Modifier.size(20.dp))
+                    Icon(AppIcons.checkCircle, contentDescription = null, tint = colors.secondary, modifier = Modifier.size(20.dp))
                     Text(
                         "Walk recorded: ${Formats.distanceAndTime(draft.liveDistanceM, (draft.path.lastOrNull()?.timeMs ?: 0L) / 1000.0)}",
                         style = MaterialTheme.typography.bodyMedium,
@@ -418,7 +418,7 @@ private fun WalkRecorder(draft: ShortcutDraft, onStart: () -> Unit, onStop: () -
                     enabled = canRecord,
                     shape = CircleShape,
                     border = BorderStroke(1.dp, colors.outlineVariant),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.secondary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
@@ -493,7 +493,7 @@ private fun PhotoTile(photo: DraftPhoto, onRemove: (DraftPhoto) -> Unit, loadThu
 
 @Composable
 private fun AddPhotoTile(onAdd: () -> Unit) {
-    val primary = MaterialTheme.colorScheme.primary
+    val primary = MaterialTheme.colorScheme.secondary
     Surface(
         onClick = onAdd,
         shape = RoundedCornerShape(14.dp),
