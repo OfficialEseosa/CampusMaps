@@ -71,11 +71,14 @@
         </activity>
 
         <!-- Glasses setup helper (registration with the Meta AI app, glasses camera permission). The Meta AI app
-             returns here through the campusmaps:// link. See glasses/GlassesSetupActivity.kt. -->
+             returns here through the campusmaps:// link. See glasses/GlassesSetupActivity.kt. Own task affinity, so neither it
+             nor the Meta AI app it opens ends up in the CampusMaps task (qa-phone N7). -->
         <activity
             android:name=".glasses.GlassesSetupActivity"
             android:exported="true"
             android:launchMode="singleTop"
+            android:taskAffinity="com.campusmaps.glassessetup"
+            android:excludeFromRecents="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
