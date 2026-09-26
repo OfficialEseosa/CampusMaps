@@ -79,7 +79,6 @@ import kotlin.math.hypot
 import kotlin.math.min
 
 private val Ink = Color(0xFF313131)
-private val Cream = Color(0xFFF9F2ED)
 private val DoorTeal = Color(0xFF2F6B7A)
 private val EntranceGreen = Color(0xFF2E7D32)
 private val VerticalPlum = Color(0xFF6E5A4E)
@@ -239,7 +238,7 @@ private fun PlanCanvas(vm: EditorViewModel, modifier: Modifier) {
 
     Canvas(
         modifier
-            .background(Cream)
+            .background(com.campusmaps.ui.theme.LocalCampusPalette.current.card)
             .pointerInput(vm.code) {
                 detectTransformGestures { centroid, panChange, zoomChange, _ ->
                     val newZoom = (zoom * zoomChange).coerceIn(0.5f, 12f)
