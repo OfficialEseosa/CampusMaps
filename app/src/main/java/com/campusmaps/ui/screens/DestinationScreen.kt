@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.campusmaps.data.model.Building
 import com.campusmaps.data.model.GraphNode
-import com.campusmaps.routing.Formats
+import com.campusmaps.route.Formats
 import com.campusmaps.ui.TripUiState
 import com.campusmaps.ui.components.AppTopBar
 import com.campusmaps.ui.components.AvoidStairsRow
@@ -213,6 +213,14 @@ private fun SearchField(query: String, onQuery: (String) -> Unit, onSearch: () -
         singleLine = true,
         placeholder = { Text("Search room number or name", style = MaterialTheme.typography.bodyMedium) },
         leadingIcon = { Icon(AppIcons.search, contentDescription = null) },
+        // Clear button (docs/20 QA #13, lost in the teammate's field; docs/22 #3).
+        trailingIcon = if (query.isNotEmpty()) {
+            {
+                androidx.compose.material3.IconButton(onClick = { onQuery("") }) {
+                    Icon(AppIcons.close, contentDescription = "Clear search")
+                }
+            }
+        } else null,
         shape = RoundedCornerShape(28.dp),
         textStyle = MaterialTheme.typography.bodyLarge,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -227,6 +235,8 @@ private fun SearchField(query: String, onQuery: (String) -> Unit, onSearch: () -
             unfocusedIndicatorColor = Color.Transparent,
             focusedLeadingIconColor = colors.onSurfaceVariant,
             unfocusedLeadingIconColor = colors.onSurfaceVariant,
+            focusedTrailingIconColor = colors.onSurfaceVariant,
+            unfocusedTrailingIconColor = colors.onSurfaceVariant,
             focusedPlaceholderColor = colors.onSurfaceVariant,
             unfocusedPlaceholderColor = colors.onSurfaceVariant,
         ),

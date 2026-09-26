@@ -67,9 +67,10 @@ import androidx.core.content.ContextCompat
 import com.campusmaps.guidance.GuidanceState
 import com.campusmaps.platform.ArOverride
 import com.campusmaps.platform.ArSupport
-import com.campusmaps.routing.Formats
-import com.campusmaps.routing.StepKind
+import com.campusmaps.route.Formats
+import com.campusmaps.route.StepKind
 import com.campusmaps.ui.ar.ArWorldOverlay
+import com.campusmaps.ui.ar.toArRouteInput
 import com.campusmaps.ui.ar.CameraPreview
 import com.campusmaps.ui.ar.PaintedHallway
 import com.campusmaps.ui.icons.AppIcons
@@ -90,6 +91,8 @@ fun GuidanceScreen(
     arOverride: ArOverride,
     onEndRoute: () -> Unit,
     onDone: () -> Unit,
+    buildingToWorld: com.campusmaps.loc.BuildingToWorld? = null,
+    onBuildingToWorld: (com.campusmaps.loc.BuildingToWorld?) -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -116,7 +119,6 @@ fun GuidanceScreen(
 
     // Arrows fade out over 400 ms when we lose track, and back in when we recover. No flash.
     val arrowsAlpha by animateFloatAsState(if (state.locating) 0f else 1f, tween(400), label = "arrows")
-    var mapEnlarged by rememberSaveable { mutableStateOf(false) }
 
     val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -130,9 +132,26 @@ fun GuidanceScreen(
             .testTag("guidanceScreen"),
     ) {
         val screenHeight = maxHeight
+        var mapEnlarged by rememberSaveable { mutableStateOf(false) }
 
         // Camera image (or its stand-in) and the AR world objects.
-        if (arOn) {
+        // Real ARCore + camera: Raphael's world-locked AR layer (SceneView ARScene, docs/05). Otherwise, or if the AR
+        // session fails, the teammate's camera preview (or painted stand-in) with the screen-space ArWorldOverlay.
+        var arFailed by remember { mutableStateOf<String?>(null) }
+        val realAr = arOn && arSupported == true && cameraGranted && arOverride != ArOverride.FORCE_OFF && arFailed == null
+        if (realAr) {
+            com.campusmaps.ui.ar.ArGuidanceView(
+                input = state.toArRouteInput(),
+                buildingToWorld = buildingToWorld,
+                onBuildingToWorld = onBuildingToWorld,
+                onFail = { arFailed = it },
+                modifier = Modifier.fillMaxSize(),
+                // Keep the AR hint above the minimap (or the enlarged map), and drop it when Locate me or the
+                // arrived buttons take that space; it overlapped both on the S25 (docs/22 #4).
+                hintBottom = bottom + 16.dp + if (mapEnlarged) screenHeight / 2 else 170.dp,
+                showHints = !state.arrived && !state.locating,
+            )
+        } else if (arOn) {
             if (cameraGranted) CameraPreview(Modifier.fillMaxSize()) else PaintedHallway(Modifier.fillMaxSize())
             ArWorldOverlay(state, arrowsAlpha, Modifier.fillMaxSize())
         }
@@ -330,7 +349,9 @@ private fun InstructionBanner(state: GuidanceState) {
                 Text(state.bannerText, style = AppTextStyles.arInstruction, color = ArOverlayColors.text, modifier = Modifier.testTag("instructionText"))
                 when {
                     riding -> Text("Riding to ${Formats.floorLong(step.completeFloor)}", style = AppTextStyles.arDistance, color = ArOverlayColors.textMuted)
-                    step.kind != StepKind.ARRIVE || state.distanceToStepM >= 0.5 ->
+                    // "in 0 m" read oddly under "Head toward Atrium centre" at the start (docs/22 #5): only show a
+                    // distance that is at least half a metre.
+                    state.distanceToStepM >= 0.5 ->
                         Text(Formats.inDistance(state.distanceToStepM), style = AppTextStyles.arDistance, color = ArOverlayColors.textMuted)
                 }
             }

@@ -42,8 +42,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.dp
-import com.campusmaps.routing.FloorChange
-import com.campusmaps.routing.StepKind
+import com.campusmaps.route.FloorChange
+import com.campusmaps.route.StepKind
 
 // Every icon in the app, by the Material Symbols name used in the design handoff (section 2).
 // One style only: Rounded.

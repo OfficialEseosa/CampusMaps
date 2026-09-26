@@ -38,16 +38,17 @@ class AppFlowTest {
 
     private val container: AppContainer get() = (rule.activity.application as CampusMapsApplication).container
 
-    // Every test starts from a clean S1: Classroom South, demo off, stairs allowed, Sat 21:00.
+    // Every test starts from a clean S1: Classroom South (real building file), demo off, stairs allowed, Sat 21:00.
     @Before
     fun resetState() {
         runBlocking {
             container.settings.setDemoMode(false)
             container.settings.setAvoidStairs(false)
-            container.settings.setBuilding("cs")
-            container.settings.clearRecents("cs")
+            container.settings.setBuilding("CS")
+            container.settings.clearRecents("CS")
+            container.settings.clearRecents("CSE")
         }
-        container.clock.set(AppClock.DEMO_PRESETS.first())
+        container.clock.set(AppClock.DEFAULT_SIMULATED)
         rule.runOnUiThread { rule.activity.recreate() }
         rule.waitForIdle()
     }
@@ -59,34 +60,52 @@ class AppFlowTest {
         rule.waitUntil(timeoutMs) { rule.onAllNodes(hasText(text, substring = substring)).fetchSemanticsNodes().isNotEmpty() }
 
     private fun openRoutesFor608() {
-        waitForTag("destination_cs_r608")
+        waitForTag("destination_R-608")
         rule.onNodeWithText("Pick a destination").assertIsNotEnabled()
-        rule.onNodeWithTag("destination_cs_r608").performScrollTo().performClick()
+        rule.onNodeWithTag("destination_R-608").performScrollTo().performClick()
+        waitForText("Route to Room 608")
         rule.onNodeWithText("Route to Room 608").assertIsEnabled().performClick()
         waitForText("To Room 608")
+        settle()
+    }
+
+    // MainViewModel ignores a tap that lands on a new screen within 600 ms (double-tap guard, docs/20 QA #1-#2).
+    private fun settle() {
+        Thread.sleep(700)
+        rule.waitForIdle()
     }
 
     @Test
     fun destinationToRouteOptionsToGuidanceAndBack() {
         openRoutesFor608()
-        // S1b: header, honest simulated time chip, locked entrance banner, best card.
+        // S1b: header, honest simulated time chip, best card from P1 (core: Library South entrance, floor 2, elevator).
         rule.onNodeWithText("Routed for", substring = true).assertIsDisplayed()
-        rule.onNodeWithTag("lockedBanner").assertIsDisplayed()
-        rule.onNodeWithText("Main entrance is card-only now. Using Library South entrance instead.", substring = true).assertIsDisplayed()
         rule.onNodeWithText("Fastest").assertIsDisplayed()
-        rule.onNodeWithText("also via: 95 Decatur Street entrance").assertIsDisplayed()
+        rule.onNodeWithText("also via: Classroom South main (floor 2)").assertIsDisplayed()
 
         // Tap the best card: S2 opens with the compact outside banner.
-        rule.onNodeWithTag("routeCard_cs_lib-ELEVATOR").performClick()
+        rule.onNodeWithTag("routeCard_E-LM2-elevator-0").performClick()
         waitForTag("guidanceScreen")
         rule.onNodeWithTag("instructionText").assertIsDisplayed()
-        rule.onNodeWithText("Walk to Library South entrance").assertIsDisplayed()
+        rule.onNodeWithText("Walk to Library South entrance (floor 2)").assertIsDisplayed()
         rule.onNodeWithTag("minimap").assertIsDisplayed()
 
         // End route goes back to S1b.
         rule.onNodeWithTag("endRoute").performClick()
         waitForText("Route options")
         rule.onNodeWithText("To Room 608").assertIsDisplayed()
+    }
+
+    // Demo C: Student Center East at Sat 21:00, the banner names both entrances.
+    @Test
+    fun lockedEntranceBannerNamesBothEntrances() {
+        runBlocking { container.settings.setBuilding("CSE") }
+        waitForTag("destination_R-220")
+        rule.onNodeWithTag("destination_R-220").performScrollTo().performClick()
+        waitForText("Route to Room 220")
+        rule.onNodeWithText("Route to Room 220").performClick()
+        waitForTag("lockedBanner")
+        rule.onNodeWithText("Main entrance is card-only now. Using West entrance instead.", substring = true).assertIsDisplayed()
     }
 
     @Test
@@ -100,12 +119,14 @@ class AppFlowTest {
 
     @Test
     fun everyEntranceLockedShowsNoRoute() {
+        // Student Center East closes both entrances at 23:00 on Saturday.
+        runBlocking { container.settings.setBuilding("CSE") }
         container.clock.set(ClockMode.Simulated(DayOfWeek.SATURDAY, LocalTime.of(23, 0)))
-        waitForTag("destination_cs_r608")
-        rule.onNodeWithTag("destination_cs_r608").performScrollTo().performClick()
+        waitForTag("destination_R-220")
+        rule.onNodeWithTag("destination_R-220").performScrollTo().performClick()
         waitForTag("routeError")
-        rule.onNodeWithText("No route to Room 608: every entrance is card-only at Sat 23:00.").performScrollTo().assertIsDisplayed()
-        rule.onNodeWithText("Route to Room 608").performClick()
+        rule.onNodeWithText("No route to Room 220: every entrance is card-only at Sat 23:00.").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("Route to Room 220").performClick()
         waitForTag("noRoute")
         rule.onNodeWithText("Pick another room").performClick()
         waitForText("Where to?")

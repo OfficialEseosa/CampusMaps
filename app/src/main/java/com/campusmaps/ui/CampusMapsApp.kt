@@ -13,15 +13,18 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.campusmaps.AppContainer
 import com.campusmaps.guidance.GuidanceState
-import com.campusmaps.routing.Formats
+import com.campusmaps.route.Formats
 import com.campusmaps.ui.screens.AddShortcutScreen
 import com.campusmaps.ui.screens.DebugLink
 import com.campusmaps.ui.screens.DebugOverlay
+import com.campusmaps.ui.screens.DebugControls
+import com.campusmaps.ui.screens.rememberPressure
 import com.campusmaps.ui.screens.DestinationActions
 import com.campusmaps.ui.screens.DestinationScreen
 import com.campusmaps.ui.screens.GlassesScreen
@@ -87,7 +90,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
             Crossfade(targetState = screen, animationSpec = tween(250), label = "screen") { target ->
                 when (target) {
                     Screen.DESTINATION -> DestinationScreen(
-                        state = trip,
+                        state = trip.copy(query = vm.searchText), // Synchronous search text (docs/22 #2)
                         buildings = app.buildings,
                         actions = DestinationActions(
                             onBuilding = vm::selectBuilding,
@@ -117,7 +120,11 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         ),
                     )
                     Screen.GUIDANCE -> guidance?.let {
-                        GuidanceScreen(state = it, arOverride = arOverride, onEndRoute = vm::endGuidance, onDone = vm::done)
+                        val t by (controller?.buildingToWorld ?: NoTransform).collectAsState()
+                        GuidanceScreen(
+                            state = it, arOverride = arOverride, onEndRoute = vm::endGuidance, onDone = vm::done,
+                            buildingToWorld = t, onBuildingToWorld = { v -> controller?.buildingToWorld?.value = v },
+                        )
                     }
                     Screen.GLASSES -> guidance?.let {
                         GlassesScreen(
@@ -154,24 +161,35 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
 
             if (debugVisible && !settings.demoMode) {
                 val g = guidance
+                val clockMode by vm.clockMode.collectAsState()
+                val walk by vm.walk.collectAsState()
+                val watchCount by app.watch.connectedCount.collectAsState()
+                val pressure = rememberPressure()
+                val arCore = rememberArCoreAvailability()
+                val problems = app.loadProblems[trip.building.code].orEmpty()
                 val lines = buildList {
-                    add("screen: ${screen.name.lowercase()}")
-                    add("clock: ${app.clock.label()}")
-                    add("ar: ${arOverride.label}  tts: ${tts.name.lowercase()}")
-                    add("network: ${if (offline) "offline" else "online"}")
+                    add("screen: ${screen.name.lowercase()}  building: ${trip.building.code}")
+                    add("clock: ${app.clock.label()}  now: ${Formats.dayTime(app.clock.now())}")
+                    add("start: ${trip.start.id} (${if (trip.start.isOutdoor) "outside" else Formats.floorShort(trip.start.floor)})")
+                    add("ar: ${arOverride.label}  ARCore: $arCore")
+                    add("barometer: ${pressure?.let { "%.2f hPa".format(it) } ?: "no barometer"}")
+                    add("watch: ${if (watchCount < 0) "not asked yet" else "$watchCount connected"}  glasses: ${if (glassesConnected) "connected (simulated)" else "not connected"}")
+                    add("tts: ${tts.name.lowercase()}  network: ${if (offline) "offline" else "online"}")
+                    add("validator: ${problems.size} problems (ERROR/WARN, see Logcat)")
                     if (g != null) {
-                        add("pose: x=${"%.1f".format(g.pose.position.x)} y=${"%.1f".format(g.pose.position.y)} ${Formats.floorShort(g.floor)}")
-                        add("heading: ${Math.toDegrees(g.pose.headingRad).toInt()} deg  conf: ${"%.2f".format(g.pose.confidence)}")
+                        val node = g.route.points.getOrNull(g.progress.segmentIndex)?.node
+                        add("node: ${node?.id ?: "-"}  ${Formats.floorShort(g.floor)}  conf ${"%.2f".format(g.pose.confidence)}")
+                        add("pose: x=${"%.1f".format(g.pose.position.x)} y=${"%.1f".format(g.pose.position.y)} heading ${Math.toDegrees(g.pose.headingRad).toInt()}")
                         add("step: ${g.progress.stepIndex + 1}/${g.route.steps.size} ${g.step.kind.name.lowercase()}")
                         add("along: ${"%.1f".format(g.progress.alongM)} m  off: ${"%.1f".format(g.progress.offRouteM.coerceAtMost(999.0))} m")
                         add("reroutes: ${g.rerouteCount}  speed: x${vm.debugSpeed().toInt()}")
                     }
                 }
                 val links = buildList {
-                    add(DebugLink("Cycle simulated time", vm::debugCycleClock))
+                    add(DebugLink("Cycle simulated time (shortcut)", vm::debugCycleClock))
                     add(DebugLink("AR: ${arOverride.label} (tap to change)", vm::debugCycleAr))
                     if (g != null) {
-                        add(DebugLink("Drop confidence (Locate me)", vm::debugDropConfidence))
+                        add(DebugLink("Drop confidence for 4 s (Locate me)", vm::debugDropConfidence))
                         add(DebugLink("Force reroute", vm::debugPushOffRoute))
                         add(DebugLink("Skip step", vm::debugSkipStep))
                         add(DebugLink("Walk speed x1 / x4", vm::debugToggleSpeed))
@@ -181,11 +199,52 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                     add(DebugLink("Approve my pending shortcuts") { vm.debugReview(approve = true) })
                     add(DebugLink("Reject my pending shortcuts") { vm.debugReview(approve = false) })
                 }
-                DebugOverlay(guidance = g, lines = lines, links = links, onClose = vm::hideDebug)
+                val here = g?.route?.points?.getOrNull(g.progress.segmentIndex)?.node ?: trip.start
+                DebugOverlay(guidance = g, lines = lines, links = links, onClose = vm::hideDebug) {
+                    DebugControls(
+                        clock = clockMode,
+                        walk = walk,
+                        guiding = g != null,
+                        arrived = g?.arrived == true,
+                        jumpTargets = trip.startOptions,
+                        jumpLabel = if (here.isOutdoor) "outside: ${here.id}" else here.id,
+                        onSimulated = vm::debugSetSimulated,
+                        onSetTime = vm::debugSetTime,
+                        onStep = vm::debugStep,
+                        onWalk = vm::debugToggleWalk,
+                        onInterval = vm::debugWalkInterval,
+                        onPause = vm::debugTogglePause,
+                        onLowConfidence = vm::debugSetLowConfidence,
+                        onJump = vm::debugJumpTo,
+                    )
+                }
             }
         }
     }
 }
+
+// ARCore's own availability string for the debug card (Raphael's line), e.g. SUPPORTED_INSTALLED or UNKNOWN_ERROR.
+@Composable
+private fun rememberArCoreAvailability(): String {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var value by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("checking") }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        repeat(10) {
+            val a = try {
+                com.google.ar.core.ArCoreApk.getInstance().checkAvailability(context)
+            } catch (e: Exception) {
+                value = "error: ${e.message}"
+                return@LaunchedEffect
+            }
+            value = a.name
+            if (!a.isTransient) return@LaunchedEffect
+            kotlinx.coroutines.delay(300)
+        }
+    }
+    return value
+}
+
+private val NoTransform = MutableStateFlow<com.campusmaps.loc.BuildingToWorld?>(null)
 
 // Stand-in flow while there is no guidance session.
 private val NoGuidance = MutableStateFlow<GuidanceState?>(null)

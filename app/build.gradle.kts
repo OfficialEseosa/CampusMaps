@@ -1,21 +1,13 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
 
-// Read local.properties so secrets (like the Google Maps key) never go into git.
-val localProps = Properties().apply {
-    val file = rootProject.file("local.properties")
-    if (file.exists()) file.inputStream().use { load(it) }
-}
-val mapsApiKey: String = localProps.getProperty("MAPS_API_KEY", "")
-
 android {
     namespace = "com.campusmaps"
-    compileSdk = 36
+    // 37, not 36: SceneView 4.38.0 (AR layer) requires compileSdk 37. targetSdk stays 36. See docs/14.
+    compileSdk = 37
 
     defaultConfig {
         // The watch app uses the same applicationId so the Wear data layer can pair them.
@@ -27,9 +19,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Empty key = the Google Maps renderer stays off and the floor plan map is used.
-        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
-        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        // Meta Wearables Device Access Toolkit: "0" works in Developer Mode (no attestation). See docs/06.
+        manifestPlaceholders["mwdat_application_id"] = "0"
+        manifestPlaceholders["mwdat_client_token"] = "0"
     }
 
     buildTypes {
@@ -56,6 +48,8 @@ android {
 
 dependencies {
     implementation(project(":shared"))
+    // Raphael's building model, loader, validator, router and survey converter (pure Kotlin/JVM).
+    implementation(project(":core"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -80,12 +74,16 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.arcore)
+    // SceneView ARScene for the world-locked route arrows (docs/05).
+    implementation(libs.sceneview.arsceneview)
 
     // Sends the current step to the watch.
     implementation(libs.play.services.wearable)
 
-    // Google Maps renderer (only used when MAPS_API_KEY is set in local.properties).
-    implementation(libs.maps.compose)
+    // Ray-Ban Meta glasses: toolkit 0.7.0, the version the glasses' DWA 0.7 accepts (docs/06, real-glasses verification).
+    implementation(libs.mwdat.core)
+    implementation(libs.mwdat.camera)
+    implementation(libs.mwdat.mockdevice)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

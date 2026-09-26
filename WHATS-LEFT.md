@@ -46,11 +46,13 @@ emulator. Live screenshots are in `screenshots/` (phone) and `screenshots/wear/`
 
 ## Open issues found during live testing
 
-1. **Shortcut floor validation**: an approved shortcut is trusted even when its floors
+1. **Fixed at integration.** S4 refuses From/To on different floors and `CoreRouter` drops cross-floor shortcuts.
+   Was: **Shortcut floor validation**: an approved shortcut is trusted even when its floors
    don't match. A 24 m walk recorded on floor 1 from Room 150 (floor 1) to Room 608
    (floor 6) became the best route, "same floor, 1:20". The simulated walk recorder also
    never changes floor. This needs validation on submission or in the router.
-2. **Watch never learns the route ended**: it keeps showing the last step after Done or
+2. (Handled in code: `MainViewModel.stopSession` calls `WatchBridge.clear()`; not re-verified on a real watch.)
+   **Watch never learns the route ended**: it keeps showing the last step after Done or
    Stop.
 3. **Stairs down on the watch** uses the same up-staircase icon as stairs up.
 4. **S3 arrival** keeps Repeat/Stop/"Fake step" and has no Done/Back to routes. The
@@ -68,8 +70,7 @@ deeper settings, outdoor Geospatial screens, the replay tool, multi-building sea
 
 ## Integration points left for you
 
-- **Google Maps API key**: the seam is built (`MapConfig`, `GoogleOutdoorMap.kt`,
-  reads `MAPS_API_KEY` from `local.properties`). Untested since no key is set.
+- ~~Google Maps API key~~: removed at integration (owner decision; the outdoor leg is ARCore Geospatial, docs/05).
 - **Real ARCore / camera pose**: implement `PositionProvider` (only
   `SimulatedPositionProvider` exists).
 - **Real glasses SDK**: implement `GlassesLink` (only `SimulatedGlassesLink` exists).
@@ -79,5 +80,5 @@ deeper settings, outdoor Geospatial screens, the replay tool, multi-building sea
 ## Suggested next steps
 
 1. Fix open issues 1, 2, 3 and 5 (code bugs); decide on 4.
-2. Add a `MAPS_API_KEY` and confirm the outdoor renderer switch works.
+2. (Dropped: Google Maps outdoor renderer removed.)
 3. Pair a real phone and watch to confirm end-to-end step delivery.

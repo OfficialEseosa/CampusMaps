@@ -1,10 +1,24 @@
+# CampusSurvey is a separate repo and must never enter this one
+survey-app/
+# raw survey exports (large photos); keep them in Drive
+*.zip
+# Gradle / Android
 *.iml
 .gradle/
 /local.properties
+local.properties
 .idea/
 .DS_Store
+Thumbs.db
 build/
 /captures
+captures/
 .externalNativeBuild
 .cxx
+.cxx/
 .kotlin/
+*.apk
+*.aab
+# stale IDE output of the plain-Kotlin modules
+core/bin/
+shared/bin/

@@ -1,5 +1,7 @@
 package com.campusmaps.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -12,10 +14,10 @@ import com.campusmaps.data.model.NodeKind
 import com.campusmaps.guidance.GuidanceController
 import com.campusmaps.platform.ArOverride
 import com.campusmaps.platform.TtsStatus
-import com.campusmaps.routing.Formats
-import com.campusmaps.routing.Route
-import com.campusmaps.routing.RouteOption
-import com.campusmaps.routing.RoutePlan
+import com.campusmaps.route.Formats
+import com.campusmaps.route.Route
+import com.campusmaps.route.RouteOption
+import com.campusmaps.route.RoutePlan
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +30,20 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import com.campusmaps.data.AppClock
+import java.time.DayOfWeek
+import java.time.LocalTime
+
+// Debug fake-walk state (Raphael's controls).
+data class WalkState(
+    val auto: Boolean = false,        // Walk: one node every intervalSec
+    val intervalSec: Int = 3,
+    val paused: Boolean = false,      // Continuous simulated walker paused
+    val lowConfidence: Boolean = false,
+)
 
 // The screens from the flow in section 3 of the handoff.
 enum class Screen { DESTINATION, ROUTES, GUIDANCE, GLASSES, ADD_SHORTCUT }
@@ -61,7 +77,27 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     private val _screen = MutableStateFlow(Screen.DESTINATION)
     val screen: StateFlow<Screen> = _screen.asStateFlow()
 
+    // Double-tap guard (Raphael's docs/20 QA #1, #2): a second tap that lands on the next screen within this
+    // window, e.g. on its route card or glasses button, is ignored.
+    private var screenChangedAt = 0L
+    private fun settled(): Boolean = android.os.SystemClock.uptimeMillis() - screenChangedAt > TAP_GUARD_MS
+    private fun go(target: Screen) {
+        if (_screen.value != target) screenChangedAt = android.os.SystemClock.uptimeMillis()
+        _screen.value = target
+    }
+
     private val selection = MutableStateFlow(Selection())
+
+    // The search box text as Compose state, set synchronously on every key. `trip` is computed on Dispatchers.Default,
+    // so feeding the TextField from trip.query let a late recomposition put back an older value and drop typed
+    // characters ("ROOM" became "R" on the S25, docs/22 #2). Every selection change goes through updateSelection.
+    var searchText by androidx.compose.runtime.mutableStateOf("")
+        private set
+
+    private fun updateSelection(change: (Selection) -> Selection) {
+        selection.update(change)
+        searchText = selection.value.query
+    }
 
     private val _showSettings = MutableStateFlow(false)
     val showSettings: StateFlow<Boolean> = _showSettings.asStateFlow()
@@ -140,51 +176,53 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
 
     fun selectBuilding(id: String) {
         viewModelScope.launch { app.settings.setBuilding(id) }
-        selection.value = Selection() // Different building file: clear the room and start
+        updateSelection { Selection() } // Different building file: clear the room and start
     }
 
-    fun selectDestination(id: String) = selection.update { it.copy(destinationId = id, query = "") }
+    fun selectDestination(id: String) = updateSelection { it.copy(destinationId = id, query = "") }
 
-    fun setQuery(text: String) = selection.update { it.copy(query = text) }
+    fun setQuery(text: String) = updateSelection { it.copy(query = text) }
 
     // Keyboard search key picks the top hit.
     fun submitSearch() {
-        trip.value.searchHits.firstOrNull()?.let { selectDestination(it.id) }
+        search(trip.value.building, searchText).firstOrNull()?.let { selectDestination(it.id) }
     }
 
-    fun selectStart(id: String) = selection.update { it.copy(startId = id) }
+    fun selectStart(id: String) = updateSelection { it.copy(startId = id) }
 
     fun setAvoidStairs(on: Boolean) {
         viewModelScope.launch { app.settings.setAvoidStairs(on) }
     }
 
     fun openRoutes() {
+        if (!settled()) return
         val t = trip.value
         val destination = t.destination ?: return
         viewModelScope.launch { app.settings.addRecent(t.building.id, destination.id) }
-        _screen.value = Screen.ROUTES
+        go(Screen.ROUTES)
     }
 
     fun openAddShortcut() {
-        _screen.value = Screen.ADD_SHORTCUT
+        go(Screen.ADD_SHORTCUT)
     }
 
     // ---------- S1b ----------
 
     fun back() {
         when (_screen.value) {
-            Screen.ROUTES, Screen.ADD_SHORTCUT -> _screen.value = Screen.DESTINATION
+            Screen.ROUTES, Screen.ADD_SHORTCUT -> go(Screen.DESTINATION)
             Screen.GUIDANCE, Screen.GLASSES -> endGuidance()
             Screen.DESTINATION -> Unit
         }
     }
 
-    fun startGuidance(option: RouteOption) = startSession(option.route, glasses = false)
+    fun startGuidance(option: RouteOption) { if (settled()) startSession(option.route, glasses = false) }
 
-    fun startAlreadyHere(route: Route) = startSession(route, glasses = false)
+    fun startAlreadyHere(route: Route) { if (settled()) startSession(route, glasses = false) }
 
     // "Guide me with glasses": follows the best route in S3.
     fun startGlasses() {
+        if (!settled()) return
         val options = (trip.value.plan as? RoutePlan.Options)?.options ?: return
         startSession(options.first().route, glasses = true)
     }
@@ -206,23 +244,40 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             watch = app.watch,
         )
         controller.glassesMode = glasses
+        controller.simulation.lowConfidence = _walk.value.lowConfidence
+        _walk.update { it.copy(paused = false) }
         controller.start()
         _guidance.value = controller
         if (glasses) {
+            // Demo C: the first thing the glasses say is core's locked-entrance notice, then the instruction.
+            val notice = (t.plan as? RoutePlan.Options)?.lockedNotice
+            var noticeSpoken = notice == null
+            var arrivalSpoken = false
             app.glasses.start(
-                currentInstruction = { controller.state.value.let { s -> if (s.arrived) s.step.text else s.bannerText } },
+                currentInstruction = {
+                    val s = controller.state.value
+                    if (s.arrived) arrivalSpoken = true
+                    val text = if (s.arrived) s.step.text else s.bannerText
+                    if (!noticeSpoken) { noticeSpoken = true; "Heads up: ${notice!!.text} $text" } else text
+                },
                 currentSign = { controller.state.value.let { s -> s.route.points.getOrNull(s.step.startIndex)?.node?.signText } },
+                finished = { arrivalSpoken && controller.state.value.arrived },
             )
         }
-        _screen.value = if (glasses) Screen.GLASSES else Screen.GUIDANCE
+        go(if (glasses) Screen.GLASSES else Screen.GUIDANCE)
     }
 
     // ---------- S2 / S3 ----------
 
     // "End route", "Stop" and "Back to routes" all land on S1b.
     fun endGuidance() {
+        // The student may have moved: S1b cards are recomputed from where they are now (Raphael's docs/20 behaviour).
+        _guidance.value?.state?.value?.let { g ->
+            val here = if (g.arrived) g.destination else g.route.points.getOrNull(g.progress.segmentIndex)?.node
+            if (here != null && here.id != trip.value.start.id) updateSelection { it.copy(startId = here.id) }
+        }
         stopSession()
-        _screen.value = Screen.ROUTES
+        go(Screen.ROUTES)
     }
 
     // "Done" on the arrived banner: reset for the next judge.
@@ -232,6 +287,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     }
 
     private fun stopSession() {
+        stopWalk()
         _guidance.value?.stop()
         _guidance.value = null
         app.glasses.stop()
@@ -244,8 +300,8 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     // Reset: back to a clean S1 (keeps settings).
     fun reset() {
         stopSession()
-        selection.value = Selection()
-        _screen.value = Screen.DESTINATION
+        updateSelection { Selection() }
+        go(Screen.DESTINATION)
     }
 
     // Settings "Reset demo": also restores demo defaults.
@@ -253,6 +309,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         reset()
         app.clock.reset()
         arOverride.value = ArOverride.AUTO
+        debugSetLowConfidence(false)
         viewModelScope.launch {
             app.settings.setAvoidStairs(false)
             app.settings.clearRecents(trip.value.building.id)
@@ -289,14 +346,78 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         viewModelScope.launch { app.settings.setDemoMode(on) }
         if (on) {
             _debugVisible.value = false
-            selection.update { it.copy(query = "") }
-            if (_screen.value == Screen.ADD_SHORTCUT) _screen.value = Screen.DESTINATION
+            updateSelection { it.copy(query = "") }
+            if (_screen.value == Screen.ADD_SHORTCUT) go(Screen.DESTINATION)
         }
     }
 
     // ---------- Debug overlay ----------
 
     fun debugCycleClock() = app.clock.cycle()
+
+    // Simulated-time switch (Raphael's debug overlay): on = Sat 26 Sep 2026 21:00, off = real clock.
+    fun debugSetSimulated(on: Boolean) = app.clock.set(if (on) AppClock.DEFAULT_SIMULATED else ClockMode.Real)
+
+    // Day chip + Material 3 TimePicker result.
+    fun debugSetTime(day: DayOfWeek, time: LocalTime) = app.clock.set(ClockMode.Simulated(day, time))
+
+    // ---- Fake walk (Raphael's Step / Walk / interval), on top of the teammate's continuous simulated walker ----
+
+    private val _walk = MutableStateFlow(WalkState())
+    val walk: StateFlow<WalkState> = _walk.asStateFlow()
+    private var walkJob: Job? = null
+
+    fun debugStep() {
+        val g = _guidance.value ?: return
+        g.simulation.paused = true
+        _walk.update { it.copy(paused = true) }
+        g.stepToNextNode()
+    }
+
+    // Walk: one node every N seconds until arrival. Pause stops it (the continuous walker stays paused).
+    fun debugToggleWalk() {
+        if (_walk.value.auto) {
+            stopWalk()
+            return
+        }
+        val g = _guidance.value ?: return
+        g.simulation.paused = true
+        _walk.update { it.copy(auto = true, paused = true) }
+        walkJob = viewModelScope.launch {
+            while (isActive && _guidance.value === g && !g.state.value.arrived) {
+                delay(_walk.value.intervalSec * 1000L)
+                g.stepToNextNode()
+            }
+            _walk.update { it.copy(auto = false) }
+        }
+    }
+
+    private fun stopWalk() {
+        walkJob?.cancel()
+        walkJob = null
+        _walk.update { it.copy(auto = false) }
+    }
+
+    fun debugWalkInterval(delta: Int) = _walk.update { it.copy(intervalSec = (it.intervalSec + delta).coerceIn(1, 20)) }
+
+    // Continuous walker on/off (the teammate's simulated student).
+    fun debugTogglePause() {
+        val sim = _guidance.value?.simulation ?: return
+        sim.paused = !sim.paused
+        _walk.update { it.copy(paused = sim.paused) }
+    }
+
+    fun debugSetLowConfidence(on: Boolean) {
+        _walk.update { it.copy(lowConfidence = on) }
+        _guidance.value?.simulation?.lowConfidence = on
+    }
+
+    // Jump to node / start point: before guidance it sets "Where are you?"; during guidance it moves the student
+    // (along the route, or off it with a reroute, including to an outdoor start point).
+    fun debugJumpTo(nodeId: String) {
+        val g = _guidance.value
+        if (g == null) selectStart(nodeId) else g.jumpTo(nodeId)
+    }
 
     fun debugCycleAr() {
         arOverride.update { ArOverride.entries[(it.ordinal + 1) % ArOverride.entries.size] }
@@ -339,6 +460,10 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             .filter { room -> room.name.lowercase().contains(q) || room.name.filter(Char::isDigit).startsWith(q) }
             .sortedWith(compareBy({ !it.name.lowercase().removePrefix("room ").startsWith(q) }, { it.name }))
             .take(5)
+    }
+
+    companion object {
+        private const val TAP_GUARD_MS = 600L
     }
 
     class Factory(private val app: AppContainer) : ViewModelProvider.Factory {

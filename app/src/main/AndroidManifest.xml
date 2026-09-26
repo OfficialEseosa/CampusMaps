@@ -34,10 +34,13 @@
             android:name="com.google.ar.core"
             android:value="optional" />
 
-        <!-- Filled from MAPS_API_KEY in local.properties. Empty = Google Maps renderer stays off. -->
+        <!-- Meta Wearables Device Access Toolkit (Developer Mode placeholders, see app/build.gradle.kts). -->
         <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}" />
+            android:name="com.meta.wearable.mwdat.APPLICATION_ID"
+            android:value="${mwdat_application_id}" />
+        <meta-data
+            android:name="com.meta.wearable.mwdat.CLIENT_TOKEN"
+            android:value="${mwdat_client_token}" />
 
         <!-- Portrait only (locked), per the design handoff. -->
         <activity

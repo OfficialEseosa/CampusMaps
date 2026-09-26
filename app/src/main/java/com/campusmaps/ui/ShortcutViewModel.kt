@@ -46,15 +46,17 @@ data class ShortcutDraft(
     val note: String = "",
     val submitting: Boolean = false,
     val walkConnects: Boolean = true,
+    // WHATS-LEFT open issue 1: a shortcut is a walk on one floor. False when From and To are on different floors.
+    val sameFloor: Boolean = true,
 ) {
     val hasWalk: Boolean get() = !recording && path.size >= 2
     val missingReason: String? get() =
-        ShortcutRules.missingReason(fromId != null, toId != null, hasWalk, photos.size, walkConnects)
+        ShortcutRules.missingReason(fromId != null, toId != null, hasWalk, photos.size, walkConnects, sameFloor)
     val canSubmit: Boolean get() = missingReason == null && !submitting
 
     // Progress steps: 0 = Walk, 1 = Photos, 2 = Submit.
     val currentStep: Int get() = when {
-        fromId == null || toId == null || !hasWalk || !walkConnects -> 0
+        fromId == null || toId == null || !sameFloor || !hasWalk || !walkConnects -> 0
         photos.size < ShortcutRules.MIN_PHOTOS -> 1
         else -> 2
     }
@@ -71,7 +73,7 @@ class ShortcutViewModel(private val app: AppContainer) : ViewModel() {
     // The building comes from settings (same as S1).
     val building: StateFlow<Building> = app.settings.settings
         .map { app.building(it.buildingId) }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, app.building(com.campusmaps.data.campus.DemoBuildings.DEFAULT_BUILDING_ID))
+        .stateIn(viewModelScope, SharingStarted.Eagerly, app.building(com.campusmaps.data.campus.CoreBridge.DEFAULT_BUILDING_ID))
 
     // One-off messages for the snackbar.
     private val _messages = Channel<String>(Channel.BUFFERED)
@@ -80,14 +82,22 @@ class ShortcutViewModel(private val app: AppContainer) : ViewModel() {
     private var recordJob: Job? = null
     private var walker: SimulatedPositionProvider? = null
 
-    // Places a student can pick for From / To: rooms, entrances, named spots and outside points.
+    // Places a student can pick for From / To: rooms, entrances and named spots inside the building file.
+    // Outside start points are not graph nodes in core (they are Start.Outside), so they cannot end a shortcut.
     fun places(building: Building): List<GraphNode> = building.nodes.values
-        .filter { it.kind != NodeKind.ELEVATOR && it.kind != NodeKind.STAIRS }
+        .filter { it.kind != NodeKind.ELEVATOR && it.kind != NodeKind.STAIRS && it.kind != NodeKind.OUTDOOR }
         .distinctBy { it.name }
         .sortedWith(compareBy({ it.kind != NodeKind.ROOM }, { it.name }))
 
-    fun setFrom(id: String) = _draft.update { it.copy(fromId = id, path = emptyList()) }
-    fun setTo(id: String) = _draft.update { it.copy(toId = id, path = emptyList()) }
+    fun setFrom(id: String) = _draft.update { it.copy(fromId = id, path = emptyList(), sameFloor = sameFloor(id, it.toId)) }
+    fun setTo(id: String) = _draft.update { it.copy(toId = id, path = emptyList(), sameFloor = sameFloor(it.fromId, id)) }
+
+    private fun sameFloor(from: String?, to: String?): Boolean {
+        val b = building.value
+        val a = from?.let { b.nodes[it] } ?: return true
+        val c = to?.let { b.nodes[it] } ?: return true
+        return a.floor == c.floor
+    }
     fun setNote(text: String) = _draft.update { it.copy(note = text) }
 
     // Records the walk as a list of positions from the localisation system.

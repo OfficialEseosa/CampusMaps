@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.campusmaps.data.model.EdgeKind
 import com.campusmaps.data.model.Point
-import com.campusmaps.routing.Formats
+import com.campusmaps.route.Formats
 import com.campusmaps.ui.theme.ArOverlayColors
 import com.campusmaps.ui.theme.Sora
 import kotlin.math.min

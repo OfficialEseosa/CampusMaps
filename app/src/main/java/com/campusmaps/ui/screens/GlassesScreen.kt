@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.campusmaps.guidance.GlassesPhase
 import com.campusmaps.guidance.GuidanceState
-import com.campusmaps.routing.Formats
+import com.campusmaps.route.Formats
 import com.campusmaps.ui.icons.AppIcons
 import com.campusmaps.ui.theme.AppTextStyles
 import com.campusmaps.ui.theme.ArOverlayColors
@@ -176,10 +176,11 @@ fun GlassesScreen(
             }
 
             // 6. Floor and the Looking / Recognising / Speaking cycle
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // On the S25 (384 dp wide) the pills beside the floor wrapped "Speaking" onto a second line (docs/22 #7):
+            // the floor goes above, the three pills get the full width.
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(Formats.floorLong(state.floor), color = Color.White, fontFamily = Sora, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.weight(1f))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     GlassesPhase.entries.forEach { phase -> PhasePill(phase, active = phase == glasses.phase && glasses.connected) }
                 }
             }

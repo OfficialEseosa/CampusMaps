@@ -78,7 +78,7 @@ import com.campusmaps.data.model.GraphNode
 import com.campusmaps.data.shortcuts.ShortcutRules
 import com.campusmaps.data.shortcuts.ShortcutStatus
 import com.campusmaps.data.shortcuts.ShortcutSubmission
-import com.campusmaps.routing.Formats
+import com.campusmaps.route.Formats
 import com.campusmaps.ui.DraftPhoto
 import com.campusmaps.ui.ShortcutDraft
 import com.campusmaps.ui.ShortcutViewModel
