@@ -1,4 +1,4 @@
-package com.campusmaps.routing
+package com.campusmaps.route
 
 import kotlin.math.abs
 import kotlin.math.roundToInt

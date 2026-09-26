@@ -1,4 +1,4 @@
-package com.campusmaps.routing
+package com.campusmaps.route
 
 import java.time.DayOfWeek
 import java.time.LocalDateTime

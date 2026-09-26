@@ -1,4 +1,8 @@
-package com.campusmaps.routing
+package com.campusmaps.route
+
+// View models of a route, as the teammate's screens, GuidanceEngine, watch and glasses flows expect them.
+// They are no longer computed here: CoreRouter builds them from core's Router.route(...) output
+// (Raphael's core module is the source of truth for paths, ETAs, entrances, notices and instruction text).
 
 import com.campusmaps.data.model.EdgeKind
 import com.campusmaps.data.model.GraphNode
@@ -66,6 +70,8 @@ data class Route(
     val points: List<RoutePoint>,
     val steps: List<RouteStep>,
     val destination: GraphNode,
+    // Core node ids in walking order (Router.OUTSIDE replaced by the outdoor start node id).
+    val nodeIds: List<String> = points.map { it.node.id },
 ) {
     val totalWalkM: Double get() = points.lastOrNull()?.cumulativeM ?: 0.0
     val startsOutside: Boolean get() = points.firstOrNull()?.node?.isOutdoor == true
@@ -84,11 +90,22 @@ data class RouteOption(
     val shortcutName: String?,
     val alsoVia: List<String>,      // Other entrances that are almost as fast
     val route: Route,
+    // The core option this card was built from (node ids, ETA breakdown, core instructions). For debug and the AR layer.
+    val core: com.campusmaps.routing.RouteOption? = null,
 )
 
 // The "Heads up" banner on S1b. Information, never an error.
-data class LockedNotice(val lockedEntrance: String, val usingEntrance: String?) {
-    val text: String get() = Instructions.lockedNotice(lockedEntrance, usingEntrance)
+// Built from core's RouteOption.notice ("Heads up: Main entrance is card-only now. Using West entrance instead.").
+data class LockedNotice(val lockedEntrance: String, val usingEntrance: String?, val text: String) {
+    companion object {
+        private val PATTERN = Regex("""^(?:Heads up: )?(.+?) is card-only now\. (?:Using (.+) instead\.|Taking another way\.)$""")
+
+        fun fromCore(notice: String): LockedNotice {
+            val text = notice.removePrefix("Heads up: ").trim()
+            val m = PATTERN.find(notice.trim()) ?: return LockedNotice(text, null, text)
+            return LockedNotice(m.groupValues[1], m.groupValues[2].ifBlank { null }, text)
+        }
+    }
 }
 
 // Everything the router can answer.
