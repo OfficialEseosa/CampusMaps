@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher mark: a location pin with a forward chevron, in the clay brand color. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,26c-11.6,0 -21,9.4 -21,21c0,15.2 21,35 21,35s21,-19.8 21,-35c0,-11.6 -9.4,-21 -21,-21z" />
+    <path
+        android:fillColor="#FFA85F33"
+        android:pathData="M45,54L54,36L63,54L63,58L54,47L45,58Z" />
+</vector>
