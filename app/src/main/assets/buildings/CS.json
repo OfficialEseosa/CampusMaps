@@ -44,7 +44,7 @@
       "lng": -84.38760369,
       "headingDeg": 33.5,
       "estimated": true,
-      "notes": "CS-20260925-1238 obs #7; POSITION ESTIMATED: its GPS fix (+-3 m, 10 samples) lands 42 m north of Walters main, but every walk (edge #6 23 steps to R-150, W02 34 steps to R-150, 20 steps from this node to the A01 photo spot, W04 15 steps to H1) puts it within about 12 m of Walters main. Placed 9.4 m from Walters main at bearing 124, the spacing of the two 2026-09-24 fixes (session CS-20260924-1614). lat/lng are that placement, not a fix. Glass double door with a ramp (W02, W04). Facing out 33.5 deg (spread 2.4). Access hours not surveyed. Moved 3 m east by the owner in the phone editor on site (2026-09-26)."
+      "notes": "CS-20260925-1238 obs #7; POSITION ESTIMATED: its GPS fix (+-3 m, 10 samples) lands 42 m north of Walters main, but every walk (edge #6 23 steps to R-150, W02 34 steps to R-150, 20 steps from this node to the A01 photo spot, W04 15 steps to H1) puts it within about 12 m of Walters main. Placed 9.4 m from Walters main at bearing 124, the spacing of the two 2026-09-24 fixes (session CS-20260924-1614). lat/lng are that placement, not a fix. Glass double door with a ramp (W02, W04). Facing out 33.5 deg (spread 2.4). Access hours not surveyed. Moved 3 m east by the owner in the phone editor on site (2026-09-26). Survey export CS-20260926-1445 node #5 'Walters side' (2026-09-26 14:47): a new outdoor fix (10 samples, +-3.4 m) lands 5.2 m north-east of Walters main, again not on the facade the walks describe, so the owner's placement is kept; facing out 37.5 deg (spread 12) agrees with 33.5. Outside approach measured: outdoor steps down about 1 m (1 step counted, heading 126, pressure +0.12 hPa), then 12 steps (9.2 m) at heading 203 along the building wall to this glass double door (walks #2 and #4, video W01). Not in the graph: the router draws the outdoor leg as a straight line to the door."
     },
     {
       "id": "E-95DS",
@@ -66,18 +66,18 @@
       "x": 7.23,
       "y": -10.09,
       "estimated": true,
-      "notes": "Estimated: the junction at the bottom of the short steps down from the Walters main lobby, on the straight corridor from the Walters side door to Room 150 (owner, on site 2026-09-26). From the main door: ahead about 3 steps, then down the short steps turning left."
+      "notes": "Estimated: the junction at the bottom of the short steps down from the Walters main lobby, on the straight corridor from the Walters side door to Room 150 (owner, on site 2026-09-26). From the main door: ahead about 3 steps, then down the short steps turning left. Position unchanged by survey export CS-20260926-1445 (it has no walk from the main door); it sits 6.0 m in from E-WS on the measured side door > 150 line."
     },
     {
       "id": "R-150",
       "type": "room",
       "name": "Room 150",
       "floor": 1,
-      "x": -5.28,
-      "y": -27.08,
+      "x": -0.15,
+      "y": -20.1,
       "doorFacing": "northeast",
       "estimated": true,
-      "notes": "CS-20260925-1238 obs #4 (no doorSide recorded). Position estimated: 18.4 m from H7 at bearing 205 (W01/W02/W03 all approach the 150 doors along the glazed corridor, compass 228 to 250 indoors). Indoor GPS of the node and of the video ends (about (-5, -13)) is 9 m away; within its error. doorFacing northeast = back along the approach; the 09-24 plaque said east. Moved by the owner in the phone editor on site (2026-09-26): the 150 double doors are straight down the corridor from the Walters side door."
+      "notes": "Survey export CS-20260926-1445 node #7 '150 Entrance', at the 150 double doors ('AUDITORIUM' sign left of the doors, '150' plaque right). Placed on the straight corridor from the Walters side door (owner's on-site line, bearing 216.4, matches the walk heading 215.4) at the MEASURED walk #6 length: 24 steps x 0.768 = 18.44 m from E-WS. This moves the room 7.2 m back toward the side door from the owner's on-site position (the walk wins; the direction is the owner's). The walkthrough video 'Mini stairs to 150' counts about 27 steps (20.7 m) from the door to the 150 doors, so the true figure is 18.4 to 20.7 m. doorFacing northeast = back along the approach. Earlier: CS-20260925-1238 obs #4."
     },
     {
       "id": "H1",
@@ -313,11 +313,11 @@
     {
       "from": "H7",
       "to": "R-150",
-      "lengthM": 21.1,
+      "lengthM": 12.44,
       "kind": "hallway",
-      "hint": "along the windows",
+      "hint": "past the vaccine sign",
       "estimated": true,
-      "notes": "Straight corridor from the bottom of the short steps to the 150 double doors (owner on site 2026-09-26). Length is the straight-line distance."
+      "notes": "Straight corridor from the bottom of the short steps to the 150 double doors. Survey export CS-20260926-1445 walk #6 measured Walters side door > 150 doors as 24 steps (18.44 m, heading 215.4); this edge is that walk minus E-WS>H7 (6.0 m). Walk #6's wide heading spread (36.7) is the turn from facing out at the door, not a turn in the corridor (the video shows it straight). Length is the straight-line distance."
     },
     {
       "from": "E-WS",
@@ -325,7 +325,7 @@
       "lengthM": 6.0,
       "kind": "hallway",
       "estimated": true,
-      "notes": "Straight from the Walters side door onto the 150 corridor (owner on site 2026-09-26). Length is the straight-line distance."
+      "notes": "Straight from the Walters side door onto the 150 corridor (owner on site 2026-09-26). The video 'Mini stairs to 150' (survey export CS-20260926-1445) passes the bottom of the short steps on the right about 6 to 9 steps (4.6 to 6.9 m) inside the door, which agrees. Length is the straight-line distance."
     },
     {
       "from": "E-WS",
@@ -588,8 +588,8 @@
       "id": "CS-A03",
       "node": "R-150",
       "kind": "text",
-      "x": -9.28,
-      "y": -21.08,
+      "x": 0.44,
+      "y": -19.3,
       "floor": 1,
       "heightM": 1.6,
       "facing": "northeast",
@@ -602,7 +602,7 @@
       ],
       "description": "Room 150 plaque right of the auditorium doors",
       "estimated": true,
-      "notes": "Carried over from session CS-20260924-1614 (its CS-A02, facingDeg 81.4) because this session has no 150 anchor; id A03 is unused in CS-20260925-1238. The plaque (grey, '150' plus the GSU logo, right of the doors) is visible in the last W03 frame. Width not measured (plaque about 15 to 20 cm). Facing set to match R-150's doorFacing."
+      "notes": "Carried over from session CS-20260924-1614 (its CS-A02, facingDeg 81.4) because this session has no 150 anchor; id A03 is unused in CS-20260925-1238. The plaque (grey, '150' plus the GSU logo, right of the doors) is visible in the last W03 frame. Width not measured (plaque about 15 to 20 cm). Facing set to match R-150's doorFacing. Moved with R-150 (2026-09-26): 1 m in front of the doors, back along the corridor; the video 'Mini stairs to 150' shows the plaque right of the doors."
     },
     {
       "id": "CS-A04",
@@ -692,6 +692,30 @@
       "description": "CLASSROOM SOUTH canopy sign over the floor-2 main entrance",
       "estimated": true,
       "notes": "CS-20260925-1238 obs #38, facingDeg 34.7, widthCm 200 (estimated), no offset. Image = straight shot cropped to the canopy sign, greyscale, 1600x329; the sign is 1454 of 1600 px, so widthM = 2.0 x 1600/1454 = 2.20 (inherits the estimated 200 cm). Outdoors. Same wording as CS-A01 (the stains on this one differ). Not yet scored."
+    },
+    {
+      "id": "CS-A09",
+      "node": "H7",
+      "kind": "image",
+      "image": "anchors/CS/CS-A09.jpg",
+      "widthM": 1.2,
+      "x": 4.97,
+      "y": -15.18,
+      "floor": 1,
+      "heightM": 1.3,
+      "facing": "350",
+      "text": "VACCINE",
+      "aliases": [
+        "GET YOUR VACCINE",
+        "SLEEVEUPGSU",
+        "DO YOUR PART FOR PUBLIC HEALTH",
+        "PUBLIC HEALTH",
+        "COVIDINFO GSU EDU",
+        "REGISTER AT COVIDINFO"
+      ],
+      "description": "#SLEEVEUPGSU vaccine roll-up banner on the left wall of the 150 corridor (walking toward Room 150)",
+      "estimated": true,
+      "notes": "Survey export CS-20260926-1445 obs #9 (logged there as CS-A01; the survey tool restarts anchor ids per session, so it gets a new id here). Free-standing roll-up banner, 100 cm wide (widthEstimated), recorded height 180 cm, facingDeg 350.1 from the straight-on shot, offset 7.0 m from '150 Entrance' (walk #8: 11 steps 'to the sign'). Position ESTIMATED: 7.0 m back from R-150 along the H7 > R-150 line, 1.2 m to the left wall (owner: the vaccine sign is on the left walking toward 150). facing 350 is the measured value (the compass agreed with the corridor within 1 deg on walk #6), not perpendicular to the corridor (306): the banner is angled toward the side door. Image = the straight shot, banner plus a small wall margin, greyscale equalised, 1200x1787, arcoreimg 100: the banner is about 1000 of 1200 px, so widthM = 1.0 x 1200/1000 = 1.2. heightM 1.3 = estimated centre of the image (a 2 m banner seen from its top bar down); 180 cm as recorded is likely the phone. Movable banner: check it is still there before the demo."
     },
     {
       "id": "CS-A92",
