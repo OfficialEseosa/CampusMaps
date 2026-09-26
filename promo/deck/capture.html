@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>capture</title>
+<script>
+// Virtual clock: the capture driver advances time frame by frame, so GSAP, three.js and
+// requestAnimationFrame all see a deterministic 1/fps step no matter how slow screenshots are.
+(function () {
+  let now = 0;
+  const cbs = [];
+  window.__vt = {
+    now: () => now,
+    step(ms) {
+      now += ms;
+      const list = cbs.splice(0, cbs.length);
+      for (const cb of list) { try { cb(now); } catch (e) { console.error(e); } }
+    },
+  };
+  performance.now = () => now;
+  Date.now = () => 1_700_000_000_000 + now;
+  window.requestAnimationFrame = (cb) => { cbs.push(cb); return cbs.length; };
+  window.cancelAnimationFrame = () => {};
+})();
+</script>
+<script type="importmap">
+{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}
+</script>
+<style>
+@font-face{font-family:Sora;src:url(media/sora_regular.ttf);font-weight:400}
+@font-face{font-family:Sora;src:url(media/sora_medium.ttf);font-weight:500}
+@font-face{font-family:Sora;src:url(media/sora_semibold.ttf);font-weight:600}
+@font-face{font-family:Sora;src:url(media/sora_bold.ttf);font-weight:700}
+@font-face{font-family:Sora;src:url(media/sora_extrabold.ttf);font-weight:800}
+html,body{margin:0;background:transparent;font-family:Sora,sans-serif;color:#fff;overflow:hidden}
+#stage{position:absolute;inset:0}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/MotionPathPlugin.min.js"></script>
+<script type="module">
+gsap.registerPlugin(MotionPathPlugin);
+gsap.ticker.lagSmoothing(0);
+const q = new URLSearchParams(location.search);
+const name = q.get('m');
+const opts = q.get('opts') ? JSON.parse(q.get('opts')) : {};
+const stage = document.getElementById('stage');
+if (q.get('w')) { stage.style.width = q.get('w') + 'px'; stage.style.height = q.get('h') + 'px'; stage.style.inset = 'auto'; }
+const m = await import(`./js/${name}.js`);
+await document.fonts.ready;
+window.__handle = m.mount(stage, opts);
+window.__ready = true;
+</script>
+</body>
+</html>

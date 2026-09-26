@@ -101,7 +101,7 @@ export function mount(el, opts = {}) {
   controls.dampingFactor = 0.08;
   controls.enableZoom = false;
   controls.enablePan = false;
-  controls.autoRotateSpeed = 0.4;
+  controls.autoRotateSpeed = opts.autoRotateSpeed ?? 0.4;
   controls.enabled = false;
 
   // ---------- state ----------
