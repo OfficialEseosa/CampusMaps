@@ -1,0 +1,442 @@
+{
+  "code": "KL",
+  "name": "Klaus Advanced Computing Building",
+  "origin": {
+    "description": "Centre of the south main entrance doors (estimated)",
+    "lat": 33.77721,
+    "lng": -84.39585,
+    "headingDeg": 0
+  },
+  "floorHeightM": 4.0,
+  "walkingSpeedMps": 1.3,
+  "stairsSecondsPerFloor": 22,
+  "stairsDownSecondsPerFloor": 18,
+  "elevators": [
+    {
+      "id": "ELEV-KL",
+      "avgWaitSec": 30,
+      "worstWaitSec": 60,
+      "secondsPerFloor": 6,
+      "estimated": true
+    }
+  ],
+  "nodes": [
+    {
+      "id": "E-S",
+      "type": "entrance",
+      "name": "South main entrance",
+      "floor": 1,
+      "x": 0,
+      "y": 0,
+      "lat": 33.77721,
+      "lng": -84.39585,
+      "headingDeg": 180,
+      "estimated": true,
+      "notes": "Estimated, not surveyed. Glass doors, south side."
+    },
+    {
+      "id": "H1",
+      "type": "intersection",
+      "name": "Atrium south",
+      "floor": 1,
+      "x": 0,
+      "y": 8,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "S1",
+      "type": "waypoint",
+      "name": "Start 1, west of our table",
+      "floor": 1,
+      "x": 0,
+      "y": 14,
+      "estimated": true,
+      "notes": "Estimated, not surveyed. Rehearsed start."
+    },
+    {
+      "id": "T",
+      "type": "waypoint",
+      "name": "Expo table",
+      "floor": 1,
+      "x": 4,
+      "y": 14,
+      "estimated": true,
+      "notes": "Estimated, not surveyed. Our expo table; move when the table is assigned."
+    },
+    {
+      "id": "S2",
+      "type": "waypoint",
+      "name": "Start 2, east of our table",
+      "floor": 1,
+      "x": 8,
+      "y": 14,
+      "estimated": true,
+      "notes": "Estimated, not surveyed. Rehearsed start."
+    },
+    {
+      "id": "H2",
+      "type": "intersection",
+      "name": "Atrium centre",
+      "floor": 1,
+      "x": 0,
+      "y": 20,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "ST-1",
+      "type": "stairs",
+      "name": "Glass staircase, floor 1",
+      "floor": 1,
+      "x": 6,
+      "y": 24,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "ST-2",
+      "type": "stairs",
+      "name": "Glass staircase, floor 2",
+      "floor": 2,
+      "x": 6,
+      "y": 24,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "H3",
+      "type": "intersection",
+      "name": "Atrium north",
+      "floor": 1,
+      "x": 0,
+      "y": 30,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "H4",
+      "type": "intersection",
+      "name": "West hallway junction",
+      "floor": 1,
+      "x": -12,
+      "y": 30,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "W1",
+      "type": "waypoint",
+      "name": "West hallway",
+      "floor": 1,
+      "x": -24,
+      "y": 30,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "R-1116",
+      "type": "room",
+      "name": "Room 1116",
+      "floor": 1,
+      "x": -28,
+      "y": 31,
+      "doorFacing": "south",
+      "estimated": true,
+      "notes": "Estimated, not surveyed. Room number unverified; pick the real demo room on site."
+    },
+    {
+      "id": "EL-1",
+      "type": "elevator",
+      "name": "Elevator, floor 1",
+      "floor": 1,
+      "x": -12,
+      "y": 24,
+      "elevatorId": "ELEV-KL",
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "EL-2",
+      "type": "elevator",
+      "name": "Elevator, floor 2",
+      "floor": 2,
+      "x": -12,
+      "y": 24,
+      "elevatorId": "ELEV-KL",
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "H5",
+      "type": "intersection",
+      "name": "East hallway junction",
+      "floor": 1,
+      "x": 12,
+      "y": 30,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "E-N",
+      "type": "entrance",
+      "name": "North entrance",
+      "floor": 1,
+      "x": 12,
+      "y": 40,
+      "lat": 33.7775697,
+      "lng": -84.3957202,
+      "headingDeg": 0,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "H7",
+      "type": "intersection",
+      "name": "Atrium bridge, floor 2",
+      "floor": 2,
+      "x": 0,
+      "y": 26,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    }
+  ],
+  "edges": [
+    {
+      "from": "E-S",
+      "to": "H1",
+      "lengthM": 8.0,
+      "kind": "hallway",
+      "hint": "through the glass doors",
+      "estimated": true
+    },
+    {
+      "from": "H1",
+      "to": "S1",
+      "lengthM": 6.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "S1",
+      "to": "T",
+      "lengthM": 4.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "T",
+      "to": "S2",
+      "lengthM": 4.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "S1",
+      "to": "H2",
+      "lengthM": 6.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "S2",
+      "to": "H2",
+      "lengthM": 10.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H2",
+      "to": "ST-1",
+      "lengthM": 7.21,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H2",
+      "to": "H3",
+      "lengthM": 10.0,
+      "kind": "hallway",
+      "hint": "past the glass staircase",
+      "estimated": true
+    },
+    {
+      "from": "H3",
+      "to": "H4",
+      "lengthM": 12.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H4",
+      "to": "W1",
+      "lengthM": 12.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "W1",
+      "to": "R-1116",
+      "lengthM": 4.12,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H4",
+      "to": "EL-1",
+      "lengthM": 6.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H3",
+      "to": "H5",
+      "lengthM": 12.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H5",
+      "to": "E-N",
+      "lengthM": 10.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "ST-1",
+      "to": "ST-2",
+      "lengthM": 0,
+      "kind": "stairs",
+      "floors": 1,
+      "estimated": true
+    },
+    {
+      "from": "EL-1",
+      "to": "EL-2",
+      "lengthM": 0,
+      "kind": "elevator",
+      "floors": 1,
+      "estimated": true
+    },
+    {
+      "from": "ST-2",
+      "to": "H7",
+      "lengthM": 6.32,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "EL-2",
+      "to": "H7",
+      "lengthM": 12.17,
+      "kind": "hallway",
+      "estimated": true
+    }
+  ],
+  "anchors": [
+    {
+      "id": "KL-A01",
+      "node": "H2",
+      "kind": "image",
+      "image": "anchors/KL/KL-A01.jpg",
+      "widthM": 0.9,
+      "x": -1.5,
+      "y": 20.5,
+      "floor": 1,
+      "heightM": 1.6,
+      "facing": "east",
+      "text": "KLAUS ADVANCED COMPUTING BUILDING",
+      "description": "Building directory board, atrium centre",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "KL-A02",
+      "node": "H3",
+      "kind": "image",
+      "image": "anchors/KL/KL-A02.jpg",
+      "widthM": 0.6,
+      "x": 0,
+      "y": 31.5,
+      "floor": 1,
+      "heightM": 1.5,
+      "facing": "south",
+      "description": "Event poster on the north atrium wall",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "KL-A03",
+      "node": "H4",
+      "kind": "text",
+      "x": -12,
+      "y": 31.5,
+      "floor": 1,
+      "heightM": 2.1,
+      "facing": "south",
+      "text": "ELEVATOR",
+      "aliases": [
+        "ELEVAT0R",
+        "ELEVATORS"
+      ],
+      "description": "Elevator sign at the west hallway",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "KL-A04",
+      "node": "R-1116",
+      "kind": "text",
+      "x": -27,
+      "y": 32,
+      "floor": 1,
+      "heightM": 1.5,
+      "facing": "south",
+      "text": "1116",
+      "aliases": [
+        "III6",
+        "1II6",
+        "11I6"
+      ],
+      "description": "Room plaque beside the door",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "KL-A05",
+      "node": "ST-1",
+      "kind": "image",
+      "image": "anchors/KL/KL-A05.jpg",
+      "widthM": 0.5,
+      "x": 6.5,
+      "y": 23,
+      "floor": 1,
+      "heightM": 1.4,
+      "facing": "west",
+      "description": "Sign at the foot of the glass staircase",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "KL-A06",
+      "node": "E-S",
+      "kind": "text",
+      "x": 0,
+      "y": 1,
+      "floor": 1,
+      "heightM": 2.4,
+      "facing": "north",
+      "text": "EXIT",
+      "aliases": [
+        "EXlT"
+      ],
+      "description": "Exit sign over the south doors",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    }
+  ],
+  "demoDestinations": [
+    "R-1116"
+  ],
+  "notes": "Klaus has NOT been surveyed. The whole file is a plausible placeholder for Demo A (Atrium, floor 1). Replace from the Hour 0 survey."
+}

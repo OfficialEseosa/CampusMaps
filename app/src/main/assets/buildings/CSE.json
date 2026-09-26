@@ -1,0 +1,378 @@
+{
+  "code": "CSE",
+  "name": "Student Center East",
+  "origin": {
+    "description": "Centre of the main entrance doors (estimated)",
+    "lat": 33.75185,
+    "lng": -84.38455,
+    "headingDeg": 0
+  },
+  "floorHeightM": 4.0,
+  "walkingSpeedMps": 1.3,
+  "stairsSecondsPerFloor": 22,
+  "stairsDownSecondsPerFloor": 18,
+  "elevators": [
+    {
+      "id": "ELEV-CSE",
+      "avgWaitSec": 35,
+      "worstWaitSec": 70,
+      "secondsPerFloor": 6,
+      "estimated": true
+    }
+  ],
+  "nodes": [
+    {
+      "id": "E-MAIN",
+      "type": "entrance",
+      "name": "Main entrance",
+      "floor": 1,
+      "x": 0,
+      "y": 0,
+      "lat": 33.75185,
+      "lng": -84.38455,
+      "headingDeg": 180,
+      "access": [
+        {
+          "days": "Mon-Thu",
+          "open": "08:00",
+          "close": "22:00",
+          "rule": "public"
+        },
+        {
+          "days": "Fri",
+          "open": "08:00",
+          "close": "20:00",
+          "rule": "public"
+        },
+        {
+          "days": "Sat",
+          "open": "12:00",
+          "close": "20:00",
+          "rule": "public"
+        },
+        {
+          "days": "Sun",
+          "open": "14:00",
+          "close": "20:00",
+          "rule": "public"
+        }
+      ],
+      "estimated": true,
+      "notes": "Estimated, not surveyed. Hours from engagement.gsu.edu (research/hackgt-and-competitors.md section 5); outside them card-only (inferred)."
+    },
+    {
+      "id": "E-WEST",
+      "type": "entrance",
+      "name": "West entrance",
+      "floor": 1,
+      "x": -40,
+      "y": 20,
+      "lat": 33.7520299,
+      "lng": -84.3849827,
+      "headingDeg": 270,
+      "access": [
+        {
+          "days": "Mon-Sun",
+          "open": "07:30",
+          "close": "23:00",
+          "rule": "public"
+        }
+      ],
+      "estimated": true,
+      "notes": "Estimated, not surveyed. Assumed public until 23:00 (redirect target for Demo C); confirm the posted rule."
+    },
+    {
+      "id": "H1",
+      "type": "intersection",
+      "name": "Main lobby",
+      "floor": 1,
+      "x": 0,
+      "y": 8,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "H2",
+      "type": "intersection",
+      "name": "West corridor",
+      "floor": 1,
+      "x": -20,
+      "y": 20,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "H3",
+      "type": "intersection",
+      "name": "Elevator lobby",
+      "floor": 1,
+      "x": 0,
+      "y": 20,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "EL-1",
+      "type": "elevator",
+      "name": "Elevators, floor 1",
+      "floor": 1,
+      "x": -5,
+      "y": 22,
+      "elevatorId": "ELEV-CSE",
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "EL-2",
+      "type": "elevator",
+      "name": "Elevators, floor 2",
+      "floor": 2,
+      "x": -5,
+      "y": 22,
+      "elevatorId": "ELEV-CSE",
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "ST-1",
+      "type": "stairs",
+      "name": "Stairs, floor 1",
+      "floor": 1,
+      "x": -20,
+      "y": 26,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "ST-2",
+      "type": "stairs",
+      "name": "Stairs, floor 2",
+      "floor": 2,
+      "x": -20,
+      "y": 26,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "H4",
+      "type": "intersection",
+      "name": "Floor 2 corridor",
+      "floor": 2,
+      "x": -5,
+      "y": 28,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "H5",
+      "type": "intersection",
+      "name": "Rooms 210 to 230 corridor",
+      "floor": 2,
+      "x": 9,
+      "y": 28,
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    },
+    {
+      "id": "R-220",
+      "type": "room",
+      "name": "Room 220",
+      "floor": 2,
+      "x": 9,
+      "y": 36,
+      "doorFacing": "west",
+      "estimated": true,
+      "notes": "Estimated, not surveyed."
+    }
+  ],
+  "edges": [
+    {
+      "from": "E-MAIN",
+      "to": "H1",
+      "lengthM": 8.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H1",
+      "to": "H3",
+      "lengthM": 12.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H3",
+      "to": "EL-1",
+      "lengthM": 5.39,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H2",
+      "to": "EL-1",
+      "lengthM": 15.13,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H3",
+      "to": "H2",
+      "lengthM": 20.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H2",
+      "to": "E-WEST",
+      "lengthM": 20.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H2",
+      "to": "ST-1",
+      "lengthM": 6.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "EL-1",
+      "to": "EL-2",
+      "lengthM": 0,
+      "kind": "elevator",
+      "floors": 1,
+      "estimated": true
+    },
+    {
+      "from": "ST-1",
+      "to": "ST-2",
+      "lengthM": 0,
+      "kind": "stairs",
+      "floors": 1,
+      "estimated": true
+    },
+    {
+      "from": "EL-2",
+      "to": "H4",
+      "lengthM": 6.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "ST-2",
+      "to": "H4",
+      "lengthM": 15.13,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H4",
+      "to": "H5",
+      "lengthM": 14.0,
+      "kind": "hallway",
+      "estimated": true
+    },
+    {
+      "from": "H5",
+      "to": "R-220",
+      "lengthM": 8.0,
+      "kind": "hallway",
+      "estimated": true
+    }
+  ],
+  "anchors": [
+    {
+      "id": "CSE-A01",
+      "node": "H1",
+      "kind": "text",
+      "x": 0,
+      "y": 9.5,
+      "floor": 1,
+      "heightM": 2.5,
+      "facing": "south",
+      "text": "STUDENT CENTER EAST",
+      "aliases": [
+        "STUDENT CENTER"
+      ],
+      "description": "Building name over the lobby desk",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "CSE-A02",
+      "node": "H3",
+      "kind": "text",
+      "x": -1.5,
+      "y": 21,
+      "floor": 1,
+      "heightM": 2.2,
+      "facing": "south",
+      "text": "ELEVATORS",
+      "aliases": [
+        "ELEVAT0RS",
+        "ELEVATOR"
+      ],
+      "description": "Elevator sign in the lobby",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "CSE-A03",
+      "node": "EL-2",
+      "kind": "text",
+      "x": -5,
+      "y": 23.5,
+      "floor": 2,
+      "heightM": 1.8,
+      "facing": "north",
+      "text": "FLOOR 2",
+      "aliases": [
+        "2ND FLOOR",
+        "FL00R 2"
+      ],
+      "description": "Floor number facing the elevator doors",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "CSE-A04",
+      "node": "H5",
+      "kind": "text",
+      "x": 9,
+      "y": 29.5,
+      "floor": 2,
+      "heightM": 2.0,
+      "facing": "south",
+      "text": "210-230",
+      "aliases": [
+        "ROOMS 210-230",
+        "21O-23O"
+      ],
+      "description": "Room range sign",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    },
+    {
+      "id": "CSE-A05",
+      "node": "R-220",
+      "kind": "text",
+      "x": 10,
+      "y": 35,
+      "floor": 2,
+      "heightM": 1.5,
+      "facing": "west",
+      "text": "220",
+      "aliases": [
+        "22O",
+        "Z20"
+      ],
+      "description": "Room plaque beside the door",
+      "estimated": true,
+      "notes": "Placeholder, not surveyed; capture and measure on site."
+    }
+  ],
+  "demoDestinations": [
+    "R-220"
+  ],
+  "notes": "Student Center East has NOT been surveyed. Plausible placeholder for Demo C; access hours from public sources, per-entrance rules inferred."
+}
