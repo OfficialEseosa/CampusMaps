@@ -67,12 +67,26 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 .doors{position:relative;width:100%;height:100%}
 .doors svg{width:100%;height:100%}
 
+/* phone screenshots fan */
+.phones{display:flex;gap:34px;justify-content:center;align-items:flex-end;height:760px;margin-top:20px}
+.phone{border-radius:38px;overflow:hidden;border:3px solid rgba(255,255,255,.14);background:#000;box-shadow:0 40px 90px rgba(0,0,0,.55);transform-origin:bottom center}
+.phone img{display:block;height:720px;width:auto}
+.phones .phone:nth-child(1){transform:rotate(-4deg) translateY(10px)}
+.phones .phone:nth-child(4){transform:rotate(4deg) translateY(10px)}
+
 /* status */
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:34px;margin-top:26px}
 .card{background:var(--ink2);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:26px 30px}
 .card h3{font-size:24px;color:var(--clay);margin-bottom:12px}
 .card li{font-size:22px;margin:6px 0 6px 0;color:var(--fg)}
 .card ul{padding-left:22px;margin:0}
+.big2 .card{padding:34px 40px;border-radius:28px}
+.big2 .card h3{font-size:30px;margin-bottom:18px}
+.big2 .card li{font-size:29px;margin:10px 0}
+.closing{display:flex;align-items:center;gap:40px;margin-top:70px;padding:34px 44px;border-radius:28px;background:linear-gradient(90deg,rgba(198,124,78,.22),rgba(198,124,78,.05));border:1px solid rgba(198,124,78,.35)}
+.closing-mark video{width:300px;display:block;margin:-40px -20px}
+.closing-line{font-size:56px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.closing-sub{font-size:26px;color:var(--mute);margin-top:12px;max-width:1100px}
 .ok::marker{color:var(--teal)}
 .todo::marker{color:var(--gold)}
 
@@ -86,7 +100,7 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 <div class="slides">
 
 <!-- 1 Title -->
-<section class="title" data-auto-animate>
+<section class="title" data-transition="fade-in zoom-out">
   <video id="logo" src="media/logo.webm" muted playsinline preload="auto"></video>
   <p class="claim" style="text-align:center;max-width:none;margin-top:-30px">Walk to any room on campus. The arrows come to you.</p>
   <p class="meta">HackGT 13 · <b>The Lighthouse Laboratory</b> (Immersive) · Uyiosa Nehikhuere &amp; Raphael Omorose</p>
@@ -94,23 +108,36 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 </section>
 
 <!-- 2 Problem -->
-<section>
+<section data-transition="convex">
   <p class="eyebrow">The problem</p>
-  <h2>The closest door isn't the fastest way to your seat.</h2>
-  <p class="claim">Classroom South has five entrances on two floors. After 8 PM half of them need a PantherCard. Maps stop at the door.</p>
-  <div class="stage" data-module="doors"></div>
+  <h2>Finding the room is the hard part.</h2>
+  <p class="claim">Buildings are confusing. Hallways that look connected aren't. Maps stop at the door, and there is usually a faster way in than the one you took.</p>
+  <div class="stage" data-module="lost" style="height:640px"></div>
+</section>
+
+<!-- 2b Campus selector -->
+<section data-transition="zoom">
+  <p class="eyebrow">The app</p>
+  <h2>Pick a campus. Pick a building. Say where.</h2>
+  <p class="claim">Georgia Tech and Georgia State, each with its own look. Three buildings mapped so far; the rest are one survey walk away.</p>
+  <div class="phones">
+    <div class="phone"><img src="media/campus-phone.png" alt=""></div>
+    <div class="phone"><img src="media/gt-buildings-phone.png" alt=""></div>
+    <div class="phone"><img src="media/gsu-buildings-phone.png" alt=""></div>
+    <div class="phone"><img src="media/cs-whereto-phone.png" alt=""></div>
+  </div>
 </section>
 
 <!-- 3 Three devices -->
-<section>
+<section data-transition="convex">
   <p class="eyebrow">How it works</p>
-  <h2>Three devices, one route engine.</h2>
-  <p class="claim">The phone routes and localises. The glasses look and speak. The watch buzzes. Nothing leaves the building.</p>
+  <h2>Pick a room. Walk. Hands-free if you want.</h2>
+  <p class="claim">The phone does all the thinking, offline. The glasses and the watch just tell you where to go.</p>
   <div class="stage" data-module="arch"></div>
 </section>
 
 <!-- 4 Buildings as graphs (3D hero) -->
-<section>
+<section data-transition="zoom">
   <p class="eyebrow">Surveyed on foot</p>
   <h2>Every building is a graph we measured ourselves.</h2>
   <div class="stage fill" data-module="building3d" data-opts='{"code":"KL"}'></div>
@@ -124,7 +151,7 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 </section>
 
 <!-- 4b CS -->
-<section>
+<section data-transition="slide">
   <p class="eyebrow">Classroom South</p>
   <h2>Three floors, five doors, one elevator that waits 3 s.</h2>
   <div class="stage fill" data-module="building3d" data-opts='{"code":"CS"}'></div>
@@ -136,7 +163,7 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 </section>
 
 <!-- 5 Routing -->
-<section>
+<section data-transition="convex">
   <p class="eyebrow">Routing that thinks</p>
   <h2>Doors, hours, stairs versus elevator, PantherCard.</h2>
   <div class="stage" data-module="pathfind"></div>
@@ -144,22 +171,22 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 </section>
 
 <!-- 6 Localisation -->
-<section>
+<section data-transition="zoom">
   <p class="eyebrow">Localisation</p>
   <h2>GPS to the door. Signs, compass and barometer to the room.</h2>
   <div class="stage" data-module="anchors"></div>
 </section>
 
 <!-- 7 Phone AR -->
-<section>
+<section data-transition="convex">
   <p class="eyebrow">On the phone</p>
   <div class="two">
     <div>
       <h2>Metre-wide arrows on the floor.<br>An amber arrow at the turn.</h2>
       <ul class="big">
-        <li>ARCore + SceneView, on-device<small>no cloud anchors indoors</small></li>
+        <li>ARCore + SceneView, on-device<small>arrows anchored to the real floor</small></li>
         <li>Reroutes when you drift<small>"Heads up: rerouting via the stairs"</small></li>
-        <li>Arrival line<small>"Room 1116 is on your right."</small></li>
+        <li>Tells you when you're there<small>"Room 608 is on your right."</small></li>
       </ul>
     </div>
     <div class="stage fill" data-module="armock" data-opts='{"video":"media/ar-walk-short.mp4","start":0}' style="height:860px;max-height:78vh;display:flex;justify-content:center"></div>
@@ -167,7 +194,7 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 </section>
 
 <!-- 8 Glasses -->
-<section>
+<section data-transition="slide">
   <p class="eyebrow">Hands-free</p>
   <div class="two">
     <div>
@@ -186,7 +213,7 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 </section>
 
 <!-- 9 Watch -->
-<section>
+<section data-transition="convex">
   <p class="eyebrow">On the wrist</p>
   <h2>The watch buzzes each turn. You never look down.</h2>
   <p class="claim">Every step reaches the Galaxy Watch within a second. Each step type has its own rhythm.</p>
@@ -194,27 +221,30 @@ ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
 </section>
 
 <!-- 10 Status -->
-<section>
+<section data-transition="zoom">
   <p class="eyebrow">Where it stands</p>
-  <h2>Built, tested, and ready for more buildings.</h2>
-  <div class="grid3">
+  <h2>Built, tested on device, ready for more buildings.</h2>
+  <div class="grid3 big2" style="grid-template-columns:1fr 1fr">
     <div class="card"><h3>Works today</h3><ul>
       <li class="ok">3 buildings surveyed: Klaus, Classroom South, Student Center East</li>
       <li class="ok">Time-aware routing, 45 core tests</li>
       <li class="ok">Phone AR guidance + reroute</li>
       <li class="ok">Watch arrows and haptics</li>
       <li class="ok">Glasses loop: look, recognise, speak</li>
-    </ul></div>
-    <div class="card"><h3>Honest gaps</h3><ul>
-      <li class="todo">Glasses link is simulated (toolkit port pending)</li>
-      <li class="todo">Indoor position provider is simulated</li>
-      <li class="todo">AR path untested on the S25 hardware</li>
+      <li class="ok">Core 45 tests · app 41 · watch 4, all on device</li>
     </ul></div>
     <div class="card"><h3>Next</h3><ul>
       <li>Class-schedule sync: "take me to my 2 PM"</li>
       <li>Crowd-sourced anchors and shortcuts</li>
       <li>More buildings, a university pilot</li>
     </ul></div>
+  </div>
+  <div class="closing">
+    <div class="closing-mark"><video src="media/logo.webm" muted playsinline loop autoplay></video></div>
+    <div>
+      <div class="closing-line">Come walk with it.</div>
+      <div class="closing-sub">Phone, glasses and watch are at the table. Pick any room in Klaus and we'll take you there.</div>
+    </div>
   </div>
   <div class="foot">CampusMaps · HackGT 13 · Klaus Atrium</div>
 </section>
@@ -238,6 +268,7 @@ const loaders = {
   armock: () => import('./js/armock.js'),
   haptics: () => import('./js/haptics.js'),
   doors: async () => ({ mount: doorsModule }),
+  lost: () => import('./js/lost.js'),
 };
 const live = new Map(); // el -> handle
 
@@ -253,6 +284,9 @@ async function activate(section) {
     try { h = await live.get(el); } catch (e) { console.error('module', name, e); live.delete(el); continue; }
     if (section.classList.contains('present')) h.play?.();
   }
+  // Staggered entrance for the slide's copy and cards.
+  const rise = section.querySelectorAll('.eyebrow, h2, .claim, ul.big li, .stat, .card, .chip, .phone, .shot, .meta');
+  if (rise.length) gsap.fromTo(rise, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: .7, stagger: .07, ease: 'power3.out', overwrite: true, clearProps: 'transform' });
   section.querySelectorAll('[data-count]').forEach(n => {
     const o = { v: 0 }; const target = +n.dataset.count;
     gsap.to(o, { v: target, duration: 1.4, ease: 'power2.out', onUpdate: () => n.textContent = Math.round(o.v) });
@@ -271,7 +305,7 @@ function deactivate(section) {
 
 Reveal.initialize({
   width: 1920, height: 1080, margin: 0.04,
-  hash: true, controls: false, progress: true, transition: 'fade', transitionSpeed: 'fast',
+  hash: true, controls: false, progress: true, transition: 'convex', transitionSpeed: 'default',
   backgroundTransition: 'none', plugins: [RevealNotes],
 }).then(() => {
   activate(Reveal.getCurrentSlide());
