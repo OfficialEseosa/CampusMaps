@@ -374,13 +374,13 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         // Explore start: the outdoor steps are followed by FusedLocation (guidance/OutdoorGps.kt).
         outdoorFixJob?.cancel()
         outdoorFixJob = if (route.steps.any { it.outdoorEnd != null }) viewModelScope.launch {
-            runCatching { com.campusmaps.geo.FusedLocationFixes.flow(app.appContext).collect { controller.onFix(it) } }
+            runCatching { com.campusmaps.geo.VpsPosition.preferVps(com.campusmaps.geo.FusedLocationFixes.flow(app.appContext)).collect { controller.onFix(it) } }
                 .onFailure { android.util.Log.w("Outdoor", "no location fixes for the street steps", it) }
         } else null
         watchEnd.routeStarted()
         // Outdoor leg (LEG 2): the entrance the route walks to and the FusedLocation distance to it (geo/HandoffController).
         handoff.newRoute(com.campusmaps.geo.GeoEntrances.forRoute(app.appContext, route))
-        runCatching { handoff.attach(viewModelScope, com.campusmaps.geo.FusedLocationFixes.flow(app.appContext)) }
+        runCatching { handoff.attach(viewModelScope, com.campusmaps.geo.VpsPosition.preferVps(com.campusmaps.geo.FusedLocationFixes.flow(app.appContext))) }
             .onFailure { android.util.Log.w("Geo", "no location fixes for the hand-off", it) }
         if (glasses) {
             // Demo C: the first thing the glasses say is core's locked-entrance notice, then the instruction.
@@ -398,7 +398,22 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
                 finished = { arrivalSpoken && controller.state.value.arrived },
             )
         }
+        vpsSnapJob?.cancel()
+        vpsSnapJob = if (route.startsOutside) viewModelScope.launch { vpsSnap(controller, t.building) } else null
         go(if (glasses) Screen.GLASSES else Screen.GUIDANCE)
+    }
+
+    // Entrance snap: a VPS position within 15 m of any outdoor entrance of this building means the student is at that door.
+    // The outdoor leg ends there; a different door than planned reroutes from it (same floor-change method). Once per route.
+    private var vpsSnapJob: Job? = null
+    private suspend fun vpsSnap(controller: GuidanceController, building: Building) {
+        val snap = com.campusmaps.geo.VpsPosition.fixes.map { fix ->
+            val g = controller.state.value
+            if (fix == null || _guidance.value !== controller || !g.startsOutside || g.arrived) null
+            else com.campusmaps.geo.VpsPosition.snap(building.core, fix, g.route.points.firstOrNull { it.node.kind == NodeKind.ENTRANCE }?.node?.id)
+        }.first { it != null }!!
+        android.util.Log.i("Geo", com.campusmaps.geo.VpsPosition.logLine(snap))
+        controller.jumpTo(snap.entranceId) // on the route: skip ahead to the door; another door: reroute from it
     }
 
     // ---------- Explore (leg 1, outdoor map; outdoor/ExploreViewModel.kt) ----------
@@ -527,6 +542,8 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         handoff.backToMap()
         outdoorFixJob?.cancel()
         outdoorFixJob = null
+        vpsSnapJob?.cancel()
+        vpsSnapJob = null
         _fromExplore.value = false
     }
 

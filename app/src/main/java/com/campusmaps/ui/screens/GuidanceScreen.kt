@@ -693,6 +693,12 @@ private fun OutdoorGeoEffect(geo: com.campusmaps.geo.ArCoreGeospatialProvider?, 
     }
     // Leaving S2 (End route, Done, back) closes the ARCore session: drop it, or the next S2 checks VPS on the dead one.
     DisposableEffect(geo) { onDispose { geo.stop() } }
+    // VPS position (TRACKING under 10 m) for the banner distance, the 40 m trigger and the entrance snap (geo/VpsPosition).
+    LaunchedEffect(geo, outdoorLeg) {
+        if (!outdoorLeg) { com.campusmaps.geo.VpsPosition.fixes.value = null; return@LaunchedEffect }
+        geo.state.collect { s -> com.campusmaps.geo.VpsPosition.fixes.value = com.campusmaps.geo.VpsPosition.fixOf(s, System.currentTimeMillis()) }
+    }
+    DisposableEffect(Unit) { onDispose { com.campusmaps.geo.VpsPosition.fixes.value = null } }
     LaunchedEffect(geo, entrance, outdoorLeg) {
         if (outdoorLeg) {
             geo.start()
