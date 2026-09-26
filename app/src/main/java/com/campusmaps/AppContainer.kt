@@ -19,6 +19,7 @@ import com.campusmaps.route.CoreRouter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 // Builds every long lived object once and hands them out. No dependency injection library,
 // just plain constructors, so it is easy to see what depends on what.
@@ -58,6 +59,11 @@ class AppContainer(context: Context) {
         buildingIds = buildings.map { it.id },
     )
     val glasses by lazy { SimulatedGlassesLink(appScope, speaker) }
+
+    init {
+        // Real localization (loc/): S2 lets the camera drive the position when ARCore is available.
+        appScope.launch { com.campusmaps.loc.ArFeed.arExpected = com.campusmaps.platform.ArSupport.isSupported(appContext) }
+    }
 
     fun building(id: String): Building =
         buildings.firstOrNull { it.id == id } ?: buildings.firstOrNull { it.id == CoreBridge.DEFAULT_BUILDING_ID } ?: buildings.first()

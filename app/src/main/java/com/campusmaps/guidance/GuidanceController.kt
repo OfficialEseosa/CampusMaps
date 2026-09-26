@@ -80,18 +80,29 @@ class GuidanceController(
         startLost = firstRoute.startsOutside,
         signText = { nearestSignText() },
     )
-    val position: PositionProvider = simulator
-    val simulation: SimulationControls = simulator
 
-    // Building -> ARCore world transform for this session (docs/05): set by ArGuidanceView's "Place route here" flow,
-    // later by a real localizer. Null = not aligned yet. Cleared when the AR view leaves.
+    // Building -> ARCore world transform for this session (docs/05): set by ArGuidanceView's sign fix (Augmented Images)
+    // or its debug "Place route here" floor tap. Null = not aligned yet. Cleared when the AR view leaves.
     val buildingToWorld = MutableStateFlow<com.campusmaps.loc.BuildingToWorld?>(null)
+
+    // Position source (docs/03 section 1): the ARCore camera pose once the route is placed, else the simulator.
+    // Debug moves (Step, Walk, jump, continuous walker) switch to the simulator; see loc/SwitchablePositionProvider.
+    private val arPosition = com.campusmaps.loc.ArPositionProvider(transform = { buildingToWorld.value }, initial = simulator.pose.value)
+    val positionSource = com.campusmaps.loc.SwitchablePositionProvider(scope, simulator, arPosition, buildingToWorld)
+    val position: PositionProvider = positionSource
+    val simulation: SimulationControls = positionSource
+
+    init {
+        com.campusmaps.loc.ArFeed.setBuilding(building.core)
+    }
 
     private val _state = MutableStateFlow(buildState(position.pose.value))
     val state: StateFlow<GuidanceState> = _state.asStateFlow()
 
     fun start() {
         watch.reset()
+        com.campusmaps.loc.ArFeed.attach(arPosition)
+        positionSource.start(arExpected = com.campusmaps.loc.ArFeed.arExpected && !glassesMode)
         position.follow(route)
         loopJob = scope.launch {
             while (true) {
@@ -103,6 +114,7 @@ class GuidanceController(
 
     fun stop() {
         loopJob?.cancel()
+        com.campusmaps.loc.ArFeed.detach(arPosition)
         position.stop()
         speaker.stop()
     }

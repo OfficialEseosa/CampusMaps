@@ -23,8 +23,8 @@ data class SignSighting(
 )
 
 // The seam between guidance and whatever knows the student's position.
-// Today: SimulatedPositionProvider (walks the route by itself, for demos and the emulator).
-// Later: ARCore + sign recognition implement this and ignore follow().
+// Today: loc/SwitchablePositionProvider = loc/ArPositionProvider (ARCore camera pose, once placed) or SimulatedPositionProvider (walks the route by itself, for demos, debug and the emulator).
+// ArPositionProvider ignores follow().
 interface PositionProvider {
     val pose: StateFlow<Pose>
 
