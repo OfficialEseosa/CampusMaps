@@ -160,6 +160,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         )
                     }
                     Screen.ADD_SHORTCUT -> AddShortcutScreen(shortcutVm, onBack = vm::back)
+                    Screen.EDITOR -> com.campusmaps.editor.BuildingEditorScreen(app, trip.building.code, onClose = { vm.buildingEditor(false) })
                     Screen.EXPLORE -> {
                         // A room picked on S1 shows on the map too.
                         LaunchedEffect(trip.building.id, trip.destination?.id) {
@@ -236,6 +237,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onBuilding = vm::selectBuilding,
                             onResetDemo = vm::resetDemo,
                             onDismiss = vm::closeSettings,
+                            onEditBuilding = { vm.buildingEditor(true) },
                         ),
                     )
                 }

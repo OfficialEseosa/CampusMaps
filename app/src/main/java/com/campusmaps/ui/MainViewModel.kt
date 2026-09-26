@@ -47,7 +47,7 @@ data class WalkState(
 )
 
 // The screens from the flow in section 3 of the handoff.
-enum class Screen { DESTINATION, ROUTES, GUIDANCE, GLASSES, ADD_SHORTCUT, EXPLORE }
+enum class Screen { DESTINATION, ROUTES, GUIDANCE, GLASSES, ADD_SHORTCUT, EXPLORE, EDITOR }
 
 // What the user has picked on S1. Kept apart from settings because Reset clears it.
 data class Selection(
@@ -217,6 +217,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             Screen.GUIDANCE, Screen.GLASSES -> endGuidance()
             Screen.DESTINATION -> if (_exploreHome.value) go(Screen.EXPLORE)
             Screen.EXPLORE -> if (_exploreBackToS1.value) { _exploreBackToS1.value = false; go(Screen.DESTINATION) }
+            Screen.EDITOR -> buildingEditor(false)
         }
     }
 
@@ -405,6 +406,12 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             app.settings.clearRecents(trip.value.building.id)
         }
         _showSettings.value = false
+    }
+
+    // Building editor (Settings > Edit this building, editor/). Closing clears the selection so S1 re-reads the reloaded building.
+    fun buildingEditor(open: Boolean) {
+        _showSettings.value = false
+        if (open) go(Screen.EDITOR) else { updateSelection { Selection(query = " ") }; updateSelection { Selection() }; go(Screen.DESTINATION) }
     }
 
     fun openSettings() {
