@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusMaps Design Handoff</title>
+<meta name="description" content="Screens, wireframes, states, copy and constraints for the CampusMaps visual design (HackGT 13).">
+<style>
+:root {
+  --bg: #f6f5f2; --surface: #ffffff; --text: #1b1c20; --muted: #5b5e66; --line: #dcdad4;
+  --accent: #1d5fc4; --accent-soft: #e4ecf9; --warn: #a3322a; --warn-soft: #fbeae8; --ok-soft: #e6f3e8;
+  --code-bg: #efeee9;
+  --wf-bg: #ffffff; --wf-fill: #eceff3; --wf-fill2: #d9e5f7; --wf-line: #5f6670; --wf-text: #22262c;
+  --wf-muted: #6b7280; --wf-accent: #1d5fc4; --wf-on-accent: #ffffff; --wf-new: #d9480f; --wf-warn: #fbe1dd; --wf-warn-text: #8c1d14;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121316; --surface: #1b1d21; --text: #e6e6e9; --muted: #a3a6ae; --line: #34373d;
+    --accent: #8ab4f8; --accent-soft: #1f2a3d; --warn: #ff9f94; --warn-soft: #3a1f1c; --ok-soft: #1d3322;
+    --code-bg: #25272c;
+    --wf-bg: #1e2125; --wf-fill: #2b2f35; --wf-fill2: #29395a; --wf-line: #9aa1ab; --wf-text: #e8eaed;
+    --wf-muted: #a0a6b0; --wf-accent: #8ab4f8; --wf-on-accent: #0b1b33; --wf-new: #ff8a4c; --wf-warn: #4a2320; --wf-warn-text: #ffb4ab;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121316; --surface: #1b1d21; --text: #e6e6e9; --muted: #a3a6ae; --line: #34373d;
+  --accent: #8ab4f8; --accent-soft: #1f2a3d; --warn: #ff9f94; --warn-soft: #3a1f1c; --ok-soft: #1d3322;
+  --code-bg: #25272c;
+  --wf-bg: #1e2125; --wf-fill: #2b2f35; --wf-fill2: #29395a; --wf-line: #9aa1ab; --wf-text: #e8eaed;
+  --wf-muted: #a0a6b0; --wf-accent: #8ab4f8; --wf-on-accent: #0b1b33; --wf-new: #ff8a4c; --wf-warn: #4a2320; --wf-warn-text: #ffb4ab;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 80px; }
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 8px 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 1.45rem; margin: 56px 0 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.15rem; margin: 28px 0 8px; }
+h4 { font-size: 1rem; margin: 18px 0 6px; }
+p, li { max-width: 72ch; }
+a { color: var(--accent); }
+code, .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, "Roboto Mono", monospace; font-size: 0.88em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.sub { color: var(--muted); margin: 0 0 16px; }
+.topbar { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.theme-btn { font: inherit; font-size: 0.85rem; padding: 8px 14px; min-height: 40px; border-radius: 20px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--text); cursor: pointer; }
+nav.toc { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 20px 0; }
+nav.toc ol { margin: 0; padding-left: 20px; columns: 2 220px; }
+nav.toc li { margin: 2px 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 14px 0; }
+.demos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px; }
+.demos .card { margin: 0; }
+.demos h4 { margin-top: 0; }
+.tag { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); vertical-align: middle; }
+.tag.new { background: transparent; border: 1.5px dashed var(--wf-new); color: var(--wf-new); }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.flow svg { min-width: 680px; width: 100%; height: auto; display: block; }
+.screen-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 16px; align-items: start; }
+figure { margin: 0; }
+figure img, figure svg.phone { width: 100%; max-width: 300px; height: auto; display: block; margin: 0 auto;
+  border-radius: 22px; border: 1px solid var(--line); background: var(--wf-bg); }
+figcaption { font-size: 0.82rem; color: var(--muted); text-align: center; margin-top: 6px; }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
+.thumbs img { width: 100%; border-radius: 12px; border: 1px solid var(--line); display: block; }
+.thumbs figcaption { font-size: 0.75rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; background: var(--surface); }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); background: var(--bg); }
+td q, .copy { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.82rem; quotes: "\201C" "\201D"; color: var(--text); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; margin: 10px 0; }
+.tablewrap table { min-width: 620px; }
+.notes { background: var(--accent-soft); border-radius: 12px; padding: 12px 16px 12px 34px; margin: 10px 0; }
+.notes li { margin: 4px 0; }
+.warnbox { background: var(--warn-soft); border-radius: 12px; padding: 12px 16px; margin: 10px 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.85rem; color: var(--muted); margin: 8px 0 16px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { display: inline-block; width: 22px; height: 14px; border-radius: 3px; border: 1.5px solid var(--wf-line); background: var(--wf-fill); }
+.sw.new { border: 1.5px dashed var(--wf-new); background: transparent; }
+.sw.acc { background: var(--wf-accent); border-color: var(--wf-accent); }
+.chip { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; border: 1px solid rgba(128,128,128,.5); margin-right: 4px; }
+.checklist { list-style: none; padding: 0; }
+.checklist li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 12px 54px; margin: 10px 0; position: relative; max-width: none; }
+.checklist .p { position: absolute; left: 12px; top: 12px; width: 32px; height: 32px; border-radius: 16px; background: var(--accent); color: var(--surface);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.watch-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 14px; }
+.watch-row svg { width: 100%; max-width: 220px; display: block; margin: 0 auto; }
+
+/* Wireframe SVG classes */
+.wf text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+.wf [font-family*="monospace"], .wf [font-family*="monospace"] text { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+.wf .fr { fill: var(--wf-bg); stroke: var(--wf-line); stroke-width: 2; }
+.wf .b { fill: var(--wf-fill); stroke: var(--wf-line); stroke-width: 1.2; }
+.wf .b0 { fill: none; stroke: var(--wf-line); stroke-width: 1.2; }
+.wf .b2 { fill: var(--wf-fill2); stroke: var(--wf-accent); stroke-width: 1.5; }
+.wf .acc { fill: var(--wf-accent); }
+.wf .accs { fill: none; stroke: var(--wf-accent); stroke-width: 2; }
+.wf .on { fill: var(--wf-on-accent); }
+.wf .t { fill: var(--wf-text); font-size: 12px; }
+.wf .m { fill: var(--wf-muted); font-size: 11px; }
+.wf .h { fill: var(--wf-text); font-weight: 700; }
+.wf .warnbg { fill: var(--wf-warn); stroke: var(--wf-warn-text); stroke-width: 1; }
+.wf .warnt { fill: var(--wf-warn-text); font-size: 12px; font-weight: 600; }
+.wf .new { fill: none; stroke: var(--wf-new); stroke-width: 1.6; stroke-dasharray: 5 4; }
+.wf .note { fill: var(--wf-new); font-size: 10.5px; font-style: italic; }
+.wf .ln { stroke: var(--wf-line); stroke-width: 1.2; fill: none; }
+/* Camera-view parts are always dark: the camera is behind them. */
+.wf .cam { fill: #3b4048; }
+.wf .camln { stroke: #5b616b; stroke-width: 1.5; fill: none; }
+.wf .ov { fill: #000; fill-opacity: 0.86; }
+.wf .w { fill: #fff; }
+.wf .g { fill: #b7c0c7; }
+.wf .blk { fill: #000; stroke: var(--wf-line); stroke-width: 2; }
+.wf .chev { fill: none; stroke: #4fc3f7; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.wf .chevglow { fill: none; stroke: #4fc3f7; stroke-opacity: 0.28; stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+.flow .node { fill: var(--surface); stroke: var(--wf-line); stroke-width: 1.5; }
+.flow .node.key { fill: var(--accent-soft); stroke: var(--accent); }
+.flow .node.aux { stroke-dasharray: 6 4; }
+.flow text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; fill: var(--text); }
+.flow .lbl { font-size: 11.5px; fill: var(--muted); }
+.flow .edge { stroke: var(--wf-line); stroke-width: 1.6; fill: none; }
+.flow .edge.back { stroke-dasharray: 5 4; }
+.flow .edge.mirror { stroke: var(--accent); stroke-dasharray: 2 4; }
+@media (max-width: 560px) {
+  h1 { font-size: 1.55rem; }
+  h2 { font-size: 1.25rem; }
+}
+</style>
+</head>
+<body>
+<!-- shared SVG defs -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a9099"/>
+    </marker>
+    <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4c86d9"/>
+    </marker>
+  </defs>
+</svg>
+
+<main>
+<div class="topbar">
+  <span class="tag">HackGT 13 · Design hand-off · 2026-09-25</span>
+  <button class="theme-btn" id="themeBtn" type="button">Switch light / dark</button>
+</div>
+<h1>CampusMaps design hand-off</h1>
+<p class="sub">Everything a designer needs to style the app without having seen it. The current screenshots are from the Android emulator with the Material 3 defaults (no styling yet). The wireframes show the intended layout, including parts that are not built yet.</p>
+
+<nav class="toc" aria-label="Contents">
+<ol>
+  <li><a href="#product">Product and demos</a></li>
+  <li><a href="#flow">Screen flow</a></li>
+  <li><a href="#s1">S1 Destination</a></li>
+  <li><a href="#s1b">S1b Route options</a></li>
+  <li><a href="#s2">S2 AR guidance</a></li>
+  <li><a href="#arrived">Arrived</a></li>
+  <li><a href="#s3">S3 Glasses mode</a></li>
+  <li><a href="#settings">Settings sheet</a></li>
+  <li><a href="#debug">Debug overlay</a></li>
+  <li><a href="#watch">Watch face</a></li>
+  <li><a href="#states">States and edge cases</a></li>
+  <li><a href="#copy">Content and tone</a></li>
+  <li><a href="#constraints">Constraints</a></li>
+  <li><a href="#conflicts">Spec conflicts to resolve</a></li>
+  <li><a href="#asks">Asks for the designer</a></li>
+</ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="product">1. Product and demos</h2>
+<p><strong>CampusMaps</strong> is indoor navigation for a university campus. It is like Google Maps Live View, but it works inside buildings. The phone's camera view shows 3D arrows on the hallway floor that lead to a room. The app picks the entrance that gets you to your room fastest, avoids doors that are card-only at that hour, and can avoid stairs. It finds your position by recognising signs and posters it already knows, and everything runs on the phone. Ray-Ban Meta glasses speak each turn so your hands stay free. A Galaxy Watch shows one big arrow and buzzes a different pattern for each kind of turn. It is being built in 36 hours at HackGT 13 (Georgia Tech) for the Immersive track. Judging happens at an expo table in the Klaus Atrium, where judges hold the phone themselves.</p>
+
+<div class="demos">
+  <div class="card"><h4>Demo A: live in Klaus <span class="tag">live, judge holds phone</span></h4>
+  <p>A judge picks a destination from a short list, points the phone at a sign, and floor arrows appear leading down the hallway. They walk under 60 m to the room, and the app says "You have arrived" at the door.</p></div>
+  <div class="card"><h4>Demo B: Classroom South <span class="tag">recorded video</span></h4>
+  <p>The same room (608, floor 6) is requested from two sides of the building, and the route cards recommend different entrances with real ETAs. Turning on "Avoid stairs" removes the stairs options live, and the route rides the elevator across floors.</p></div>
+  <div class="card"><h4>Demo C: Student Center, after hours <span class="tag">recorded video</span></h4>
+  <p>A user with the phone in a pocket hears through the glasses: "Heads up: Main entrance is card-only now. Using West entrance instead." Inside, the glasses see signs and speak each turn while the watch buzzes and shows the arrow.</p></div>
+</div>
+<p class="sub" style="margin-top:12px">The pitch in one line: "Google Maps gets you to the building. Then you're on your own." Keep that tone: calm, practical, and a little cheeky. The app shell should stay quiet so the AR view and the voice are what people notice.</p>
+
+<!-- ============================================================ -->
+<h2 id="flow">2. Screen flow</h2>
+<div class="legend">
+  <span><span class="sw acc"></span>main path</span>
+  <span><svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#8a9099" stroke-width="1.6" stroke-dasharray="5 4"/></svg>back or reset</span>
+  <span><svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#4c86d9" stroke-width="1.6" stroke-dasharray="2 4"/></svg>mirrors state (no navigation)</span>
+  <span><span class="sw" style="border-style:dashed"></span>overlay or companion</span>
+</div>
+<div class="card scroll flow">
+<svg viewBox="0 0 920 430" role="img" aria-label="Screen flow: S1 Destination to S1b Route options to S2 AR guidance to Arrived. S1b also leads to S3 Glasses mode. Settings sheet and Debug overlay open over any screen. The watch face mirrors S2 and S3.">
+  <!-- return arcs -->
+  <path class="edge back" d="M 800 92 C 800 20, 110 20, 110 92" marker-end="url(#ah)"/>
+  <text class="lbl" x="455" y="34" text-anchor="middle">Done · Reset (app bar) → S1</text>
+  <path class="edge back" d="M 770 92 C 770 52, 340 52, 340 92" marker-end="url(#ah)"/>
+  <text class="lbl" x="560" y="84" text-anchor="middle">Back to routes · system Back from S2 or S3</text>
+
+  <!-- main row -->
+  <rect class="node key" x="20" y="96" width="180" height="84" rx="14"/>
+  <text x="110" y="128" text-anchor="middle" font-weight="700" font-size="15">S1 Destination</text>
+  <text class="lbl" x="110" y="148" text-anchor="middle">building, room, start,</text>
+  <text class="lbl" x="110" y="164" text-anchor="middle">avoid stairs</text>
+
+  <rect class="node key" x="250" y="96" width="180" height="84" rx="14"/>
+  <text x="340" y="128" text-anchor="middle" font-weight="700" font-size="15">S1b Route options</text>
+  <text class="lbl" x="340" y="148" text-anchor="middle">2–3 entrance cards,</text>
+  <text class="lbl" x="340" y="164" text-anchor="middle">ETA, locked banner</text>
+
+  <rect class="node key" x="480" y="96" width="180" height="84" rx="14"/>
+  <text x="570" y="128" text-anchor="middle" font-weight="700" font-size="15">S2 AR guidance</text>
+  <text class="lbl" x="570" y="148" text-anchor="middle">camera + floor arrows,</text>
+  <text class="lbl" x="570" y="164" text-anchor="middle">instruction, minimap</text>
+
+  <rect class="node key" x="710" y="96" width="180" height="84" rx="14"/>
+  <text x="800" y="128" text-anchor="middle" font-weight="700" font-size="15">Arrived</text>
+  <text class="lbl" x="800" y="148" text-anchor="middle">state of S2 (and S3)</text>
+  <text class="lbl" x="800" y="164" text-anchor="middle">Done · Back to routes</text>
+
+  <path class="edge" d="M 200 138 L 246 138" marker-end="url(#ah)"/>
+  <text class="lbl" x="223" y="200" text-anchor="middle">"Route to…"</text>
+  <path class="edge" d="M 430 138 L 476 138" marker-end="url(#ah)"/>
+  <text class="lbl" x="453" y="200" text-anchor="middle">tap a card</text>
+  <path class="edge" d="M 660 138 L 706 138" marker-end="url(#ah)"/>
+  <text class="lbl" x="683" y="200" text-anchor="middle">last node</text>
+
+  <!-- glasses -->
+  <rect class="node key" x="480" y="250" width="180" height="84" rx="14"/>
+  <text x="570" y="282" text-anchor="middle" font-weight="700" font-size="15">S3 Glasses mode</text>
+  <text class="lbl" x="570" y="302" text-anchor="middle">black, high contrast,</text>
+  <text class="lbl" x="570" y="318" text-anchor="middle">Repeat · Stop</text>
+  <path class="edge" d="M 340 180 L 340 292 L 476 292" marker-end="url(#ah)"/>
+  <text class="lbl" x="350" y="276">"Guide me with glasses"</text>
+  <path class="edge back" d="M 520 334 C 520 380, 300 380, 300 184" marker-end="url(#ah)"/>
+  <text class="lbl" x="410" y="392" text-anchor="middle">Stop → S1b</text>
+
+  <!-- watch -->
+  <rect class="node aux" x="710" y="250" width="180" height="84" rx="42"/>
+  <text x="800" y="282" text-anchor="middle" font-weight="700" font-size="15">Watch face</text>
+  <text class="lbl" x="800" y="302" text-anchor="middle">one big arrow + buzz</text>
+  <text class="lbl" x="800" y="318" text-anchor="middle">(separate device)</text>
+  <path class="edge mirror" d="M 660 292 L 706 292" marker-end="url(#ahA)"/>
+  <path class="edge mirror" d="M 600 180 C 610 232, 690 244, 740 258" marker-end="url(#ahA)"/>
+
+  <!-- overlays -->
+  <rect class="node aux" x="20" y="250" width="180" height="70" rx="14"/>
+  <text x="110" y="280" text-anchor="middle" font-weight="700" font-size="15">Settings sheet</text>
+  <text class="lbl" x="110" y="300" text-anchor="middle">from the app bar, any screen</text>
+  <rect class="node aux" x="20" y="340" width="180" height="70" rx="14"/>
+  <text x="110" y="370" text-anchor="middle" font-weight="700" font-size="15">Debug overlay</text>
+  <text class="lbl" x="110" y="390" text-anchor="middle">long-press title; off in demo</text>
+</svg>
+</div>
+<p>Two rules shape the flow. First, a judge holds the phone for about 60 seconds, so every action must be a visible button with no hidden gestures. The only hidden gesture is the debug toggle, and demo mode turns it off. Second, the team must reset the phone between judges in under 20 seconds, which is what Reset is for. The spec also says to skip S1b when you start inside and there is only one sensible route. That is not built yet.</p>
+
+<div class="legend">
+  <span><span class="sw"></span>exists in the build today</span>
+  <span><span class="sw new"></span>not built yet (dashed orange in every wireframe)</span>
+  <span><span class="sw acc"></span>primary action</span>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s1">3. S1 Destination</h2>
+<p>This is where the user picks a room. For the judge it is one tap, because the building is preselected and the demo destinations are already listed.</p>
+<div class="screen-grid">
+  <figure><img src="img/s1-destination.png" alt="Current S1 screenshot, light theme, Klaus with Room 1116 selected" width="540" height="1200" loading="lazy"><figcaption>Current: S1, Klaus, Room 1116 selected (light)</figcaption></figure>
+  <figure>
+<svg class="wf phone" viewBox="0 0 360 780" role="img" aria-label="S1 wireframe">
+  <rect class="fr" x="1" y="1" width="358" height="778" rx="28"/>
+  <text class="m" x="24" y="22">9:41</text>
+  <text class="h" x="20" y="60" font-size="19">CampusMaps</text>
+  <rect class="b" x="152" y="42" width="34" height="22" rx="6"/><text class="t" x="169" y="57" text-anchor="middle" font-size="11">KL</text>
+  <circle class="b0" cx="284" cy="54" r="17"/><text class="m" x="284" y="58" text-anchor="middle">↺</text>
+  <circle class="b0" cx="326" cy="54" r="17"/><text class="m" x="326" y="58" text-anchor="middle">⚙</text>
+  <text class="note" x="342" y="88" text-anchor="end">Reset · Settings (icons, 48 dp)</text>
+  <!-- building segmented -->
+  <rect class="b2" x="20" y="96" width="107" height="44" rx="22"/>
+  <rect class="b" x="127" y="96" width="106" height="44"/>
+  <rect class="b" x="233" y="96" width="107" height="44" rx="22"/>
+  <text class="t" x="73" y="123" text-anchor="middle" font-weight="700">✓ Klaus</text>
+  <text class="t" x="180" y="123" text-anchor="middle">Classroom S.</text>
+  <text class="t" x="286" y="123" text-anchor="middle">Student Ctr E.</text>
+  <text class="m" x="20" y="162">Klaus Advanced Computing Building</text>
+  <!-- search -->
+  <rect class="b0" x="20" y="174" width="320" height="52" rx="10"/>
+  <text class="m" x="36" y="205">🔍  Search room number or name</text>
+  <text class="note" x="342" y="240" text-anchor="end">hidden in demo mode</text>
+  <!-- list -->
+  <text class="t" x="20" y="262" font-weight="600">Recent and demo destinations</text>
+  <rect class="b2" x="20" y="272" width="320" height="60" rx="12"/>
+  <text class="h" x="36" y="298" font-size="14">Room 1116</text><text class="m" x="36" y="317">R-1116 · Floor 1</text>
+  <text class="t" x="324" y="306" text-anchor="end" font-weight="600">✓ Selected</text>
+  <rect class="b" x="20" y="338" width="320" height="60" rx="12"/>
+  <text class="h" x="36" y="364" font-size="14">Next demo room</text><text class="m" x="36" y="383">placeholder · Klaus lists 1 today</text>
+  <rect class="b" x="20" y="404" width="320" height="60" rx="12"/>
+  <text class="h" x="36" y="430" font-size="14">Nearest exit</text><text class="m" x="36" y="449">placeholder (Demo A idea)</text>
+  <!-- start -->
+  <text class="t" x="20" y="494" font-weight="600">Where are you?</text>
+  <rect class="b0" x="20" y="504" width="320" height="48" rx="10"/>
+  <text class="t" x="36" y="533">📍 Outside: P1 Decatur St side</text><text class="m" x="324" y="533" text-anchor="end">▾</text>
+  <text class="note" x="20" y="568">later filled by real localization; shows "Located" state</text>
+  <!-- avoid stairs -->
+  <rect class="b0" x="20" y="580" width="320" height="52" rx="10"/>
+  <text class="t" x="36" y="611">♿  Avoid stairs</text>
+  <rect class="acc" x="284" y="594" width="44" height="24" rx="12"/><circle class="on" cx="316" cy="606" r="9"/>
+  <text class="note" x="20" y="650">route error appears here (red text)</text>
+  <!-- CTA -->
+  <rect class="acc" x="20" y="700" width="320" height="56" rx="28"/>
+  <text class="on" x="180" y="734" text-anchor="middle" font-weight="700" font-size="16">Route to Room 1116</text>
+  <rect class="b" x="140" y="766" width="80" height="4" rx="2"/>
+</svg>
+  <figcaption>Wireframe: intended S1</figcaption></figure>
+</div>
+<div class="thumbs">
+  <figure><img src="img/s1-dark.png" alt="S1 dark theme" loading="lazy"><figcaption>Dark theme</figcaption></figure>
+  <figure><img src="img/s1-demo-mode.png" alt="S1 in demo mode" loading="lazy"><figcaption>Demo mode (no search)</figcaption></figure>
+</div>
+<h4>Elements</h4>
+<div class="tablewrap"><table>
+<thead><tr><th>Element</th><th>Purpose</th><th>States</th><th>Exact copy today</th></tr></thead>
+<tbody>
+<tr><td>App bar title</td><td>App name + current building code. Long-press toggles the debug overlay.</td><td>normal; demo mode adds a tag; long-press disabled in demo mode</td><td><q>CampusMaps  KL</q>, <q>DEMO</q></td></tr>
+<tr><td>Reset, Settings</td><td>Reset clears the destination and returns to S1 (the team uses it between judges). Settings opens the sheet.</td><td>always visible</td><td><q>Reset</q>, <q>Settings</q></td></tr>
+<tr><td>Building chips</td><td>Pick one of three buildings. Preselected from the "demo building" setting.</td><td>selected / unselected</td><td><q>KL</q> <q>CS</q> <q>CSE</q>; names: <q>Klaus Advanced Computing Building</q>, <q>Classroom South</q>, <q>Student Center East</q></td></tr>
+<tr><td>Search field</td><td>Filter room nodes by number or name; top 5 hits. The keyboard's search key picks the top hit.</td><td>empty; typing; no match; with Clear; hidden in demo mode</td><td><q>Search room number or name</q>, <q>Clear</q>, <q>No room matches "6608"</q></td></tr>
+<tr><td>Destination list</td><td>One-tap demo destinations.</td><td>selected (tinted + label); empty</td><td><q>Recent and demo destinations</q> / demo mode: <q>Demo destinations</q>; row <q>R-608  Room 608</q> + <q>Floor 6</q>; <q>Selected</q>; <q>None in this building file</q></td></tr>
+<tr><td>Where are you?</td><td>Start point. Today a picker; later the real position from sign recognition.</td><td>outdoor start point; inside node</td><td><q>Where are you?</q>, <q>Outside: P1 Decatur St side</q>, <q>Inside: S1, Start 1, west of our table (floor 1)</q></td></tr>
+<tr><td>Avoid stairs</td><td>Accessibility preference, persisted.</td><td>on / off</td><td><q>Avoid stairs</q></td></tr>
+<tr><td>Route error</td><td>Why there is no route.</td><td>hidden / shown in error colour</td><td><q>No route to Room 220: every entrance is card-only at Sat 23:00.</q></td></tr>
+<tr><td>Route button</td><td>Go to S1b.</td><td>disabled / enabled</td><td><q>Pick a destination</q> / <q>Route to Room 608</q></td></tr>
+</tbody></table></div>
+<h4>Design notes</h4>
+<ul class="notes">
+  <li>Use the full building names on the chips (the judge does not know "CSE"). A segmented button fits three.</li>
+  <li>Destination rows should read as big tappable cards: room name first, floor second, 56 dp or taller.</li>
+  <li>The primary button sits at the bottom within thumb reach, full width, 56 dp tall.</li>
+  <li>Reset should look safe but not tempting. The team needs it; a judge should not tap it by accident. An icon with a label on long-press is fine, as long as the tap target is 48 dp.</li>
+  <li>Demo mode hides search and the debug gesture. The screen must still look complete without the search field.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s1b">4. S1b Route options</h2>
+<p>This is the "smart" screen of Demo B. It shows two or three ways in, best first, with a real ETA on each. The avoid-stairs toggle is repeated here so flipping it in front of a judge changes the cards live.</p>
+<div class="screen-grid">
+  <figure><img src="img/s1b-routes.png" alt="Current S1b screenshot with three route cards for Room 608" width="540" height="1200" loading="lazy"><figcaption>Current: Room 608 from P1, three cards</figcaption></figure>
+  <figure>
+<svg class="wf phone" viewBox="0 0 360 780" role="img" aria-label="S1b wireframe">
+  <rect class="fr" x="1" y="1" width="358" height="778" rx="28"/>
+  <text class="m" x="24" y="22">9:41</text>
+  <text class="t" x="24" y="60" font-size="18">←</text>
+  <text class="h" x="52" y="60" font-size="17">Route options</text>
+  <circle class="b0" cx="326" cy="54" r="17"/><text class="m" x="326" y="58" text-anchor="middle">⚙</text>
+  <text class="h" x="20" y="106" font-size="22">To Room 608</text>
+  <text class="m" x="20" y="126">Floor 6 · Classroom South</text>
+  <text class="m" x="20" y="144">From: Outside, P1 Decatur St side</text>
+  <rect class="b" x="20" y="152" width="200" height="22" rx="11"/>
+  <text class="m" x="30" y="167">🕘 Routed for Sat 21:00 (simulated)</text>
+  <!-- banner -->
+  <rect class="warnbg" x="20" y="184" width="320" height="58" rx="12"/>
+  <text class="warnt" x="36" y="208">🔒 Heads up: Main entrance is card-only now.</text>
+  <text class="warnt" x="58" y="228" font-weight="400">Using West entrance instead.</text>
+  <text class="note" x="342" y="256" text-anchor="end">only when a door is locked</text>
+  <!-- avoid -->
+  <text class="t" x="20" y="284">♿  Avoid stairs</text>
+  <rect class="b" x="284" y="268" width="44" height="24" rx="12"/><circle class="b0" cx="296" cy="280" r="9"/>
+  <!-- card 1 -->
+  <rect class="b2" x="20" y="306" width="320" height="124" rx="16"/>
+  <circle class="acc" cx="52" cy="340" r="20"/><text class="on" x="52" y="345" text-anchor="middle" font-size="13">⇅</text>
+  <text class="h" x="82" y="334" font-size="15">Library South entrance</text>
+  <text class="m" x="82" y="352">Enter on floor 1 · elevator</text>
+  <text class="h" x="326" y="346" text-anchor="end" font-size="28">2:14</text>
+  <rect class="acc" x="36" y="370" width="60" height="20" rx="10"/><text class="on" x="66" y="384" text-anchor="middle" font-size="11">Fastest</text>
+  <text class="t" x="104" y="384">90 m walk, elevator, avg wait 35 s</text>
+  <text class="m" x="36" y="412">also via: 95 Decatur Street entrance</text>
+  <!-- card 2 -->
+  <rect class="b" x="20" y="442" width="320" height="100" rx="16"/>
+  <circle class="b0" cx="52" cy="476" r="20"/><text class="t" x="52" y="481" text-anchor="middle">▟</text>
+  <text class="h" x="82" y="470" font-size="15">Library South entrance</text>
+  <text class="m" x="82" y="488">Enter on floor 1 · stairs</text>
+  <text class="h" x="326" y="482" text-anchor="end" font-size="24">3:01</text>
+  <text class="t" x="36" y="522">+47 s: same walk, 5 floors of stairs</text>
+  <!-- card 3 -->
+  <rect class="b" x="20" y="554" width="320" height="100" rx="16"/>
+  <circle class="b0" cx="52" cy="588" r="20"/><text class="t" x="52" y="593" text-anchor="middle">▟</text>
+  <text class="h" x="82" y="582" font-size="15">Walters side</text>
+  <text class="m" x="82" y="600">Enter on floor 1 · stairs</text>
+  <text class="h" x="326" y="594" text-anchor="end" font-size="24">3:53</text>
+  <text class="t" x="36" y="634">+1:39: 71 m more walking, 5 floors of stairs</text>
+  <text class="note" x="20" y="674">whole card is the tap target → S2</text>
+  <!-- glasses -->
+  <rect class="b0" x="20" y="700" width="320" height="56" rx="28"/>
+  <text class="t" x="180" y="733" text-anchor="middle" font-weight="600" font-size="14">👓  Guide me with glasses</text>
+  <rect class="b" x="140" y="766" width="80" height="4" rx="2"/>
+</svg>
+  <figcaption>Wireframe: intended S1b</figcaption></figure>
+</div>
+<div class="thumbs">
+  <figure><img src="img/s1b-locked-banner.png" alt="S1b with locked entrance banner" loading="lazy"><figcaption>Locked-entrance banner</figcaption></figure>
+  <figure><img src="img/s1b-avoid-stairs.png" alt="S1b with avoid stairs on" loading="lazy"><figcaption>Avoid stairs on</figcaption></figure>
+  <figure><img src="img/s1b-no-route.png" alt="S1b with no route message" loading="lazy"><figcaption>No route (debug card open)</figcaption></figure>
+  <figure><img src="img/s1b-dark.png" alt="S1b dark theme" loading="lazy"><figcaption>Dark theme</figcaption></figure>
+</div>
+<h4>Elements</h4>
+<div class="tablewrap"><table>
+<thead><tr><th>Element</th><th>Purpose</th><th>States</th><th>Exact copy today</th></tr></thead>
+<tbody>
+<tr><td>Header</td><td>Destination, start, and the time used for routing (access rules depend on the time).</td><td>real time / simulated time</td><td><q>To Room 608 (floor 6)</q>, <q>From: Outside: P1 Decatur St side</q>, <q>Routed for Saturday 21:00 (simulated)</q></td></tr>
+<tr><td>Locked-entrance banner</td><td>Explains that a door was skipped because it is card-only now. Demo C's key moment on screen.</td><td>hidden / shown</td><td><q>Heads up: Main entrance is card-only now. Using West entrance instead.</q> (fallback: <q>…Taking another way.</q>)</td></tr>
+<tr><td>Avoid stairs</td><td>Same setting as S1; flipping it recomputes the cards live.</td><td>on / off</td><td><q>Avoid stairs</q></td></tr>
+<tr><td>Route card (×1–3)</td><td>One way in. Best first, highlighted.</td><td>best; other; "from here" (start is inside); "already here"</td><td>title <q>Walters main</q> or <q>From here</q> / <q>From here, by elevator</q> / <q>You are already here</q>; <q>Enter on floor 1</q></td></tr>
+<tr><td>Vertical-method badge</td><td>Stairs, elevator or no floor change. Should become an icon.</td><td>3 values</td><td><q>STAIRS</q>, <q>ELEV</q>, <q>LEVEL</q></td></tr>
+<tr><td>ETA</td><td>Total time door to door, m:ss.</td><td>number; unknown</td><td><q>2:14</q>, <q>--:--</q></td></tr>
+<tr><td>Explanation line</td><td>What makes this card different from the best one.</td><td>best / delta</td><td><q>Fastest: 90 m walk, elevator, average wait 35 s</q>, <q>+47 s: same walk, 5 floors of stairs</q>, <q>+1:39: 71 m more walking, 5 floors of stairs</q>, <q>no floor change</q></td></tr>
+<tr><td>Also via</td><td>Other doors that lead onto the same route.</td><td>hidden / shown</td><td><q>also via: 95 Decatur Street entrance, LibSo main entrance</q></td></tr>
+<tr><td>Glasses button</td><td>Starts S3 with the best route. Today it is always shown; the spec wants it offered when glasses are connected.</td><td>enabled / disabled (no options)</td><td><q>Guide me with glasses</q></td></tr>
+</tbody></table></div>
+<h4>Design notes</h4>
+<ul class="notes">
+  <li>This screen is filmed for Demo B. The ETA and the entrance name must be readable in a 1080p screen recording that is shown small on a laptop at the table: ETA at least 28 sp, entrance name at least 16 sp.</li>
+  <li>The difference between cards is the story. The best card should stand out through more than colour alone (a "Fastest" label, larger size or elevation).</li>
+  <li>Cards change in place when Avoid stairs is flipped. A short cross-fade or reorder animation helps the viewer see the change on video.</li>
+  <li>The banner is information, not an error: the app has already solved the problem. Use a warning or tertiary tone with a lock icon, not an alarming red.</li>
+  <li>Stairs and elevator icons need to differ in shape, not only in colour.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s2">5. S2 AR guidance</h2>
+<p>This is the hero screen and the judge's whole experience. It is the full-screen camera with arrows drawn on the floor, the current instruction at the top, and a small map at the bottom. Today only the camera, text and minimap exist. On the emulator the camera area is a dark fallback panel ("AR unavailable on this device"), because the emulator has no ARCore.</p>
+<div class="screen-grid">
+  <figure><img src="img/s2-guidance.png" alt="Current S2 screenshot: instruction Turn left at Atrium north, dark panel, minimap and floor badge" width="540" height="1200" loading="lazy"><figcaption>Current: S2 while walking (emulator fallback, no camera)</figcaption></figure>
+  <figure>
+<svg class="wf phone" viewBox="0 0 360 780" role="img" aria-label="S2 AR guidance wireframe with floor arrows, next-turn arrow, destination pin, instruction banner, minimap and point-at-a-sign prompt">
+  <rect class="fr" x="1" y="1" width="358" height="778" rx="28"/>
+  <rect class="cam" x="2" y="2" width="356" height="776" rx="27"/>
+  <!-- hallway perspective -->
+  <path class="camln" d="M 0 780 L 150 360 M 360 780 L 212 360 M 150 360 L 212 360 M 150 360 L 150 250 M 212 360 L 212 250 M 150 250 L 212 250"/>
+  <path class="camln" d="M 150 395 L 40 395 M 150 360 L 60 360 M 0 520 L 110 470"/>
+  <!-- destination pin (far, left corridor) -->
+  <g>
+    <rect class="new" x="18" y="292" width="92" height="30" rx="8"/>
+    <rect x="20" y="294" width="88" height="26" rx="7" fill="#fff" fill-opacity="0.92"/>
+    <text x="64" y="312" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Room 1116</text>
+    <path d="M 64 330 C 52 330 48 340 48 346 C 48 356 64 372 64 372 C 64 372 80 356 80 346 C 80 340 76 330 64 330 Z" fill="#ff7043"/>
+    <circle cx="64" cy="346" r="5" fill="#fff"/>
+  </g>
+  <!-- arrow chain -->
+  <g>
+    <path class="chevglow" d="M 142 736 L 180 712 L 218 736"/><path class="chev" d="M 142 736 L 180 712 L 218 736"/>
+    <path class="chevglow" d="M 150 660 L 180 641 L 210 660"/><path class="chev" d="M 150 660 L 180 641 L 210 660" stroke-width="6"/>
+    <path class="chevglow" d="M 157 596 L 180 581 L 203 596"/><path class="chev" d="M 157 596 L 180 581 L 203 596" stroke-width="5"/>
+    <path class="chevglow" d="M 163 543 L 180 532 L 197 543"/><path class="chev" d="M 163 543 L 180 532 L 197 543" stroke-width="4"/>
+    <path class="chevglow" d="M 167 500 L 180 492 L 193 500"/><path class="chev" d="M 167 500 L 180 492 L 193 500" stroke-width="3.5"/>
+    <!-- next-turn arrow -->
+    <path d="M 180 470 L 180 430 Q 180 410 160 410 L 118 410" fill="none" stroke="#4fc3f7" stroke-opacity="0.3" stroke-width="26" stroke-linecap="round"/>
+    <path d="M 180 470 L 180 430 Q 180 410 160 410 L 124 410" fill="none" stroke="#4fc3f7" stroke-width="12" stroke-linecap="round"/>
+    <path d="M 132 392 L 106 410 L 132 428 Z" fill="#4fc3f7"/>
+    <path class="chev" d="M 92 402 L 80 410 L 92 418" stroke-width="3"/>
+    <rect class="new" x="94" y="380" width="104" height="100" rx="10"/>
+    <rect class="new" x="136" y="480" width="88" height="270" rx="10"/>
+  </g>
+  <text class="note" x="18" y="548">arrow chain on the</text>
+  <text class="note" x="18" y="561">floor, every 1.5 m,</text>
+  <text class="note" x="18" y="574">fades beyond 15 m</text>
+  <text class="note" x="206" y="444">next-turn arrow</text>
+  <text class="note" x="20" y="286">destination pin + room label</text>
+  <!-- instruction banner -->
+  <rect class="ov" x="12" y="30" width="336" height="130" rx="18"/>
+  <rect x="24" y="46" width="56" height="56" rx="14" fill="#4fc3f7"/>
+  <path d="M 62 92 L 62 70 Q 62 62 54 62 L 38 62" fill="none" stroke="#000" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 44 54 L 34 62 L 44 70 Z" fill="#000"/>
+  <text class="w" x="92" y="68" font-size="22" font-weight="700">Turn left at</text>
+  <text class="w" x="92" y="94" font-size="22" font-weight="700">Atrium north</text>
+  <text class="g" x="92" y="116" font-size="14">in 16 m</text>
+  <line x1="24" y1="128" x2="336" y2="128" stroke="#555"/>
+  <text class="g" x="24" y="148" font-size="13">Then: Room 1116 is on your right</text>
+  <circle cx="322" cy="54" r="15" fill="none" stroke="#fff" stroke-opacity="0.6"/><text class="w" x="322" y="59" text-anchor="middle" font-size="14">✕</text>
+  <circle class="new" cx="322" cy="54" r="19"/>
+  <text class="note" x="244" y="178">End route (proposed)</text>
+  <rect x="12" y="166" width="96" height="24" rx="12" fill="#ffcc80"/>
+  <text x="60" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#3e2500">Rerouted (1)</text>
+  <!-- minimap -->
+  <g transform="translate(12,636) scale(0.756) translate(-12,-596)">
+  <rect class="ov" x="12" y="596" width="164" height="164" rx="16"/>
+  <text class="w" x="22" y="614" font-size="11">F1</text>
+  <path d="M 40 740 L 94 740 L 94 650 L 150 650 M 94 700 L 150 720 M 60 650 L 94 650" stroke="#8a8f96" stroke-width="2" fill="none"/>
+  <path d="M 94 740 L 94 650 L 40 650" stroke="#29b6f6" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="94" cy="712" r="7" fill="#1e88e5" stroke="#fff" stroke-width="3"/>
+  <path d="M 94 712 L 94 696" stroke="#fff" stroke-width="2"/>
+  <circle cx="40" cy="650" r="7" fill="none" stroke="#ef5350" stroke-width="3"/>
+  </g>
+  <text class="note" x="14" y="628">tap map: half screen</text>
+  <!-- locate prompt -->
+  <g transform="translate(224,548) scale(0.8) translate(-190,-600)">
+  <rect x="190" y="600" width="158" height="78" rx="16" fill="#ffb300"/>
+  <rect x="204" y="614" width="30" height="22" rx="3" fill="none" stroke="#221600" stroke-width="2"/>
+  <text x="244" y="630" font-size="14" font-weight="700" fill="#221600">Point at</text>
+  <text x="244" y="648" font-size="14" font-weight="700" fill="#221600">a sign</text>
+  <text x="204" y="668" font-size="11" fill="#221600">to find where you are</text>
+  </g>
+  <text class="note" x="346" y="540" text-anchor="end">only when confidence &lt; 0.5</text>
+  <!-- floor badge -->
+  <rect x="276" y="690" width="72" height="62" rx="18" fill="#1e88e5"/>
+  <text x="312" y="731" text-anchor="middle" font-size="28" font-weight="700" fill="#fff">F1</text>
+</svg>
+  <figcaption>Wireframe: intended S2 over the camera</figcaption></figure>
+</div>
+<div class="thumbs">
+  <figure><img src="img/s2-low-confidence.png" alt="S2 with Locate me prompt" loading="lazy"><figcaption>Low confidence: "Locate me"</figcaption></figure>
+  <figure><img src="img/s2-big-map.png" alt="S2 with enlarged minimap" loading="lazy"><figcaption>Minimap enlarged</figcaption></figure>
+  <figure><img src="img/s2-rerouted.png" alt="S2 after reroute, floor 2" loading="lazy"><figcaption>Rerouted, elevator step, F2</figcaption></figure>
+</div>
+<h4>Elements</h4>
+<div class="tablewrap"><table>
+<thead><tr><th>Element</th><th>Purpose</th><th>States</th><th>Exact copy today</th></tr></thead>
+<tbody>
+<tr><td>Camera view <span class="tag">exists</span></td><td>Full-screen ARCore camera feed, the background of everything.</td><td>live; AR unavailable; camera permission missing; AR failed</td><td><q>AR unavailable on this device</q> / <q>ARCore: UNKNOWN_ERROR. Follow the text and the map.</q>; <q>Camera permission needed for AR</q>; <q>Waiting for permission</q>; <q>AR failed to start</q></td></tr>
+<tr><td>Arrow chain on the floor <span class="tag new">not built</span></td><td>Flat glowing chevrons every 1.5 m along the route, world-locked, pointing forward. <strong>Never cut: it is the demo.</strong></td><td>visible; fading beyond 15 m; hidden when tracking is lost</td><td>—</td></tr>
+<tr><td>Next-turn arrow <span class="tag new">not built</span></td><td>A larger arrow at the next decision point, bent in the turn direction.</td><td>left / right / straight / U-turn / elevator / stairs</td><td>—</td></tr>
+<tr><td>Destination pin <span class="tag new">not built</span></td><td>A pin or ring floating 1.5 m up at the room door, always facing the camera, with the room name.</td><td>far; near; arrived</td><td>label = room name, e.g. <q>Room 1116</q></td></tr>
+<tr><td>Instruction banner</td><td>Current step (large), distance, then the next step (small).</td><td>normal; arrived; no route</td><td><q>Turn left at Atrium north</q>, <q>in 16 m</q>, <q>Then: Room 1116 is on your right</q>, <q>No route</q></td></tr>
+<tr><td>Turn icon in banner <span class="tag new">not built</span></td><td>The same direction as the next-turn arrow, as a Material Symbol.</td><td>per instruction type</td><td>—</td></tr>
+<tr><td>Rerouted chip</td><td>Shows the route was recomputed because the user went off the route.</td><td>hidden / count</td><td><q>Rerouted (1)</q></td></tr>
+<tr><td>Routing error</td><td>A reroute failed.</td><td>hidden / shown</td><td>e.g. <q>No route to Room 220 from here.</q></td></tr>
+<tr><td>Minimap</td><td>2D floor plan: corridors grey, route in colour, user as a dot, destination ring. Works when AR tracking is lost.</td><td>small (170 dp) / half screen (tap)</td><td><q>F1</q> (corner label)</td></tr>
+<tr><td>"Point at a sign" prompt</td><td>Asks the user to aim the camera at a known sign so the app can find them.</td><td>shown when confidence &lt; 0.5 and not arrived</td><td><q>Locate me:<br>point at a sign</q></td></tr>
+<tr><td>Floor badge</td><td>Current floor; counts up during an elevator ride (barometer) in Demo B.</td><td>number; unknown</td><td><q>F1</q>, <q>F?</q></td></tr>
+<tr><td>End route <span class="tag new">proposed</span></td><td>Visible exit. Today only the system Back button leaves S2.</td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+<h4>Design notes</h4>
+<ul class="notes">
+  <li><strong>The judge holds the phone for 60 seconds.</strong> Nothing may depend on a gesture they would not guess. Anything tappable (minimap, End) needs a 48 dp target and a visible affordance.</li>
+  <li><strong>Readable outdoors and on video.</strong> Instruction text sits on a near-opaque dark scrim (today 90% black), 28 sp bold or larger, white. Do not use thin weights or text over the raw camera image.</li>
+  <li>The overlay is always dark, whatever the system theme, because it sits on a camera image. Hand over a separate "AR overlay" palette (see Constraints).</li>
+  <li>Keep the middle 60% of the screen clear. That is where the arrows are, and the judge must see the floor.</li>
+  <li>The prompt, the floor badge and the minimap all live at the bottom and can overlap on small screens. Please lay out all three together, including the half-screen map.</li>
+  <li>The next-turn icon in the banner should match the 3D next-turn arrow in shape and colour, so the screen reads as one system.</li>
+  <li>When tracking is lost, the arrows hide and the prompt appears. That transition should feel calm (fade, no flash), because it will happen live in front of judges.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="arrived">6. Arrived</h2>
+<p>This is a state of S2, and S3 has the same state. The route is complete; the banner turns green and two buttons appear.</p>
+<div class="screen-grid">
+  <figure><img src="img/s2-arrived.png" alt="Current arrived state: You have arrived, Room 1116 is on your right, Done and Back to routes buttons" width="540" height="1200" loading="lazy"><figcaption>Current: S2 arrived</figcaption></figure>
+  <figure>
+<svg class="wf phone" viewBox="0 0 360 780" role="img" aria-label="Arrived wireframe">
+  <rect class="fr" x="1" y="1" width="358" height="778" rx="28"/>
+  <rect class="cam" x="2" y="2" width="356" height="776" rx="27"/>
+  <path class="camln" d="M 0 780 L 130 380 M 360 780 L 232 380 M 130 380 L 232 380 M 130 380 L 130 220 M 232 380 L 232 220"/>
+  <!-- door on right wall -->
+  <path d="M 262 560 L 262 330 L 300 300 L 300 600 Z" fill="#4a505a" stroke="#7a818b"/>
+  <!-- ring on floor + pin -->
+  <ellipse cx="236" cy="600" rx="62" ry="18" fill="none" stroke="#81c784" stroke-width="6"/>
+  <ellipse cx="236" cy="600" rx="62" ry="18" fill="none" stroke="#81c784" stroke-opacity="0.3" stroke-width="18"/>
+  <path d="M 236 470 C 216 470 208 486 208 496 C 208 514 236 540 236 540 C 236 540 264 514 264 496 C 264 486 256 470 236 470 Z" fill="#81c784"/>
+  <path d="M 225 496 L 233 504 L 248 488" fill="none" stroke="#0b2e10" stroke-width="4" stroke-linecap="round"/>
+  <rect x="186" y="428" width="100" height="30" rx="8" fill="#fff" fill-opacity="0.92"/>
+  <text x="236" y="448" text-anchor="middle" font-size="13" font-weight="700" fill="#111">Room 1116</text>
+  <rect class="new" x="176" y="420" width="124" height="204" rx="10"/>
+  <text class="note" x="20" y="440">pin turns to "arrived"</text>
+  <text class="note" x="20" y="454">at the door</text>
+  <!-- banner -->
+  <rect class="ov" x="12" y="30" width="336" height="110" rx="18"/>
+  <circle cx="50" cy="84" r="24" fill="#81c784"/>
+  <path d="M 38 84 L 47 93 L 63 76" fill="none" stroke="#0b2e10" stroke-width="5" stroke-linecap="round"/>
+  <text x="88" y="78" font-size="24" font-weight="700" fill="#81c784">You have arrived</text>
+  <text class="w" x="88" y="104" font-size="15">Room 1116 is on your right</text>
+  <!-- buttons -->
+  <rect class="acc" x="12" y="648" width="164" height="56" rx="28"/>
+  <text class="on" x="94" y="682" text-anchor="middle" font-weight="700" font-size="15">Done</text>
+  <rect x="184" y="648" width="164" height="56" rx="28" fill="none" stroke="#fff" stroke-opacity="0.8" stroke-width="1.5"/>
+  <text class="w" x="266" y="682" text-anchor="middle" font-weight="600" font-size="15">Back to routes</text>
+  <!-- small map + floor -->
+  <rect class="ov" x="12" y="716" width="100" height="52" rx="12"/>
+  <text class="w" x="22" y="746" font-size="11">map</text>
+  <rect x="290" y="716" width="58" height="52" rx="16" fill="#1e88e5"/>
+  <text x="319" y="750" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">F1</text>
+</svg>
+  <figcaption>Wireframe: arrived</figcaption></figure>
+</div>
+<h4>Elements</h4>
+<div class="tablewrap"><table>
+<thead><tr><th>Element</th><th>Purpose</th><th>States</th><th>Exact copy today</th></tr></thead>
+<tbody>
+<tr><td>Arrived headline</td><td>Clear end of the route; also spoken.</td><td>—</td><td><q>You have arrived</q></td></tr>
+<tr><td>Door side line</td><td>Which side the door is on. When the door side is unknown the router says the full sentence instead.</td><td>side known / unknown</td><td><q>Room 1116 is on your right</q> (also left, ahead, behind) / <q>You have arrived at Room 1116</q></td></tr>
+<tr><td>Done</td><td>Resets to S1 for the next judge.</td><td>—</td><td><q>Done</q></td></tr>
+<tr><td>Back to routes</td><td>Back to S1b; the cards are recomputed from here.</td><td>—</td><td><q>Back to routes</q></td></tr>
+</tbody></table></div>
+<ul class="notes">
+  <li>This is the "applause" frame of Demo A. Make it feel finished: a confident colour change and a clear check mark, with no confetti.</li>
+  <li>Done is the button the team taps between judges, so make it the primary one.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s3">7. S3 Glasses mode</h2>
+<p>The phone is in a pocket and the glasses do the talking. This screen is for the teammate operating the demo and for the screen recording in Demo C. It is filmed, so it must be very high contrast. The glasses cannot use their camera and audio at the same time, so the app alternates: take a burst of photos, stop, recognise, then speak.</p>
+<div class="screen-grid">
+  <figure><img src="img/s3-glasses.png" alt="Current S3: black screen, Seen: ELEVATORS, Turn left at Elevator lobby, placeholder still, Floor 1, Repeat and Stop" width="540" height="1200" loading="lazy"><figcaption>Current: S3 while walking</figcaption></figure>
+  <figure>
+<svg class="wf phone" viewBox="0 0 360 780" role="img" aria-label="S3 glasses mode wireframe">
+  <rect class="blk" x="1" y="1" width="358" height="778" rx="28"/>
+  <text x="20" y="62" font-size="13" font-weight="700" fill="#ffd54f" letter-spacing="1">GLASSES MODE</text>
+  <rect x="222" y="46" width="118" height="24" rx="12" fill="#1b5e20"/>
+  <circle cx="236" cy="58" r="4" fill="#81c784"/>
+  <text x="246" y="62" font-size="11" fill="#fff">Glasses connected</text>
+  <text x="20" y="110" font-size="20" fill="#fff">👁  Seen: ELEVATORS</text>
+  <text x="20" y="160" font-size="30" font-weight="700" fill="#fff">Turn left at</text>
+  <text x="20" y="196" font-size="30" font-weight="700" fill="#fff">Elevator lobby</text>
+  <text x="20" y="234" font-size="17" fill="#b0bec5">Next: Take the elevator to floor 2</text>
+  <!-- thumbnail -->
+  <rect x="20" y="262" width="180" height="135" rx="10" fill="#222" stroke="#888"/>
+  <rect class="new" x="16" y="258" width="188" height="143" rx="12"/>
+  <text x="110" y="326" text-anchor="middle" font-size="12" fill="#aaa">live glasses still</text>
+  <text x="110" y="342" text-anchor="middle" font-size="11" fill="#777">(last burst frame)</text>
+  <rect x="28" y="370" width="54" height="20" rx="10" fill="#000" fill-opacity="0.7" stroke="#888"/>
+  <text x="55" y="384" text-anchor="middle" font-size="10" fill="#fff">Hide</text>
+  <text x="222" y="340" font-size="30" font-weight="700" fill="#fff">Floor 1</text>
+  <!-- burst state -->
+  <rect x="20" y="420" width="140" height="30" rx="15" fill="#263238"/>
+  <circle cx="38" cy="435" r="6" fill="#ff7043"/>
+  <text x="52" y="440" font-size="12" fill="#fff">Looking…</text>
+  <rect x="168" y="420" width="140" height="30" rx="15" fill="none" stroke="#546e7a"/>
+  <text x="186" y="440" font-size="12" fill="#90a4ae">🔊 Speaking</text>
+  <rect class="new" x="14" y="414" width="300" height="42" rx="18"/>
+  <text class="note" x="20" y="474">camera / audio cycle indicator (proposed)</text>
+  <!-- buttons -->
+  <rect x="20" y="628" width="156" height="84" rx="42" fill="#6750a4"/>
+  <text x="98" y="677" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">↻ Repeat</text>
+  <rect x="184" y="628" width="156" height="84" rx="42" fill="#c62828"/>
+  <text x="262" y="677" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">■ Stop</text>
+  <rect x="20" y="724" width="320" height="36" rx="18" fill="none" stroke="#555"/>
+  <text x="180" y="747" text-anchor="middle" font-size="12" fill="#888">Fake step (debug only, hidden in demo mode)</text>
+</svg>
+  <figcaption>Wireframe: intended S3</figcaption></figure>
+</div>
+<div class="thumbs">
+  <figure><img src="img/s3-arrived.png" alt="S3 arrived state" loading="lazy"><figcaption>Arrived (debug card at top)</figcaption></figure>
+</div>
+<h4>Elements</h4>
+<div class="tablewrap"><table>
+<thead><tr><th>Element</th><th>Purpose</th><th>States</th><th>Exact copy today</th></tr></thead>
+<tbody>
+<tr><td>Mode header + connection</td><td>Says this is glasses mode and whether the glasses are connected.</td><td>connected / not connected</td><td><q>GLASSES MODE  (not connected)</q></td></tr>
+<tr><td>Seen line</td><td>The last sign the glasses recognised. This is the proof on video that the camera drives the turns.</td><td>nothing yet / sign text</td><td><q>Seen: nothing yet</q>, <q>Seen: ELEVATORS</q>, <q>Seen: 608</q></td></tr>
+<tr><td>Current instruction</td><td>What is being spoken now.</td><td>normal; arrived; no route</td><td><q>Turn left at Elevator lobby</q>, <q>You have arrived</q>, <q>No route</q></td></tr>
+<tr><td>Next / door side</td><td>The next step, or on arrival the door side.</td><td>walking / arrived</td><td><q>Next: Take the elevator to floor 2</q>; arrived: <q>Room 608 is on your right</q></td></tr>
+<tr><td>Live thumbnail <span class="tag new">placeholder</span></td><td>The last still from the glasses, so the operator sees what they see. Can be hidden for recording.</td><td>image / empty / hidden</td><td><q>glasses still (placeholder)</q></td></tr>
+<tr><td>Floor</td><td>Current floor.</td><td>number / unknown</td><td><q>Floor 1</q>, <q>Floor ?</q></td></tr>
+<tr><td>Look / speak indicator <span class="tag new">proposed</span></td><td>Shows the burst cycle: camera on, then speaking. They never overlap.</td><td>looking / recognising / speaking / idle</td><td>—</td></tr>
+<tr><td>Repeat</td><td>Speaks the current instruction again.</td><td>—</td><td><q>Repeat</q></td></tr>
+<tr><td>Stop</td><td>Ends guidance, back to S1b.</td><td>—</td><td><q>Stop</q></td></tr>
+<tr><td>Fake step</td><td>Debug: move one node along the route.</td><td>hidden in demo mode; disabled on arrival</td><td><q>Fake step</q></td></tr>
+</tbody></table></div>
+<ul class="notes">
+  <li><strong>Filmed:</strong> pure black background, white text, 24 sp or larger, bold for the instruction. It must survive phone-to-phone video with glare. No greys darker than #B0BEC5 for text.</li>
+  <li>Repeat and Stop are 72 dp or taller and use half the width each. They are used without looking closely, while walking.</li>
+  <li>This screen stays dark in both system themes.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="settings">8. Settings sheet</h2>
+<p>A bottom sheet opened from the app bar. It is used by the team, not by judges. Do not add depth here; it only needs to look tidy.</p>
+<div class="screen-grid">
+  <figure><img src="img/settings.png" alt="Current settings bottom sheet" width="540" height="1200" loading="lazy"><figcaption>Current: settings sheet over S1</figcaption></figure>
+  <figure>
+<svg class="wf phone" viewBox="0 0 360 780" role="img" aria-label="Settings sheet wireframe">
+  <rect class="fr" x="1" y="1" width="358" height="778" rx="28"/>
+  <rect class="b" x="20" y="60" width="200" height="20" rx="4"/>
+  <rect class="b" x="20" y="100" width="320" height="44" rx="22"/>
+  <rect class="b" x="20" y="170" width="320" height="52" rx="10"/>
+  <rect class="b" x="20" y="240" width="320" height="60" rx="12"/>
+  <rect x="1" y="1" width="358" height="778" rx="28" fill="#000" fill-opacity="0.35"/>
+  <rect class="fr" x="1" y="320" width="358" height="459" rx="28"/>
+  <rect class="b" x="160" y="334" width="40" height="5" rx="2.5"/>
+  <text class="h" x="24" y="378" font-size="20">Settings</text>
+  <text class="t" x="24" y="416" font-size="14">🔊 Speak instructions</text>
+  <text class="m" x="50" y="434">TTS: ready</text>
+  <rect class="acc" x="284" y="408" width="44" height="24" rx="12"/><circle class="on" cx="316" cy="420" r="9"/>
+  <line class="ln" x1="24" y1="450" x2="336" y2="450"/>
+  <text class="t" x="24" y="480" font-size="14">♿ Avoid stairs</text>
+  <rect class="b" x="284" y="466" width="44" height="24" rx="12"/><circle class="b0" cx="296" cy="478" r="9"/>
+  <line class="ln" x1="24" y1="500" x2="336" y2="500"/>
+  <text class="t" x="24" y="528" font-size="14">▶ Demo mode</text>
+  <text class="m" x="50" y="546">Hides debug, keeps screen on,</text>
+  <text class="m" x="50" y="560">demo destinations only</text>
+  <rect class="b" x="284" y="520" width="44" height="24" rx="12"/><circle class="b0" cx="296" cy="532" r="9"/>
+  <text class="t" x="24" y="598" font-weight="600">Demo building</text>
+  <rect class="b2" x="24" y="608" width="96" height="40" rx="20"/><text class="t" x="72" y="633" text-anchor="middle">✓ Klaus</text>
+  <rect class="b" x="128" y="608" width="96" height="40" rx="20"/><text class="t" x="176" y="633" text-anchor="middle">Class. S.</text>
+  <rect class="b" x="232" y="608" width="104" height="40" rx="20"/><text class="t" x="284" y="633" text-anchor="middle">Student C. E.</text>
+  <rect class="acc" x="24" y="672" width="312" height="52" rx="26"/>
+  <text class="on" x="180" y="703" text-anchor="middle" font-weight="700">Reset demo</text>
+  <text class="m" x="180" y="752" text-anchor="middle">Long-press the title to toggle the debug overlay.</text>
+</svg>
+  <figcaption>Wireframe: settings sheet</figcaption></figure>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th>Element</th><th>Purpose</th><th>States</th><th>Exact copy today</th></tr></thead>
+<tbody>
+<tr><td>Title</td><td>—</td><td>—</td><td><q>Settings</q></td></tr>
+<tr><td>Speak instructions</td><td>Phone text-to-speech on or off, with engine status.</td><td>on / off; status text</td><td><q>Speak instructions (TTS: ready)</q></td></tr>
+<tr><td>Avoid stairs</td><td>Same preference as S1 and S1b.</td><td>on / off</td><td><q>Avoid stairs</q></td></tr>
+<tr><td>Demo mode</td><td>Hides debug, keeps the screen on, lists only demo destinations.</td><td>on / off</td><td><q>Demo mode (hides debug, keeps screen on, demo destinations only)</q></td></tr>
+<tr><td>Demo building</td><td>Building preselected on S1.</td><td>KL / CS / CSE</td><td><q>Demo building</q>, <q>KL</q> <q>CS</q> <q>CSE</q></td></tr>
+<tr><td>Reset demo</td><td>Back to S1 with the demo building.</td><td>—</td><td><q>Reset demo</q></td></tr>
+<tr><td>Hint</td><td>Tells the team about the debug gesture.</td><td>hidden in demo mode</td><td><q>Long-press the title to toggle the debug overlay.</q></td></tr>
+</tbody></table></div>
+
+<!-- ============================================================ -->
+<h2 id="debug">9. Debug overlay</h2>
+<p>This is a draggable card for the team and testers, and it is visible in Demo C's screen recording ("Seen: ROOM 220"). Style it lightly. It must stay a dense monospace readout that is readable in a screenshot. Demo mode hides it completely.</p>
+<div class="screen-grid">
+  <figure><img src="img/debug-overlay.png" alt="Current debug overlay over S2 arrived" width="540" height="1200" loading="lazy"><figcaption>Current: debug card expanded over S2</figcaption></figure>
+  <figure>
+<svg class="wf phone" viewBox="0 0 360 780" role="img" aria-label="Debug overlay wireframe">
+  <rect class="fr" x="1" y="1" width="358" height="778" rx="28"/>
+  <rect class="cam" x="2" y="2" width="356" height="776" rx="27"/>
+  <rect class="ov" x="12" y="30" width="336" height="90" rx="18"/>
+  <text class="w" x="24" y="70" font-size="20" font-weight="700">Turn left at Atrium north</text>
+  <rect x="16" y="140" width="328" height="480" rx="12" fill="#101010" fill-opacity="0.96" stroke="#444"/>
+  <rect x="16" y="140" width="328" height="30" rx="12" fill="#2a2a2a"/>
+  <text x="28" y="160" font-size="11" fill="#ffd54f" font-family="ui-monospace,Consolas,monospace">≡ DEBUG (drag here, tap to collapse)</text>
+  <g font-family="ui-monospace,Consolas,monospace" font-size="11" fill="#eee">
+    <text x="28" y="192">node R-1116  floor 1  conf 1.00</text>
+    <text x="28" y="208">source FAKE</text>
+    <text x="28" y="224">last anchor KL-A04 text 17 s ago</text>
+    <text x="28" y="240">route 8/8  instr 3  reroutes 0</text>
+    <text x="28" y="256">ARCore UNKNOWN_ERROR</text>
+    <text x="28" y="272">barometer 1013.25 hPa</text>
+    <text x="28" y="288">watch: not connected   glasses: not connected</text>
+    <text x="28" y="304">TTS ready</text>
+    <text x="28" y="320" fill="#ff8a80">3 validator problems (see Logcat)</text>
+    <text x="28" y="352">Sim time</text>
+    <text x="28" y="368" fill="#90caf9">SAT 2026-09-26 21:00  (change)</text>
+    <text x="28" y="398">TTS</text>
+    <text x="28" y="428" fill="#ffd54f">Fake walk (every 3 s)</text>
+    <text x="28" y="480">Low confidence</text>
+    <text x="28" y="514">Jump to node / start point:</text>
+  </g>
+  <rect x="284" y="340" width="44" height="22" rx="11" fill="#6750a4"/><circle cx="317" cy="351" r="8" fill="#fff"/>
+  <rect x="284" y="386" width="44" height="22" rx="11" fill="#6750a4"/><circle cx="317" cy="397" r="8" fill="#fff"/>
+  <g font-size="12" fill="#b39ddb"><text x="28" y="456">Step</text><text x="80" y="456">Walk</text><text x="136" y="456">−</text><text x="164" y="456">+</text></g>
+  <rect x="284" y="468" width="44" height="22" rx="11" fill="#444"/><circle cx="295" cy="479" r="8" fill="#999"/>
+  <rect x="28" y="526" width="304" height="40" rx="20" fill="none" stroke="#888"/>
+  <text x="180" y="551" text-anchor="middle" font-size="12" fill="#90caf9">R-1116</text>
+  <text class="note" x="20" y="646">collapses to one line: "DEBUG +  (tap to expand, drag here)"</text>
+  <text class="note" x="20" y="662">+ "node … floor … conf …"</text>
+</svg>
+  <figcaption>Wireframe: debug card (layout as built)</figcaption></figure>
+</div>
+<div class="thumbs">
+  <figure><img src="img/sim-time.png" alt="Simulated time dialog" loading="lazy"><figcaption>Simulated-time dialog</figcaption></figure>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th>Element</th><th>Purpose</th><th>States</th><th>Exact copy today</th></tr></thead>
+<tbody>
+<tr><td>Header / drag handle</td><td>Drag to move; tap to collapse.</td><td>expanded / collapsed</td><td><q>DEBUG (drag here, tap to collapse)</q> / <q>DEBUG +  (tap to expand, drag here)</q></td></tr>
+<tr><td>Readout</td><td>Position, confidence, last anchor, route progress, ARCore, barometer, devices, TTS, data problems.</td><td>—</td><td><q>node R-1116  floor 1  conf 1.00</q>, <q>last anchor KL-A04 text 17 s ago</q>, <q>route 8/8  instr 3  reroutes 0</q>, <q>barometer 1013.25 hPa</q> / <q>no barometer</q>, <q>watch: not connected   glasses: not connected</q></td></tr>
+<tr><td>Sim time</td><td>Pretend it is another time so locked-door rules fire (Demo C).</td><td>off / on + value; dialog with day chips and clock</td><td><q>Sim time</q>, <q>SAT 2026-09-26 21:00  (change)</q>, dialog <q>Simulated time</q>, <q>FRI SAT SUN MON</q>, <q>Cancel</q> <q>Set</q></td></tr>
+<tr><td>Fake walk</td><td>Move along the route without walking.</td><td>Step / Walk / Pause; interval</td><td><q>Fake walk (every 3 s)</q>, <q>Step</q>, <q>Walk</q>, <q>Pause</q></td></tr>
+<tr><td>Low confidence</td><td>Forces the "point at a sign" prompt.</td><td>on / off</td><td><q>Low confidence</q></td></tr>
+<tr><td>Jump picker</td><td>Teleport to any node (tests reroutes).</td><td>—</td><td><q>Jump to node / start point:</q></td></tr>
+</tbody></table></div>
+<ul class="notes"><li>Only asks here: a monospace face, the header colour, and a translucent card that does not let S2 text bleed through (today 95% opaque).</li></ul>
+
+<!-- ============================================================ -->
+<h2 id="watch">10. Watch face (Galaxy Watch 8 Classic)</h2>
+<p>This is a separate Wear OS app and is not built yet. It has one screen. The phone does all the thinking; the watch shows one big arrow relative to your body ("turn left next") and buzzes a pattern for each type of step, so you can navigate without looking. It is optional in the demos: if it is not reliable by feature freeze, it is dropped.</p>
+<div class="card watch-row">
+  <figure>
+  <svg class="wf" viewBox="0 0 360 360" role="img" aria-label="Watch face: turn left, 10 m">
+    <circle cx="180" cy="180" r="172" fill="#000" stroke="var(--wf-line)" stroke-width="3"/>
+    <text x="180" y="76" text-anchor="middle" font-size="22" fill="#b0bec5">🚪 Atrium north</text>
+    <path d="M 214 262 L 214 170 Q 214 140 184 140 L 128 140" fill="none" stroke="#4fc3f7" stroke-opacity="0.3" stroke-width="44" stroke-linecap="round"/>
+    <path d="M 214 262 L 214 170 Q 214 140 184 140 L 136 140" fill="none" stroke="#4fc3f7" stroke-width="26" stroke-linecap="round"/>
+    <path d="M 146 104 L 94 140 L 146 176 Z" fill="#4fc3f7"/>
+    <text x="180" y="316" text-anchor="middle" font-size="40" font-weight="700" fill="#fff">10 m</text>
+  </svg>
+  <figcaption>Turn left · buzz 80-80-80</figcaption></figure>
+  <figure>
+  <svg class="wf" viewBox="0 0 360 360" role="img" aria-label="Watch face: elevator up to floor 6">
+    <circle cx="180" cy="180" r="172" fill="#000" stroke="var(--wf-line)" stroke-width="3"/>
+    <text x="180" y="80" text-anchor="middle" font-size="22" fill="#b0bec5">Elevator</text>
+    <path d="M 180 270 L 180 130" stroke="#4fc3f7" stroke-width="26" stroke-linecap="round"/>
+    <path d="M 132 150 L 180 90 L 228 150 Z" fill="#4fc3f7"/>
+    <text x="180" y="316" text-anchor="middle" font-size="40" font-weight="700" fill="#fff">Floor 6</text>
+  </svg>
+  <figcaption>Elevator · 300-100-300</figcaption></figure>
+  <figure>
+  <svg class="wf" viewBox="0 0 360 360" role="img" aria-label="Watch face: locked entrance, redirect">
+    <circle cx="180" cy="180" r="172" fill="#000" stroke="var(--wf-line)" stroke-width="3"/>
+    <text x="180" y="84" text-anchor="middle" font-size="26" fill="#ffb300">🔒 Main locked</text>
+    <path d="M 120 250 L 120 190 Q 120 160 150 160 L 226 160" fill="none" stroke="#ffb300" stroke-width="24" stroke-linecap="round"/>
+    <path d="M 216 124 L 266 160 L 216 196 Z" fill="#ffb300"/>
+    <text x="180" y="310" text-anchor="middle" font-size="34" font-weight="700" fill="#fff">West entrance</text>
+  </svg>
+  <figcaption>Locked notice · 80-60-80-60-80-60-80</figcaption></figure>
+  <figure>
+  <svg class="wf" viewBox="0 0 360 360" role="img" aria-label="Watch face: arrived, Room 220">
+    <circle cx="180" cy="180" r="172" fill="#000" stroke="var(--wf-line)" stroke-width="3"/>
+    <circle cx="180" cy="160" r="70" fill="#81c784"/>
+    <path d="M 145 160 L 170 185 L 218 135" fill="none" stroke="#0b2e10" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="180" y="290" text-anchor="middle" font-size="36" font-weight="700" fill="#fff">Room 220</text>
+  </svg>
+  <figcaption>Arrived · 600</figcaption></figure>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th>Element</th><th>Purpose</th><th>Values</th><th>Copy</th></tr></thead>
+<tbody>
+<tr><td>Big arrow</td><td>Direction relative to the body, not world-locked. It fills the face.</td><td>left, right, straight, turn around, up, down</td><td>—</td></tr>
+<tr><td>Step-type icon</td><td>What happens at the next step.</td><td>stairs up, stairs down, elevator, door or entrance, locked entrance, arrived</td><td>—</td></tr>
+<tr><td>Short label</td><td>One fact.</td><td>distance, room, floor</td><td><q>10 m</q>, <q>Room 312</q>, <q>Floor 3</q></td></tr>
+<tr><td>Haptic</td><td>Pattern per step type (ms on/off).</td><td>straight 80 · left 80,80,80 · right 80,80,80,80,80 · stairs 300,100,80 · elevator 300,100,300 · door 80,100,300 · locked 80,60,80,60,80,60,80 · arrive 600</td><td>—</td></tr>
+</tbody></table></div>
+<ul class="notes">
+  <li>The screen is round AMOLED, so use black backgrounds. The arrow should read at arm's length in a glance of under half a second, and in ambient mode as an outline.</li>
+  <li>Stay inside the round safe area. Nothing tappable is needed; the watch only displays.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="states">11. States and edge cases</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>State</th><th>When it happens</th><th>What shows today</th><th>What to design</th></tr></thead>
+<tbody>
+<tr><td><strong>Locked entrance</strong></td><td>The nearest door is card-only at the routing time (for example Student Center East main door after 20:00 on Saturday).</td><td>Error-container banner on S1b: <q>Heads up: Main entrance is card-only now. Using West entrance instead.</q> The same text is the first spoken instruction.</td><td>Banner with a lock icon in an informative (not alarming) tone. Matching watch face (amber lock + redirect arrow). Possibly a small lock marker on the minimap entrance.</td></tr>
+<tr><td><strong>No route</strong></td><td>Every entrance is locked, or the graph has no path.</td><td>Red text on S1/S1b: <q>No route to Room 220: every entrance is card-only at Sat 23:00.</q> or <q>No route to Room 220 from here.</q> No cards. S2 shows <q>No route</q>.</td><td>An empty state for S1b: icon, the sentence, and one action (change time is debug-only; "Pick another room" is fine).</td></tr>
+<tr><td><strong>Low confidence</strong></td><td>Position confidence below 0.5: no sign seen recently, or tracking was lost.</td><td>Amber card, bottom right of S2: <q>Locate me:</q> / <q>point at a sign</q>. The arrows should hide (per the AR spec).</td><td>The prompt, ideally with a small example of what a sign looks like (Demo A script: "a small hint showing what the nearest anchor looks like"). A calm fade of the arrows out and back in.</td></tr>
+<tr><td><strong>AR unavailable</strong></td><td>No ARCore, camera denied, or the AR session failed.</td><td>Dark panel on S2: <q>AR unavailable on this device</q> + <q>ARCore: UNKNOWN_ERROR. Follow the text and the map.</q> / <q>Camera permission needed for AR</q> / <q>Permission denied. Guidance continues with text and the map. Enable Camera in system settings for AR.</q></td><td>A graceful text-and-map mode: instruction banner plus a larger minimap. It should not look broken; this is what a replay or fallback demo shows.</td></tr>
+<tr><td><strong>Arrived</strong></td><td>The user reaches the last node.</td><td>Green <q>You have arrived</q>, the door-side line, and <q>Done</q> / <q>Back to routes</q>. S3: same text; the watch buzzes 600 ms.</td><td>See section 6. The destination pin changes to an arrived state.</td></tr>
+<tr><td><strong>Rerouted</strong></td><td>The user left the route, so a new route was computed from where they are.</td><td>Amber text <q>Rerouted (1)</q> under the banner on S2.</td><td>A brief chip that fades after a few seconds; the count is for the team.</td></tr>
+<tr><td><strong>Demo mode on</strong></td><td>Set by the team before judging.</td><td><q>DEMO</q> tag in the app bar; S1 has no search and shows <q>Demo destinations</q>; the debug overlay and the long-press are disabled; <q>Fake step</q> is hidden on S3; the screen stays on.</td><td>A subtle indicator that the team can see and a judge will not question. The S1 layout must look complete without search.</td></tr>
+<tr><td><strong>Night mode</strong></td><td>The system dark theme (the recordings are in the evening).</td><td>S1, S1b and Settings follow the system light/dark scheme. S2, S3 and the debug card are always dark.</td><td>A dark M3 scheme. Check that S1b cards, the banner and the best-card highlight all work in dark. The AR overlay palette does not change with the theme.</td></tr>
+<tr><td>Simulated time</td><td>The team sets a fake clock so that access rules fire.</td><td>S1b header: <q>Routed for Saturday 21:00 (simulated)</q>.</td><td>A small, honest chip. It appears on video in Demo C, so it must not look like a hack.</td></tr>
+<tr><td>Already here</td><td>Start equals destination.</td><td>One card: <q>You are already here</q>, <q>The start is the destination.</q></td><td>Could reuse the arrived visual.</td></tr>
+</tbody></table></div>
+
+<!-- ============================================================ -->
+<h2 id="copy">12. Content and tone</h2>
+<p>Instructions are generated by the router from the building data, so the designer styles templates, not fixed sentences. Room and place names come from the building files. The voice is short, imperative, and landmark-first, the way a friend gives directions. Every instruction is also spoken, so it must sound natural read aloud.</p>
+<h4>Instruction templates (from the code)</h4>
+<div class="tablewrap"><table>
+<thead><tr><th>Type</th><th>Template</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>Start (outside)</td><td class="copy">Walk to {entrance}</td><td class="copy">Walk to South main entrance</td></tr>
+<tr><td>Entrance</td><td class="copy">Go through {entrance}[, {hint}]</td><td class="copy">Go through South main entrance, through the glass doors</td></tr>
+<tr><td>Start (inside)</td><td class="copy">Head toward / Continue toward / Turn left toward {place}</td><td class="copy">Head toward Elevator, floor 1</td></tr>
+<tr><td>Turn</td><td class="copy">Turn left | Turn right | Turn around at {place}[, {hint}]</td><td class="copy">Turn left at Atrium north</td></tr>
+<tr><td>Elevator</td><td class="copy">Take the elevator to floor {n}</td><td class="copy">Take the elevator to floor 6</td></tr>
+<tr><td>Stairs</td><td class="copy">Take the stairs up|down {one|two|…} floor(s)</td><td class="copy">Take the stairs up two floors</td></tr>
+<tr><td>After a floor change</td><td class="copy">Exit toward {place}</td><td class="copy">Exit toward West hallway junction</td></tr>
+<tr><td>Door</td><td class="copy">Go through the door</td><td class="copy">Go through the door</td></tr>
+<tr><td>Locked notice</td><td class="copy">Heads up: {entrance} is card-only now. Using {other} instead. (or: Taking another way.)</td><td class="copy">Heads up: Main entrance is card-only now. Using West entrance instead.</td></tr>
+<tr><td>Arrive</td><td class="copy">{room} is on your left|right|ahead|behind — or — You have arrived at {room}</td><td class="copy">Room 608 is on your right</td></tr>
+<tr><td>Arrived headline</td><td class="copy">You have arrived</td><td class="copy">You have arrived</td></tr>
+<tr><td>Already there</td><td class="copy">You are at {room}</td><td class="copy">You are at Room 1116</td></tr>
+</tbody></table></div>
+<p class="sub">Hints are appended with a comma only when the sentence stays short. Distances show as <q>in 16 m</q>. S2 prefixes the next step with <q>Then:</q> and S3 with <q>Next:</q>.</p>
+<h4>Numbers and formats</h4>
+<ul>
+  <li><strong>ETA</strong> is m:ss, rounded: <q>0:44</q>, <q>2:14</q>, <q>3:53</q>; unknown is <q>--:--</q>.</li>
+  <li><strong>ETA difference</strong> is under a minute in seconds (<q>+47 s</q>), otherwise m:ss (<q>+1:39</q>).</li>
+  <li><strong>Entrance on cards</strong>: entrance name + <q>Enter on floor 1</q>. From an inside start: <q>From here</q> or <q>From here, by elevator</q>.</li>
+  <li><strong>Floors</strong> are integers: <q>F1</q> on the S2 badge, <q>Floor 1</q> on S3 and in lists, <q>(floor 6)</q> in the S1b header.</li>
+  <li><strong>Units</strong> are metres and seconds everywhere. Do not show feet or minutes-only.</li>
+</ul>
+<h4>Voice</h4>
+<ul>
+  <li>Calm and specific. "Heads up" is as loud as it gets. The app has already solved the problem when it tells you about it.</li>
+  <li>Name landmarks people can see ("Atrium north", "the glass doors"), not node ids.</li>
+  <li>Pitch lines that set the tone: "Google Maps gets you to the building. Then you're on your own." and "The closest door isn't always the fastest way to your seat."</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="constraints">13. Constraints for the designer</h2>
+<h4>Platform</h4>
+<ul>
+  <li><strong>Jetpack Compose, Material 3.</strong> Components are standard M3 (cards, switches, filter chips, segmented buttons, bottom sheet, buttons). Custom drawing is fine for the AR overlay and minimap.</li>
+  <li>Phone: Galaxy S25 Ultra, portrait only (locked). Screenshots here are 1080 × 2400 px (about 412 dp wide). Design at 412 × 915 dp; the wireframes are drawn at 360 × 780 for simplicity.</li>
+  <li><strong>Everything is on the device.</strong> Fonts are bundled in the app, not downloaded at runtime (there is no network in the demo).</li>
+  <li>Touch targets at least <strong>48 dp</strong>. Main buttons are already measured at 48 to 61 dp.</li>
+</ul>
+<h4>Colour: hand over as M3 tokens</h4>
+<p>The app today uses the stock M3 baseline scheme (purple). Please hand over a light and a dark scheme as M3 roles. At minimum:</p>
+<div class="tablewrap"><table>
+<thead><tr><th>M3 role</th><th>Used for in CampusMaps</th><th>Today (light / dark)</th></tr></thead>
+<tbody>
+<tr><td>primary / onPrimary</td><td>Route button, Done, selected chips, switches</td><td><span class="chip" style="background:#6750A4"></span>#6750A4 / <span class="chip" style="background:#D0BCFF"></span>#D0BCFF</td></tr>
+<tr><td>primaryContainer / onPrimaryContainer</td><td>Best route card, selected destination row</td><td><span class="chip" style="background:#EADDFF"></span>#EADDFF / <span class="chip" style="background:#4F378B"></span>#4F378B</td></tr>
+<tr><td>secondary (+ container)</td><td>Method badge, other route cards, chips</td><td><span class="chip" style="background:#625B71"></span>#625B71 / <span class="chip" style="background:#CCC2DC"></span>#CCC2DC</td></tr>
+<tr><td>tertiary (+ container)</td><td>Suggested for the locked-entrance banner and the simulated-time chip</td><td><span class="chip" style="background:#7D5260"></span>#7D5260 / <span class="chip" style="background:#EFB8C8"></span>#EFB8C8</td></tr>
+<tr><td>surface, surfaceContainer*, onSurface, outline</td><td>Backgrounds, sheet, list rows</td><td><span class="chip" style="background:#FEF7FF"></span>#FEF7FF / <span class="chip" style="background:#141218"></span>#141218</td></tr>
+<tr><td>error / errorContainer</td><td>No route, routing errors, today also the locked banner</td><td><span class="chip" style="background:#B3261E"></span>#B3261E / <span class="chip" style="background:#F2B8B5"></span>#F2B8B5</td></tr>
+</tbody></table></div>
+<p><strong>AR overlay palette (fixed, not themed).</strong> These colours sit on a camera image or pure black, so they do not follow light or dark. Please hand them over as a separate named set. Today's hard-coded values:</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Name (suggested)</th><th>Use</th><th>Today</th></tr></thead>
+<tbody>
+<tr><td>overlayScrim</td><td>Instruction banner, minimap background</td><td><span class="chip" style="background:#000"></span>#000000 at 90% / 80%</td></tr>
+<tr><td>overlayText / overlayTextMuted</td><td>Instruction / distance and "Then:"</td><td><span class="chip" style="background:#fff"></span>#FFFFFF / <span class="chip" style="background:#B0BEC5"></span>#B0BEC5, #CFD8DC</td></tr>
+<tr><td>arrow (AR chevrons, next-turn, route line on map)</td><td>The guidance colour</td><td><span class="chip" style="background:#29B6F6"></span>#29B6F6 (map route today; AR arrows not built)</td></tr>
+<tr><td>user</td><td>User dot, floor badge</td><td><span class="chip" style="background:#1E88E5"></span>#1E88E5</td></tr>
+<tr><td>destination</td><td>Destination ring on the map, pin</td><td><span class="chip" style="background:#EF5350"></span>#EF5350</td></tr>
+<tr><td>arrived</td><td>"You have arrived"</td><td><span class="chip" style="background:#81C784"></span>#81C784</td></tr>
+<tr><td>attention</td><td>Locate prompt / reroute chip</td><td><span class="chip" style="background:#FFB300"></span>#FFB300 / <span class="chip" style="background:#FFCC80"></span>#FFCC80</td></tr>
+<tr><td>stop</td><td>S3 Stop</td><td><span class="chip" style="background:#C62828"></span>#C62828</td></tr>
+<tr><td>map nodes</td><td>entrance, stairs, elevator, room, other</td><td><span class="chip" style="background:#66BB6A"></span><span class="chip" style="background:#FFA726"></span><span class="chip" style="background:#AB47BC"></span><span class="chip" style="background:#EF5350"></span><span class="chip" style="background:#BDBDBD"></span></td></tr>
+<tr><td>debug</td><td>Card, header, links</td><td><span class="chip" style="background:#101010"></span>#101010 at 95%, <span class="chip" style="background:#FFD54F"></span>#FFD54F, <span class="chip" style="background:#90CAF9"></span>#90CAF9</td></tr>
+</tbody></table></div>
+<h4>Type and icons</h4>
+<ul>
+  <li><strong>One type family</strong>, bundled as TTF, mapped to the M3 type scale. Pick one that is highly legible at a distance and on video. Atkinson Hyperlegible fits the accessibility story; Inter or Roboto Flex are safe too. Suggested minimum sizes: S2 instruction 28 sp bold, S3 instruction 30 sp bold, S1b ETA 28 sp bold.</li>
+  <li><strong>Icons: Material Symbols</strong> (one style, Rounded or Outlined). Likely set: <code>turn_left</code>, <code>turn_right</code>, <code>straight</code>, <code>u_turn_left</code>, <code>elevator</code>, <code>stairs</code>, <code>door_front</code>, <code>lock</code>, <code>location_on</code>, <code>my_location</code>, <code>signpost</code>, <code>eyeglasses</code>, <code>accessible</code>, <code>volume_up</code>, <code>replay</code>, <code>stop</code>, <code>check_circle</code>, <code>settings</code>, <code>restart_alt</code>, <code>schedule</code>, <code>map</code>.</li>
+</ul>
+<h4>The AR arrow</h4>
+<ul>
+  <li>A flat <strong>glowing chevron</strong> lying on the floor, about 0.5 m long and 0.3 m wide, repeated every 1.5 m along the path. It uses an emissive (self-lit) colour so it reads in dim hallways, fades out beyond 15 m, and is hidden when tracking is lost.</li>
+  <li>It must read on both a dark carpet and a bright, sunlit atrium floor. Consider a light core with a darker edge or glow, and avoid pure white (it blows out on camera) and red/green-only meaning.</li>
+  <li>A larger <strong>next-turn arrow</strong> at the turn point (bent left or right, or an up arrow for an elevator).</li>
+  <li>A <strong>destination pin or ring</strong>, 1.5 m high at the door, facing the camera, with a text label. A label alone is acceptable if the pin gets cut.</li>
+  <li>Deliver a top-down vector (SVG) with exact proportions and hex colours; the team builds the 3D model (GLB) from it. A mock-up composited on a real hallway photo would help a lot.</li>
+</ul>
+<h4>Watch</h4>
+<ul><li>Galaxy Watch 8 Classic, round AMOLED, Wear OS 6, Compose for Wear OS Material 3. One screen with a single big arrow. The brief says a 1.5 in screen; Samsung lists 1.34 in and 438 × 438 px for this model, so check on the device.</li></ul>
+<h4>Do not design yet</h4>
+<ul><li>Onboarding and permission explainers, accounts or sign-in, settings depth beyond the sheet above, outdoor (Geospatial) screens, the replay tool, multiple-building search.</li></ul>
+
+<!-- ============================================================ -->
+<h2 id="conflicts">14. Spec conflicts to resolve</h2>
+<p>These places in the written spec disagree with each other or with the build. The code is what ships, so it wins unless the team decides otherwise.</p>
+<div class="warnbox"><ol>
+  <li><strong>The locked-entrance copy exists in three versions.</strong> The UI spec says <q>North entrance is card-access after 10 pm. Routes below use the south entrance.</q> The Demo C script says <q>…card-access only after 7 pm. Redirecting you to the west entrance, one minute away.</q> The code says <q>Heads up: Main entrance is card-only now. Using West entrance instead.</q> None of them agree on the hour, the door, or whether a time is given.</li>
+  <li><strong>The "point at a sign" prompt also has three versions.</strong> Demo A: <q>Point the camera at a sign to get started</q> (with an example picture). Demo A fallback: <q>Look at a sign to re-locate</q>. Code: <q>Locate me: point at a sign</q>, and only when confidence is below 0.5. The start-of-route prompt and the lost-tracking prompt may need to be two different states.</li>
+  <li><strong>ETA format.</strong> The spec and the code use m:ss (<q>2:14</q>). The Demo B script shows whole minutes (<q>North entrance, elevator, 4 min</q>), and a code comment shows <q>3 min</q>.</li>
+  <li><strong>Vertical method.</strong> The spec asks for an icon; the build shows text badges (<q>STAIRS</q>, <q>ELEV</q>, <q>LEVEL</q>). "LEVEL" (no floor change) has no obvious icon.</li>
+  <li><strong>Glasses entry.</strong> The spec says to offer "Guide me with glasses" automatically when glasses are connected. The build always shows the button. Show it always, or only when connected?</li>
+  <li><strong>"Next" prefix.</strong> S2 says <q>Then:</q>; S3 says <q>Next:</q>.</li>
+  <li><strong>Floor notation.</strong> The app uses <q>F1</q>, <q>Floor 1</q>, and <q>(floor 6)</q> in different places.</li>
+  <li><strong>Arrived text can repeat itself.</strong> When the door side is unknown, S2 shows <q>You have arrived</q> over <q>You have arrived at Room 1116</q>.</li>
+  <li><strong>No hidden gestures, but debug is a long-press.</strong> This is acceptable only because demo mode turns it off. The minimap's tap-to-enlarge has no visible affordance either.</li>
+  <li><strong>No visible way out of S2.</strong> Only the system Back button leaves S2. A judge will look for an on-screen exit.</li>
+  <li><strong>Theme.</strong> S1, S1b and Settings follow the system theme, but S2, S3 and debug are always dark. Moving from a light S1b to a black S2 is a hard jump on video. Consider a dark S1b in demo mode, or accept the jump.</li>
+  <li><strong>Crowded bottom of S2.</strong> The minimap (bottom left), the "Locate me" prompt and the floor badge (both bottom right) compete for space, and the enlarged map takes half the screen, covering the floor arrows.</li>
+  <li><strong>Watch screen size.</strong> The brief says 1.5 in, but the Watch 8 Classic lists 1.34 in (438 × 438 px). The Demo B script also wants a "big floor number on screen and on the watch" during the elevator ride, which the one-screen watch spec does not describe.</li>
+  <li><strong>Reset in the app bar.</strong> The team needs Reset between judges, but it sits in the app bar where a judge can tap it mid-route.</li>
+  <li><strong>Building chips.</strong> The spec says the chips read "Klaus, Classroom South, Student Center East"; the build shows the codes <q>KL</q>, <q>CS</q>, <q>CSE</q>.</li>
+  <li><strong>Entrance floors in Classroom South.</strong> The Demo B plan says two entrances are on floor 2 (one via Library South), but today's cards show <q>Library South entrance · Enter on floor 1</q>. This is probably a data issue, but the designer will see it in the screenshots.</li>
+</ol></div>
+
+<!-- ============================================================ -->
+<h2 id="asks">15. Asks for the designer</h2>
+<ul class="checklist">
+  <li><span class="p">1</span><strong>S2 AR overlay and the arrow look.</strong> The instruction banner, the next-turn icon, the AR chevron (top-down SVG + colours + glow), the next-turn arrow, the destination pin and label, the minimap style, the "point at a sign" prompt, the floor badge, the lost-tracking and arrived states, and the AR overlay palette. Show it on a real hallway photo, dim and bright.</li>
+  <li><span class="p">2</span><strong>S1b route cards.</strong> Card anatomy (entrance, method icon, ETA, difference line, also-via), best-card treatment, the locked-entrance banner, the no-route empty state, and the simulated-time chip. Light and dark.</li>
+  <li><span class="p">3</span><strong>S1 Destination.</strong> Building selector, destination rows, start picker, avoid-stairs row, the primary button, and the demo-mode layout. Light and dark.</li>
+  <li><span class="p">4</span><strong>S3 Glasses mode.</strong> A high-contrast black layout for filming, the connection chip, the thumbnail, the look/speak indicator, and Repeat/Stop.</li>
+  <li><span class="p">5</span><strong>Watch face.</strong> Arrow set (left, right, straight, U-turn, up, down), step icons, the label style, the locked and arrived variants, and an ambient outline version.</li>
+  <li><span class="p">6</span><strong>App icon.</strong> An adaptive icon (foreground + background layers, 108 dp canvas) plus a monochrome layer. A matching Wear OS icon is a bonus.</li>
+</ul>
+<p class="sub">Deliver: M3 colour tokens (light + dark) and the AR overlay set as hex, a type-scale mapping for one family, Figma frames at 412 dp width, and SVG exports for the arrow, the pin and the icon. Keep the screens in section 13's "do not design yet" list out of scope.</p>
+
+</main>
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById('themeBtn');
+  function current() {
+    var t = root.getAttribute('data-theme');
+    if (t) return t;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  try { var saved = localStorage.getItem('cm-theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  btn.addEventListener('click', function () {
+    var next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('cm-theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
