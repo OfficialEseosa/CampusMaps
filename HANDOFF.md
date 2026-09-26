@@ -29,6 +29,10 @@ Street steps in S2 and on the watch, glasses polish, Directions cache, S1 map ic
 
 Teammate's campus redesign merged and made consistent; measured Klaus data (Demo A verified on the S25); ElevenLabs voice with cache pre-warm; barometer floor during rides; mascot watermarks; three QA passes. Details: docs/22 "Wave 4" and `reports/w4-*.md`. Keys in local.properties: MAPS_API_KEY, ARCORE_API_KEY, ELEVENLABS_API_KEY (the pre-commit hook blocks all three formats).
 
+## Wave 5 (2026-09-26 noon)
+
+Automatic start: GPS "Your location" on S1 outdoors, VPS entrance snap on the outdoor leg, "Find me" sign reader on S1 (docs/22 "Wave 5", `reports/w5-*.md`).
+
 ## Open, in priority order
 
 1. **Anchor photos**: both CS sign photos fail ARCore's quality check (`assets/anchors/SCORES.md`), so there is no image database. Photograph high-texture targets at Klaus (directory boards, posters), score with `C:\Users\rapha\tools\arcoreimg\arcoreimg.exe`, build `anchors.imgdb`.

@@ -176,3 +176,10 @@ Verified on the S25 and the Galaxy Watch 8 Classic (watch app installed over Wi-
 | P4 | Outside start on the emulator stays on the first street step for the whole route when the fix is far from the building (fresh fix gate); real GPS is fine | Low |
 | P5 | Home can jump from the picker to Explore up to 3 s after launch while location resolves; "1 rooms" counts destination rooms only; Explore keeps "Turn on location" until restart after a grant; room lost on a relaunch restored from process death; stale sheet distance near the door | Low |
 | P6 | The watch shows "0 m" on the first "Head toward" step | Low |
+
+## Wave 5 (2026-09-26, about 12:00): the app knows where you are
+
+Owner concern: S1 asked "Where are you?" although the plan was automatic position. Root cause: indoors the first fix must come from a sign, and the image-anchor path fails on plain plaques; text reading existed only in the glasses loop. Built:
+- **GPS start** (`reports/w5-gpsstart.md`): S1 opened outdoors with a fresh fix (under 30 s, better than 50 m, more than 25 m from every entrance, demo mode off) starts from "Outside: Your location" with a hint "From your location (GPS, N m)"; a manual pick is never overwritten; at the building or in demo mode the default start stays (Start 1 at the expo table).
+- **VPS entrance snap** (same report): on the outdoor leg of S2, the Geospatial position (TRACKING, under 10 m) drives the banner distance and the 40 m trigger; within 15 m of any entrance of the building it snaps to that door and reroutes from it if it is not the planned one (logcat `Geo`: "VPS snap to E-WM, 6.2 m"). JVM-tested; needs the real walk.
+- **Find me** (`reports/w5-findme.md`): a camera sheet from S1 that reads sign text and room numbers (ML Kit, frames scaled 2x), matches room numbers in one frame and anchor texts by a 2-of-3 vote, sets the start automatically ("You are at Room 1116W"). Verified on the emulator with the app's own sign photos (E-RWD, R-1116W, E-LM2, R-608). Owner: hold the phone an arm's length from the 1116W plaque, then at the Research Wing sign.
