@@ -32,3 +32,9 @@ The emulator's default is 1080 x 2400 at 420 dpi, which is 411 dp wide. The requ
 - The campus name and subtitle stay clear of the mark at both widths. At 360 dp the cards are shorter, so the mascots are smaller (they scale with the card).
 - Buzz is narrow (aspect about 0.72), so on the card he fills less width than "GT" did. If he should read bigger, raise the 0.66 height fraction for GT only.
 - `CampusGhostCode` was removed; nothing else used it.
+
+## Tweak: bigger Buzz
+- On the GT card Buzz now fills 93% of the card height (it was 66%), offset (12 dp, 10 dp), with his head in the top-right area. The panther is unchanged.
+- On the GT S0b header he is 210 dp tall (was 150 dp), offset (14 dp, 12 dp). The header height does not change: the mark now sits in a `matchParentSize` box, so it can never make the card or header taller.
+- Buzz's body now runs behind the "Midtown · 1 building mapped" line and the arrow button, faintly. On the header his head sits behind the "switch campus" pill.
+- Screenshots: `7-s0-buzz-bigger-411dp.png`, `8-s0b-gt-buzz-bigger-411dp.png`.
