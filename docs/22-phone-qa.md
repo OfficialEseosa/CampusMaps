@@ -91,3 +91,57 @@ Screenshots are in the session scratchpad under `phoneqa/` (full size). Downscal
 3. **Glasses.** S3 is simulated. The Meta toolkit session is not ported (docs/21 open issue 2).
 4. **Watch.** Confirm that the paired Galaxy Watch shows the steps and buzzes, and clears on Done/Stop. The phone side sends without errors.
 5. **Speech loudness** at expo volume, with the media volume raised.
+
+## Wave 2 QA (2026-09-26, about 00:30)
+
+Four QA agents ran in parallel after the wave 1 merge: the S25 (AR, Geospatial, glasses, watch), emulator A (the three demo flows, mock-glasses replay, debug card), emulator B (splash, themes, search, persistence, process death, memory, touch targets) and a faked GPS walk from 300 m to the Classroom South entrance. Full reports with screenshots: `reports/qa-phone.md`, `reports/qa-emuA.md`, `reports/qa-emuB.md`, `reports/qa-gps.md`. Fixes made during QA: `reports/w2-fix.md`.
+
+### Results
+
+| Surface | Result |
+|---|---|
+| Cold start with the splash (S25) | 542 to 679 ms, splash 1.4 s, no white flash. System logo and first Compose frame match in size. |
+| Demo A, B, C on the emulator | All pass. "Exit toward" shows (bug 16 fixed), difference line reads "rides 5 floors" (bug 12 fixed), S3 shows Done / Repeat / Back to routes on arrival. |
+| Mock-glasses replay (emulator) | 10 cycles, camera OFF before speech every time, "Seen: LIBRARY SOUTH", thumbnail shows the still, **no ANR**. |
+| Explore map (S25, real key) | Tiles, blue dot, clay line and sheet work. Street steps are still the straight-line fallback: the Routes API returns 403 `API_KEY_SERVICE_BLOCKED` until "Routes API" is added to the key's API restrictions. |
+| GPS walk (emulator) | Map home, sheet, one "Almost there" card at 35 m, transition plays (15 in-between frames, no blank frames after the fix), S2 banner and chip, indoor chip past the door, arrival, Back, process death, no permission, offline: all pass. |
+| S2 on the S25 (desk) | Position no longer moves by itself; debug Step works; "Locate me" steady after the hysteresis fix. Floor tap and arrows need a real floor. |
+| Geospatial (S25, indoors) | Session starts, VPS available at the entrance, earth tracking reached, entrance anchor placed; a second session in the same run now works (fix). |
+| Real glasses (S25) | The app reaches Meta AI registration; the agent did not grant "Nearby devices" or "Connect CampusMaps" (owner consent). No burst ran yet. |
+| Watch (phone side) | Exactly one "Route ended: clearing the watch" per Done / End route / Back to routes / S3 Stop; reached 1 watch. |
+| Themes, search, settings persistence, process death, memory, touch targets (emulator) | All pass. PSS steady at about 101 MB over four S2 cycles (no ARCore on the emulator). |
+
+### Fixed during wave 2
+
+| # | Bug | Fix |
+|---|---|---|
+| W1 | Map-to-AR transition was a jump cut (card started the animation before S2 existed) | Card starts S2 first, S2 draws underneath, 900 ms runs once frames settle (`ui/transition`, `CampusMapsApp`) |
+| W2 | "Almost there" card re-fired after End route, reopening S2 | Trigger re-arms only on a new route or above 60 m |
+| W3 | Map and S2 could pick different doors (S2 routed from the nearest fixed start) | S2 routes from a "Your location" node at the real fix (`ui/ExploreStart.kt`), same entrance as the map |
+| W4 | Map opened on the campus centre, dot off screen | First fix frames the dot (and the entrance), then the camera is the user's |
+| W5 | "Locate me" flickered | Shows after 2 s low confidence, hides after 1 s good |
+| W6 | Meta AI opened inside the CampusMaps task | Glasses setup helper has its own task affinity |
+| W7 | Second S2 checked VPS on a closed ARCore session | Geospatial provider stops when S2 leaves |
+| W8 | Back on Explore opened from S1 exited the app | Back returns to S1 |
+| W9 | "Watch not reachable" logged every second | At most once per 30 s |
+
+### Still open
+
+| # | Item | Severity | Note |
+|---|---|---|---|
+| O1 | Street directions 403 | Medium | Owner: add "Routes API" to the key's API restrictions in Google Cloud. Directions is also re-requested on every fix; cache per entrance. |
+| O2 | Without ARCore the simulated walker walks the outdoor leg by itself | Medium | Only affects the emulator and the S25 until Geospatial tracks. |
+| O3 | Demo mode hides the "See the map" row, so Explore is unreachable from S1 in demo mode | Low | Decide: keep (judges start indoors) or add a map icon to the S1 app bar. |
+| O4 | Glasses mode says "Take the elevator" 4 times during the ride; "Seen:" keeps an old sign | Low | `glasses/`, S3 |
+| O5 | Debug: link rows overlap (48 dp on a 40 dp pitch); one Force reroute counts 2; the card reopens on every screen change | Low | `ui/screens/DebugOverlay.kt` |
+| O6 | With animations off, S1 flashes one frame before Explore opens as home | Low | `CampusMapsApp` home pick |
+| O7 | Both CS sign photos fail ARCore's image quality check, so no image database exists | High (data) | Photograph high-texture targets (directory boards, posters) at Klaus; see `assets/anchors/SCORES.md`. |
+
+### Only a human can test (wave 2)
+
+1. **Walk up to Classroom South with the S25**: Explore shows the line to the recommended entrance; under 40 m the "Almost there" card appears once; Go plays the tilt-zoom-fade into S2; outdoors the chip says "AR tracking on" and chevrons point to the door once earth tracking is TRACKING with accuracy under 10 m; crossing the door switches the chip to the indoor node.
+2. **AR floor tap and a 3 to 5 m walk** on a real floor: arrows lie on the floor, the dot moves only when you move, covering the camera 3 s shows "Locate me".
+3. **Real glasses**: turn on Developer Mode, open Glasses mode on CS to Room 608, grant "Nearby devices", confirm "Connect CampusMaps" in Meta AI; watch `adb logcat -s GlassesLink GlassesMeta GlassesSetup GlassesMode`: "camera OFF" must precede "SPEAK start" every cycle. Then tap the CampusMaps launcher icon: the app, not Meta AI, must appear.
+4. **Watch on the wrist**: the face shows each step and buzzes, returns to idle on Done and Stop, and stairs up and down look different.
+5. **Shortcut persistence** on the phone: add a same-floor shortcut with the walk and 2 photos, debug Approve, force-stop, relaunch, route: the card still says "Student shortcut".
+6. **Speech loudness** at expo volume with media volume raised (it was 3 of 15).
