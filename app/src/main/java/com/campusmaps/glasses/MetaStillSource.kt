@@ -60,7 +60,7 @@ class MetaStillSource(
     private var lastSetupLaunch = 0L
     private var session: DeviceSession? = null
     private var stream: Stream? = null
-    private var watchJobs = mutableListOf<Job>()
+    private val watchJobs = java.util.concurrent.CopyOnWriteArrayList<Job>() // cancelled from stop() while burst() adds (a ConcurrentModificationException crashed End route)
     @Volatile private var failure: String? = null
 
     private val selector by lazy { AutoDeviceSelector() }

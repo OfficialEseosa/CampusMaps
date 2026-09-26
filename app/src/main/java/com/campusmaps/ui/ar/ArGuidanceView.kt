@@ -337,16 +337,21 @@ fun ArGuidanceView(
                         }
                     }
                     val dest = input.destination
-                    if (dest != null && dest.floor == floor && dist(dest.x, dest.y) <= DEST_LABEL_MAX_M) {
+                    // The label is a text texture: adding and removing it (distance or floor gates) destroys the texture
+                    // while Filament still binds it and aborts the process ("Invalid texture still bound to MaterialInstance",
+                    // Classroom South 2026-09-26). So once there is a destination it stays in the scene; on another floor
+                    // it sits at that floor's height, out of view.
+                    if (dest != null) {
+                        val destDy = (dest.floor - t.refFloor) * t.floorHeightM
                         CubeNode(size = Float3(0.05f, 1.3f, 0.05f), materialInstance = red,
-                            position = Float3(dest.x.toFloat(), (dy + 0.65).toFloat(), (-dest.y).toFloat()))
+                            position = Float3(dest.x.toFloat(), (destDy + 0.65).toFloat(), (-dest.y).toFloat()))
                         TextNode(
                             text = dest.label,
                             fontSize = 64f,
                             textColor = Color.White.toArgb(),
                             backgroundColor = Color(0xE6C62828).toArgb(),
                             widthMeters = 1.0f, heightMeters = 0.28f,
-                            position = Float3(dest.x.toFloat(), (dy + 1.5).toFloat(), (-dest.y).toFloat()),
+                            position = Float3(dest.x.toFloat(), (destDy + 1.5).toFloat(), (-dest.y).toFloat()),
                             cameraPositionProvider = { box.camWorld },
                         )
                     }

@@ -61,12 +61,11 @@ object AutoPlace {
     }
 
     /**
-     * Camera bearing to use at an entrance: the door's [walkInDeg] when the compass is missing or agrees within
-     * [ENTRANCE_TRUST_DEG] (the student is walking in; the door is exact, the compass is noisy by the door frame),
-     * else the compass (the student has turned round).
+     * Camera bearing to use at an entrance: always the door's [walkInDeg]. The student is walking in, the door's heading
+     * was measured, and the compass by a steel door frame can be 70 degrees off (Classroom South 2026-09-26: compass
+     * 288 for a 214 door, which sent the route into the wall). The heading refiner removes any small residual.
      */
-    fun entranceBearingDeg(compassDeg: Double?, walkInDeg: Double): Double =
-        if (compassDeg == null || abs(diffDeg(compassDeg, walkInDeg)) <= ENTRANCE_TRUST_DEG) wrap360(walkInDeg) else wrap360(compassDeg)
+    fun entranceBearingDeg(compassDeg: Double?, walkInDeg: Double): Double = wrap360(walkInDeg)
 
     /**
      * The transform: building point ([bx], [by]) on [floor] is the floor point under the camera ([camX], [floorY], [camZ]),

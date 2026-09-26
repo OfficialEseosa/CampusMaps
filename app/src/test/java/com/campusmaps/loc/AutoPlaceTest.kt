@@ -90,7 +90,7 @@ class AutoPlaceTest {
         assertEquals(90.0, AutoPlace.entranceBearingDeg(null, 90.0), 1e-9)
         assertEquals(90.0, AutoPlace.entranceBearingDeg(130.0, 90.0), 1e-9)
         assertEquals(350.0, AutoPlace.entranceBearingDeg(20.0, 350.0), 1e-9) // 30 degrees across north
-        assertEquals(270.0, AutoPlace.entranceBearingDeg(270.0, 90.0), 1e-9) // turned round
+        assertEquals(90.0, AutoPlace.entranceBearingDeg(270.0, 90.0), 1e-9) // the door always wins (compass by a steel frame lies)
     }
 
     // ---- floor height ----
