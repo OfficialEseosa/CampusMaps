@@ -167,33 +167,39 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                         val exploreState by exploreVm.state.collectAsState()
                         val plan = exploreState.plan
                         val scope = androidx.compose.runtime.rememberCoroutineScope()
-                        val startAr: (com.campusmaps.outdoor.EntrancePlan) -> Unit = { p ->
+                        val startAr: (com.campusmaps.outdoor.EntrancePlan, Boolean) -> Unit = { p, fromCard ->
                             val f = exploreVm.state.value.fix
-                            vm.startFromExplore(p.buildingId, p.destinationId, p.entranceId, f?.lat, f?.lng)
+                            vm.startFromExplore(p.buildingId, p.destinationId, p.entranceId, f?.lat, f?.lng, fromCard)
                         }
                         // While only the map shows, the hand-off follows the map's recommended entrance so the 40 m
                         // trigger can raise the "Almost there" card before any S2 session exists.
-                        LaunchedEffect(plan?.buildingId, plan?.entranceId, guidance == null) {
+                        LaunchedEffect(plan?.buildingId, plan?.destinationId, plan?.entranceId, guidance == null) {
                             if (guidance == null && plan != null) {
-                                vm.handoff.newRoute(com.campusmaps.geo.GeoEntrance(plan.entranceId, plan.entranceName,
-                                    com.campusmaps.geo.LatLng(plan.entrance.lat, plan.entrance.lng)))
+                                // Re-arm only for a new map route. After End route the trigger stays consumed (it
+                                // re-arms above 60 m); re-arming here re-fired the card at once and reopened S2.
+                                val key = "${plan.buildingId}/${plan.destinationId}/${plan.entranceId}"
+                                if (vm.handoffRouteKey != key) {
+                                    vm.handoffRouteKey = key
+                                    vm.handoff.newRoute(com.campusmaps.geo.GeoEntrance(plan.entranceId, plan.entranceName,
+                                        com.campusmaps.geo.LatLng(plan.entrance.lat, plan.entrance.lng)))
+                                }
                                 runCatching { vm.handoff.attach(scope, com.campusmaps.geo.FusedLocationFixes.flow(appContext)) }
                             }
                         }
-                        // The card's "Go" (or the trigger) moved the hand-off to ANIMATING with no session yet: start S2 now.
-                        LaunchedEffect(handoffUi.phase) {
-                            if (handoffUi.phase == com.campusmaps.geo.HandoffPhase.ANIMATING && guidance == null) plan?.let(startAr)
-                        }
+                        // The card's "Go" starts S2 first; startFromExplore then plays the transition with S2 already
+                        // composed underneath. (Animating before the session existed faded the map into an empty
+                        // layer and then cut to S2.)
                         com.campusmaps.ui.transition.MapToArHost(
                             ui = handoffUi,
                             controller = vm.handoff,
+                            onCardGo = { plan?.let { startAr(it, true) } },
                             mapContent = {
                                 ExploreScreen(
                                     vm = exploreVm,
                                     actions = ExploreActions(
                                         onSearch = vm::openSearchFromExplore,
                                         onSettings = vm::openSettings,
-                                        onStartAr = startAr,
+                                        onStartAr = { startAr(it, false) },
                                     ),
                                 )
                             },

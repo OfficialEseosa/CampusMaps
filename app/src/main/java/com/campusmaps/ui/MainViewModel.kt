@@ -283,6 +283,9 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     // LEG 2 hand-off (geo/): the 40 m trigger, the "Almost there" card and the map-to-AR transition state. One per app.
     val handoff = com.campusmaps.geo.HandoffController()
 
+    // The map route (building/room/entrance) the hand-off was last armed for; the map re-arms only when it changes.
+    var handoffRouteKey: String? = null
+
     // True while the current S2 session was started from the Explore map: S2 is then drawn inside the map-to-AR host
     // (CampusMapsApp) and End route returns to the map instead of S1b.
     private val _fromExplore = MutableStateFlow(false)
@@ -303,9 +306,13 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
 
     // "Start AR navigation" on Explore: same building, room and entrance as the map, started from the outdoor start point
     // nearest the student, then the same S2 path S1b uses (startSession).
-    fun startFromExplore(buildingId: String, destinationId: String, entranceId: String, lat: Double?, lng: Double?) {
-        if (!settled()) return
+    // [fromCard]: the "Almost there" card (tap or its own timer) is not a stray tap, so the tap guard does not apply.
+    fun startFromExplore(buildingId: String, destinationId: String, entranceId: String, lat: Double?, lng: Double?, fromCard: Boolean = false) {
+        if (!fromCard && !settled()) return
+        if (startingFromExplore || _guidance.value != null) return
+        startingFromExplore = true
         viewModelScope.launch {
+          try {
             if (settings.value.buildingId != buildingId) app.settings.setBuilding(buildingId)
             val building = app.building(buildingId)
             val startId = building.outdoorStarts.minByOrNull { (_, p) ->
@@ -324,8 +331,14 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
                 is RoutePlan.AlreadyHere -> startSession(plan.route, glasses = false)
                 else -> go(Screen.ROUTES)
             }
+          } finally {
+            startingFromExplore = false
+            // No session came of it (timeout or no plan): drop the card so the map is usable again.
+            if (_guidance.value == null) handoff.backToMap()
+          }
         }
     }
+    private var startingFromExplore = false
 
     // ---------- S2 / S3 ----------
 
@@ -366,6 +379,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     // Reset: back to a clean S1 (keeps settings).
     fun reset() {
         stopSession()
+        handoffRouteKey = null
         updateSelection { Selection() }
         go(Screen.DESTINATION)
     }

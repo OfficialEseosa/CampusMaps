@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +42,9 @@ import com.campusmaps.geo.HandoffPhase
 import com.campusmaps.geo.HandoffUi
 import com.campusmaps.ui.theme.Sora
 import kotlinx.coroutines.delay
+
+/** Progress while S2 is composed underneath but the hand-off has not visibly started. */
+private const val PREPARE_P = 0.0001f
 
 /** Length of the map-to-AR hand-off. */
 const val HANDOFF_MS = 900
@@ -97,7 +101,26 @@ fun rememberHandoffProgress(phase: HandoffPhase, onDone: () -> Unit): Float {
     LaunchedEffect(phase) {
         when (phase) {
             HandoffPhase.MAP, HandoffPhase.CARD -> anim.snapTo(0f)
-            HandoffPhase.ANIMATING -> { anim.animateTo(1f, tween(HANDOFF_MS, easing = FastOutSlowInEasing)); done() }
+            HandoffPhase.ANIMATING -> {
+                // Compose S2 underneath at (almost) zero alpha first and wait until frames are smooth again: S2's first
+                // composition (camera, minimap) blocks the main thread for up to ~1.5 s, which otherwise eats the
+                // whole 900 ms and shows as a jump cut.
+                anim.snapTo(PREPARE_P)
+                val w0 = android.os.SystemClock.uptimeMillis()
+                var last = withFrameNanos { it }
+                var smooth = 0
+                while (smooth < 3 && android.os.SystemClock.uptimeMillis() - w0 < 2_000) {
+                    val now = withFrameNanos { it }
+                    smooth = if (now - last < 40_000_000L) smooth + 1 else 0
+                    last = now
+                }
+                var frames = 0
+                val t0 = android.os.SystemClock.uptimeMillis()
+                android.util.Log.i("Handoff", "S2 ready after ${t0 - w0} ms")
+                anim.animateTo(1f, tween(HANDOFF_MS, easing = FastOutSlowInEasing)) { if (value > 0f && value < 1f) frames++ }
+                android.util.Log.i("Handoff", "map-to-AR ran ${android.os.SystemClock.uptimeMillis() - t0} ms, $frames in-between frames")
+                done()
+            }
             HandoffPhase.AR -> anim.snapTo(1f)
         }
     }
@@ -138,6 +161,7 @@ fun MapToArHost(
     arContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     focus: TransformOrigin = TransformOrigin.Center,
+    onCardGo: () -> Unit = { controller.startHandoff() },
 ) {
     val progress = rememberHandoffProgress(ui.phase) { controller.animationDone() }
     Box(modifier.fillMaxSize()) {
@@ -148,7 +172,7 @@ fun MapToArHost(
             enter = fadeIn(tween(250)) + slideInVertically(tween(250)) { it / 2 },
             exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
         ) {
-            HandoffCard(onGo = { controller.startHandoff() }, entranceName = ui.entrance?.name)
+            HandoffCard(onGo = onCardGo, entranceName = ui.entrance?.name)
         }
     }
 }
