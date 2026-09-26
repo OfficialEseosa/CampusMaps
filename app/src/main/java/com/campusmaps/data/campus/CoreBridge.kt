@@ -108,6 +108,9 @@ object CoreBridge {
                 } else null,
                 signText = core.anchors.firstOrNull { it.node == n.id && (it.text != null || it.aliases.isNotEmpty()) }
                     ?.let { it.text ?: it.aliases.first() },
+                lat = n.lat.takeIf { n.isOutdoorEntrance },
+                lng = n.lng.takeIf { n.isOutdoorEntrance },
+                headingDeg = n.walkInHeadingDeg.takeIf { n.isOutdoorEntrance },
             )
         }
 
@@ -170,6 +173,37 @@ object CoreBridge {
             outdoorStarts = outdoorStarts,
             core = core,
         )
+    }
+
+    /**
+     * Where the outdoor leg ends: the entrance of a route option, for the map and the Geospatial arrow.
+     * [headingDeg] is the compass bearing (0 = north, clockwise) you face when walking IN through the door; [facingOutDeg] is the
+     * file's value (the door faces out). [estimated] is true while the entrance is a guess (KL, CSE, CS Walters side).
+     */
+    data class EntranceGeo(
+        val nodeId: String,
+        val name: String,
+        val floor: Int,
+        val lat: Double,
+        val lng: Double,
+        val headingDeg: Double?,
+        val facingOutDeg: Double?,
+        val estimated: Boolean,
+    )
+
+    /** The entrance of [coreOption] (core's entrance node id) with its coordinates; null for inside starts or an entrance without lat / lng. */
+    fun entranceGeo(building: Building, coreOption: com.campusmaps.routing.RouteOption): EntranceGeo? =
+        coreOption.entrance?.let { entranceGeo(building, it) }
+
+    /** By entrance node id (e.g. "E-LM2") or by entrance name as shown on a route card (e.g. "Library South entrance (floor 2)"). */
+    fun entranceGeo(building: Building, entranceIdOrName: String): EntranceGeo? {
+        val n = building.core.nodeOrNull(entranceIdOrName)
+            ?: building.core.nodes.firstOrNull { it.type == NodeType.ENTRANCE && it.name.equals(entranceIdOrName, ignoreCase = true) }
+            ?: return null
+        if (n.type != NodeType.ENTRANCE) return null
+        val lat = n.lat ?: return null
+        val lng = n.lng ?: return null
+        return EntranceGeo(n.id, n.name, n.floor, lat, lng, n.walkInHeadingDeg, n.headingDeg, n.estimated)
     }
 
     private fun kindOf(t: NodeType): NodeKind = when (t) {
