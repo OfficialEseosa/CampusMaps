@@ -82,12 +82,15 @@ fun DestinationScreen(state: TripUiState, buildings: List<Building>, actions: De
             .background(MaterialTheme.colorScheme.surface)
             .imePadding(),
     ) {
+        // The map icon sits next to Reset and Settings in every mode (docs/22 O3): in demo mode the "See the map" row
+        // is hidden, and this is the way to Explore.
         AppTopBar(
             title = "CampusMaps",
             tags = listOfNotNull(state.building.code, if (demo) "DEMO" else null),
             onReset = actions.onReset,
             onSettings = actions.onSettings,
             onTitleLongPress = if (demo) null else actions.onTitleLongPress,
+            onMap = actions.onExplore,
         )
 
         Column(

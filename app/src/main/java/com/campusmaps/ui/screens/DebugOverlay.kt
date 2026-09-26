@@ -53,6 +53,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.ViewConfiguration
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.sp
 import com.campusmaps.data.AppClock
 import com.campusmaps.data.ClockMode
@@ -77,11 +81,13 @@ fun DebugOverlay(
     lines: List<String>,
     links: List<DebugLink>,
     onClose: () -> Unit,
+    // Fold state lives with the caller (above the screen switch) so the card stays folded across screens.
+    collapsed: Boolean,
+    onCollapsedChange: (Boolean) -> Unit,
     controls: @Composable ColumnScope.() -> Unit = {},
 ) {
     var ox by rememberSaveable { mutableFloatStateOf(0f) }
     var oy by rememberSaveable { mutableFloatStateOf(0f) }
-    var collapsed by rememberSaveable { mutableStateOf(false) }
     val density = LocalDensity.current
     val conf = LocalConfiguration.current
     val maxX = with(density) { (conf.screenWidthDp.dp - 120.dp).toPx() }
@@ -118,7 +124,7 @@ fun DebugOverlay(
             } else {
                 Spacer(Modifier.weight(1f))
             }
-            LinkText(if (collapsed) "open" else "fold") { collapsed = !collapsed }
+            LinkText(if (collapsed) "open" else "fold") { onCollapsedChange(!collapsed) }
             LinkText("close", onClose)
         }
         if (!collapsed) {
@@ -128,7 +134,17 @@ fun DebugOverlay(
             ) {
                 lines.forEach { Text(it, style = AppTextStyles.debugMono, color = ArOverlayColors.text) }
                 controls()
-                links.forEach { LinkText(it.label, it.onClick) }
+                // No gap between link rows: each row is its own 44 dp touch target on a 44 dp pitch.
+                // The platform pads every touch target to 48 dp; here 44 dp, so the touch areas no longer overlap.
+                val base = LocalViewConfiguration.current
+                val vc = remember(base) {
+                    object : ViewConfiguration by base {
+                        override val minimumTouchTargetSize: DpSize get() = DpSize(44.dp, 44.dp)
+                    }
+                }
+                CompositionLocalProvider(LocalViewConfiguration provides vc) {
+                    Column { links.forEach { LinkText(it.label, it.onClick) } }
+                }
             }
         }
     }
@@ -257,9 +273,9 @@ private fun LinkText(text: String, onClick: () -> Unit) {
         text,
         style = AppTextStyles.debugMono,
         color = ArOverlayColors.debugLink,
-        // Exactly 36 dp, the row pitch, so neighbouring link rows no longer overlap their tap areas (docs/22 #15).
+        // 44 dp tall and stacked without a gap: 44 dp touch target on a 44 dp pitch, no overlap (docs/22 O5).
         modifier = Modifier
-            .height(36.dp)
+            .height(44.dp)
             .clickable(onClick = onClick)
             .wrapContentHeight(Alignment.CenterVertically),
     )

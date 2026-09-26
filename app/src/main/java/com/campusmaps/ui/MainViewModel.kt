@@ -515,7 +515,18 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
 
     fun debugDropConfidence() = _guidance.value?.simulation?.dropConfidence()
 
-    fun debugPushOffRoute() = _guidance.value?.simulation?.pushOffRoute()
+    // Force reroute: push 8 m off the path, and once the controller has rerouted, put the student on the start of the
+    // new route. Without the snap the student is still more than 6 m off the fresh route 3 s later (the lead-in walk
+    // is slower than that), so the controller rerouted a second time and one tap counted 2 reroutes.
+    fun debugPushOffRoute() {
+        val c = _guidance.value ?: return
+        val before = c.state.value.rerouteCount
+        c.simulation.pushOffRoute()
+        viewModelScope.launch {
+            kotlinx.coroutines.withTimeoutOrNull(5_000L) { c.state.first { it.rerouteCount > before } } ?: return@launch
+            c.simulation.jumpToPoint(0)
+        }
+    }
 
     fun debugSkipStep() = _guidance.value?.skipStep()
 
