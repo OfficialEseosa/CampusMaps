@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -92,7 +94,8 @@ fun DebugOverlay(
             .offset { IntOffset(ox.roundToInt(), oy.roundToInt()) }
             .width(280.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(ArOverlayColors.debugCard)
+            // Opaque: at 95% the S1 text behind read through the card (docs/22 #15).
+            .background(ArOverlayColors.debugCard.copy(alpha = 1f))
             .padding(12.dp)
             .testTag("debugOverlay"),
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -254,9 +257,10 @@ private fun LinkText(text: String, onClick: () -> Unit) {
         text,
         style = AppTextStyles.debugMono,
         color = ArOverlayColors.debugLink,
+        // Exactly 36 dp, the row pitch, so neighbouring link rows no longer overlap their tap areas (docs/22 #15).
         modifier = Modifier
-            .heightIn(min = 32.dp)
+            .height(36.dp)
             .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
+            .wrapContentHeight(Alignment.CenterVertically),
     )
 }
