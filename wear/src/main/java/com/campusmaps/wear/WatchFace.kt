@@ -118,9 +118,17 @@ private fun StepArrow(type: WatchStepType, ambient: Boolean, modifier: Modifier)
             WatchStepType.STRAIGHT -> drawPath(polygon(40f, 92f, 40f, 42f, 20f, 42f, 50f, 8f, 80f, 42f, 60f, 42f, 60f, 92f), paint, style = style)
             WatchStepType.LEFT -> drawPath(polygon(52f, 92f, 52f, 53f, 34f, 53f, 34f, 70f, 8f, 45f, 34f, 20f, 34f, 37f, 68f, 37f, 68f, 92f), paint, style = style)
             WatchStepType.RIGHT -> drawPath(polygon(48f, 92f, 48f, 53f, 66f, 53f, 66f, 70f, 92f, 45f, 66f, 20f, 66f, 37f, 32f, 37f, 32f, 92f), paint, style = style)
-            WatchStepType.STAIRS -> drawPath(polygon(8f, 92f, 8f, 72f, 29f, 72f, 29f, 51f, 50f, 51f, 50f, 30f, 71f, 30f, 71f, 9f, 92f, 9f, 92f, 92f), paint, style = style)
-            // The STAIRS shape mirrored horizontally: steps descend from left to right.
-            WatchStepType.STAIRS_DOWN -> drawPath(polygon(92f, 92f, 92f, 72f, 71f, 72f, 71f, 51f, 50f, 51f, 50f, 30f, 29f, 30f, 29f, 9f, 8f, 9f, 8f, 92f), paint, style = style)
+            // Stairs rising to the right, with an up arrow in the empty top-left corner.
+            WatchStepType.STAIRS -> {
+                drawPath(polygon(8f, 92f, 8f, 72f, 29f, 72f, 29f, 51f, 50f, 51f, 50f, 30f, 71f, 30f, 71f, 9f, 92f, 9f, 92f, 92f), paint, style = style)
+                drawPath(polygon(22f, 6f, 38f, 24f, 27f, 24f, 27f, 42f, 17f, 42f, 17f, 24f, 6f, 24f), paint, style = style)
+            }
+            // A mirror alone still reads as "stairs" (WHATS-LEFT 3): stairs falling to the right plus a down arrow
+            // in the empty top-right corner, so up and down differ at a glance.
+            WatchStepType.STAIRS_DOWN -> {
+                drawPath(polygon(92f, 92f, 92f, 72f, 71f, 72f, 71f, 51f, 50f, 51f, 50f, 30f, 29f, 30f, 29f, 9f, 8f, 9f, 8f, 92f), paint, style = style)
+                drawPath(polygon(78f, 42f, 94f, 24f, 83f, 24f, 83f, 6f, 73f, 6f, 73f, 24f, 62f, 24f), paint, style = style)
+            }
             WatchStepType.ELEVATOR -> drawElevator(s, paint, ambient)
             WatchStepType.DOOR -> {
                 drawRoundRect(paint, topLeft = p(26f, 8f), size = Size(48f * s, 84f * s), cornerRadius = CornerRadius(4f * s), style = style)
@@ -166,3 +174,7 @@ private fun PreviewLeft() = WatchFace(WatchStep(WatchStepType.LEFT, "10 m", "Atr
 @Preview(widthDp = 227, heightDp = 227, showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 private fun PreviewAmbient() = WatchFace(WatchStep(WatchStepType.ELEVATOR, "Floor 6", "Elevator"), ambient = true)
+
+@Preview(widthDp = 227, heightDp = 227, showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun PreviewStairsDown() = WatchFace(WatchStep(WatchStepType.STAIRS_DOWN, "Floor 1", "Stairs down"), ambient = false)

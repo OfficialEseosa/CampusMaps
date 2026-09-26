@@ -7,7 +7,7 @@ enum class WatchStepType {
     LEFT,
     RIGHT,
     STAIRS,      // Stairs up
-    STAIRS_DOWN, // Same icon mirrored; same haptic as STAIRS
+    STAIRS_DOWN, // Mirrored stairs plus a down arrow; same haptic as STAIRS
     ELEVATOR,
     DOOR,
     LOCKED,
