@@ -61,7 +61,9 @@ object CoreBridge {
         for (f in files) {
             val code = f.removeSuffix(".json")
             try {
-                val core = assets.open("$DIR/$f").bufferedReader().use { BuildingLoader.fromJson(it.readText()) }
+                val asset = assets.open("$DIR/$f").bufferedReader().use { BuildingLoader.fromJson(it.readText()) }
+                // Field fixes from the in-app building editor (filesDir/patches/<code>.json); a bad patch is logged and skipped.
+                val core = com.campusmaps.editor.PatchStore.applyStored(context, asset)
                 if (BuildConfig.DEBUG) {
                     val all = BuildingValidator.validate(core, imageExists = { path -> assetExists(context, path) })
                     all.forEach {
