@@ -161,7 +161,7 @@ private fun CampusBuildingCard(row: CampusBuildingEntry, p: CampusPalette, onBui
     val live = b != null
     val floors = b?.floors?.let { it.last - it.first + 1 } ?: row.info.floors
     val name = b?.name ?: row.info.name
-    val sub = if (b != null) "$floors floors · ${b.rooms.size} rooms" else "$floors floors · mapping soon"
+    val sub = if (b != null) "$floors floors · ${b.rooms.size} ${if (b.rooms.size == 1) "room" else "rooms"}" else "$floors floors · mapping soon"
 
     Row(
         Modifier
