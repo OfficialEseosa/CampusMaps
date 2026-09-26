@@ -31,7 +31,8 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 
-// Explore map colours (design board 02).
+// Explore map colours (design board 02). The route line and the entrance pin follow the campus skin in the map itself
+// (accent line, deep pin); these two are the clay fallbacks.
 object ExploreMapColors {
     val route = Color(0xFFC67C4E)       // Clay route line
     val casing = Color(0xFFFFFFFF)      // White casing under it
@@ -60,6 +61,7 @@ fun GoogleOutdoorMap(
     val routeW = with(density) { 6.dp.toPx() }
     val casingW = with(density) { 10.dp.toPx() }
     val line = remember(route) { route.map { LatLng(it.lat, it.lng) } }
+    val palette = com.campusmaps.ui.theme.LocalCampusPalette.current
 
     // Frame the whole walk when a route appears.
     LaunchedEffect(line) {
@@ -83,11 +85,11 @@ fun GoogleOutdoorMap(
     ) {
         if (line.size >= 2) {
             Polyline(points = line, color = ExploreMapColors.casing, width = casingW, zIndex = 1f)
-            Polyline(points = line, color = ExploreMapColors.route, width = routeW, zIndex = 2f)
+            Polyline(points = line, color = palette.accent, width = routeW, zIndex = 2f)
         }
         entrance?.let { e ->
             MarkerComposable(e, state = rememberUpdatedMarkerState(LatLng(e.lat, e.lng)), anchor = Offset(0.5f, 0.5f), zIndex = 3f) {
-                Box(Modifier.size(18.dp).background(ExploreMapColors.entrance, CircleShape).border(3.dp, Color.White, CircleShape))
+                Box(Modifier.size(18.dp).background(palette.deep, CircleShape).border(3.dp, Color.White, CircleShape))
             }
         }
         user?.let { u ->
