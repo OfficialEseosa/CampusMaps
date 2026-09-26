@@ -65,6 +65,9 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     val settings by vm.settings.collectAsState()
     val showSettings by vm.showSettings.collectAsState()
     val debugVisible by vm.debugVisible.collectAsState()
+    // The phone's barometer for guidance sessions (loc/baro): floor changes during elevator and stairs rides.
+    remember { com.campusmaps.loc.baro.BaroFeed.install(app.appContext) }
+    val baroStatus by com.campusmaps.loc.baro.BaroFeed.status.collectAsState()
     // Debug card fold state, kept here (outside the screen switch) so a folded card stays folded on S1b and S2.
     // A long-press that shows the card again opens it unfolded.
     var debugFolded by rememberSaveable { mutableStateOf(false) }
@@ -328,6 +331,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                     add("start: ${trip.start.id} (${if (trip.start.isOutdoor) "outside" else Formats.floorShort(trip.start.floor)})")
                     add("ar: ${arOverride.label}  ARCore: $arCore")
                     add("barometer: ${pressure?.let { "%.2f hPa".format(it) } ?: "no barometer"}")
+                    baroStatus?.let { add(it.debugLine()) }
                     add("watch: ${if (watchCount < 0) "not asked yet" else "$watchCount connected"}  glasses: ${if (glassesConnected) "connected (${app.glasses::class.simpleName})" else "not connected"}")
                     add("tts: ${tts.name.lowercase()}  network: ${if (offline) "offline" else "online"}")
                     add("validator: ${problems.size} problems (ERROR/WARN, see Logcat)")
