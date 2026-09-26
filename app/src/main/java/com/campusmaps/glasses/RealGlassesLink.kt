@@ -82,7 +82,7 @@ class RealGlassesLink(
                     continue
                 }
                 if (!ready) {
-                    ready = try { source.connect() } catch (e: CancellationException) { throw e } catch (e: Exception) { Log.w(TAG, "connect: $e"); false }
+                    ready = try { withContext(Dispatchers.IO) { source.connect() } } catch (e: CancellationException) { throw e } catch (e: Exception) { Log.w(TAG, "connect: $e"); false }
                     _connected.value = ready
                     if (!ready) {
                         Log.i(TAG, "RECONNECT: not connected, retry in ${backoff / 1000} s")
@@ -106,7 +106,8 @@ class RealGlassesLink(
                 val t0 = SystemClock.elapsedRealtime()
                 Log.i(TAG, "CYCLE $cycle LOOKING: burst of $STILLS (expect ${hint?.anchorId ?: "-"} '${sign ?: ""}')")
                 val stills: List<Bitmap> = try {
-                    source.burst(STILLS, hint?.anchorId)
+                    // Off the main thread: mock setup, file copies, capture waits and HEIC decoding (an ANR on the emulator).
+                    withContext(Dispatchers.IO) { source.burst(STILLS, hint?.anchorId) }
                 } catch (e: CancellationException) { throw e } catch (e: Exception) {
                     Log.w(TAG, "RECONNECT: burst failed ($e), retry in ${backoff / 1000} s")
                     source.disconnect()
