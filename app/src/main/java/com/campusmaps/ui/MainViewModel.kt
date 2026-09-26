@@ -46,8 +46,12 @@ data class WalkState(
     val lowConfidence: Boolean = false,
 )
 
-// The screens from the flow in section 3 of the handoff.
-enum class Screen { DESTINATION, ROUTES, GUIDANCE, GLASSES, ADD_SHORTCUT, EXPLORE }
+// The screens from the flow in section 3 of the handoff, plus the redesign's campus picker (CAMPUS),
+// building picker (BUILDINGS) and 3D route preview (PREVIEW).
+enum class Screen { CAMPUS, BUILDINGS, DESTINATION, ROUTES, PREVIEW, GUIDANCE, GLASSES, ADD_SHORTCUT, EXPLORE }
+
+// "Guide me with" on S1b. MAP is S2 with the camera forced off (text and the big map).
+enum class GuideMode { PHONE, GLASSES, MAP }
 
 // What the user has picked on S1. Kept apart from settings because Reset clears it.
 data class Selection(
@@ -77,7 +81,7 @@ data class TripUiState(
 
 class MainViewModel(private val app: AppContainer) : ViewModel() {
 
-    private val _screen = MutableStateFlow(Screen.DESTINATION)
+    private val _screen = MutableStateFlow(Screen.CAMPUS)
     val screen: StateFlow<Screen> = _screen.asStateFlow()
 
     // Double-tap guard (Raphael's docs/20 QA #1, #2): a second tap that lands on the next screen within this
@@ -175,9 +179,37 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         viewModelScope.launch { app.shortcuts.sync() }
     }
 
+    // ---------- S0 campus, S0b buildings ----------
+
+    // The campus in use: set by the S0 picker, otherwise the campus of the saved building.
+    private val _campus = MutableStateFlow(com.campusmaps.data.campus.Campuses.of(settings.value.buildingId).id)
+    val campus: StateFlow<com.campusmaps.data.campus.CampusId> = _campus.asStateFlow()
+
+    fun pickCampus(id: com.campusmaps.data.campus.CampusId) {
+        _campus.value = id
+        go(Screen.BUILDINGS)
+    }
+
+    // The swap pill on S0b: the other campus, staying on S0b.
+    fun swapCampus() {
+        _campus.update { if (it == com.campusmaps.data.campus.CampusId.GT) com.campusmaps.data.campus.CampusId.GSU else com.campusmaps.data.campus.CampusId.GT }
+    }
+
+    fun openCampus() = go(Screen.CAMPUS)
+
+    fun openBuildings() = go(Screen.BUILDINGS)
+
+    // A mapped building on S0b: load it and go to "Where to?".
+    fun openBuilding(id: String) {
+        if (!settled()) return
+        if (id != settings.value.buildingId) selectBuilding(id)
+        go(Screen.DESTINATION)
+    }
+
     // ---------- S1 ----------
 
     fun selectBuilding(id: String) {
+        _campus.value = com.campusmaps.data.campus.Campuses.of(id).id
         viewModelScope.launch { app.settings.setBuilding(id) }
         updateSelection { Selection() } // Different building file: clear the room and start
     }
@@ -202,6 +234,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         val t = trip.value
         val destination = t.destination ?: return
         viewModelScope.launch { app.settings.addRecent(t.building.id, destination.id) }
+        _selectedRouteId.value = null
         go(Screen.ROUTES)
     }
 
@@ -213,11 +246,53 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
 
     fun back() {
         when (_screen.value) {
+            Screen.CAMPUS -> Unit
+            Screen.BUILDINGS -> go(Screen.CAMPUS)
             Screen.ROUTES, Screen.ADD_SHORTCUT -> go(Screen.DESTINATION)
+            Screen.PREVIEW -> go(Screen.ROUTES)
             Screen.GUIDANCE, Screen.GLASSES -> endGuidance()
-            Screen.DESTINATION -> if (_exploreHome.value) go(Screen.EXPLORE)
+            Screen.DESTINATION -> if (_exploreHome.value) go(Screen.EXPLORE) else go(Screen.BUILDINGS)
             Screen.EXPLORE -> if (_exploreBackToS1.value) { _exploreBackToS1.value = false; go(Screen.DESTINATION) }
         }
+    }
+
+    // "Guide me with" (S1b mode tiles). Remembered for the session.
+    private val _guideMode = MutableStateFlow(GuideMode.PHONE)
+    val guideMode: StateFlow<GuideMode> = _guideMode.asStateFlow()
+    fun setGuideMode(mode: GuideMode) { _guideMode.value = mode }
+
+    // The route card picked on S1b; null = the fastest (first) option.
+    private val _selectedRouteId = MutableStateFlow<String?>(null)
+    val selectedRouteId: StateFlow<String?> = _selectedRouteId.asStateFlow()
+    fun selectRoute(option: RouteOption) { _selectedRouteId.value = option.id }
+
+    // The XR preview card on S1b and its "Start AR guidance" button.
+    fun openPreview() { if (settled() && trip.value.plan is RoutePlan.Options) go(Screen.PREVIEW) }
+
+    // The option S1b's Start button (and the 3D preview) follow: the picked card if it is still offered, else the fastest.
+    fun selectedOption(): RouteOption? {
+        val options = (trip.value.plan as? RoutePlan.Options)?.options ?: return null
+        return options.firstOrNull { it.id == _selectedRouteId.value } ?: options.first()
+    }
+
+    // "Start with <mode>" on S1b.
+    fun startSelected() {
+        if (!settled()) return
+        when (val plan = trip.value.plan) {
+            is RoutePlan.AlreadyHere -> startSession(plan.route, glasses = false)
+            is RoutePlan.Options -> {
+                val option = selectedOption() ?: return
+                startSession(option.route, glasses = _guideMode.value == GuideMode.GLASSES)
+            }
+            else -> Unit
+        }
+    }
+
+    // "Start AR guidance" on the 3D preview: phone guidance (map mode stays map mode).
+    fun startFromPreview() {
+        if (!settled()) return
+        if (_guideMode.value == GuideMode.GLASSES) _guideMode.value = GuideMode.PHONE
+        selectedOption()?.let { startSession(it.route, glasses = false) }
     }
 
     fun startGuidance(option: RouteOption) { if (settled()) startSession(option.route, glasses = false) }
@@ -295,7 +370,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
 
     fun showExploreAsHome() {
         _exploreHome.value = true
-        if (_screen.value == Screen.DESTINATION && selection.value.destinationId == null) go(Screen.EXPLORE)
+        if (_screen.value in setOf(Screen.CAMPUS, Screen.DESTINATION) && selection.value.destinationId == null) go(Screen.EXPLORE)
     }
 
     // Explore opened from S1 (the map row or the debug link) while S1 is home: Back returns to S1 and S1 stays home.

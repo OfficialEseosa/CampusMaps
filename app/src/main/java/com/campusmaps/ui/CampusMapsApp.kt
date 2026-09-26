@@ -22,6 +22,9 @@ import com.campusmaps.guidance.GuidanceState
 import com.campusmaps.route.Formats
 import com.campusmaps.outdoor.ExploreViewModel
 import com.campusmaps.ui.screens.AddShortcutScreen
+import com.campusmaps.ui.screens.BuildingsScreen
+import com.campusmaps.ui.screens.CampusScreen
+import com.campusmaps.ui.screens.PreviewScreen
 import com.campusmaps.ui.screens.ExploreActions
 import com.campusmaps.ui.screens.ExploreScreen
 import androidx.compose.runtime.LaunchedEffect
@@ -44,8 +47,8 @@ import com.campusmaps.ui.theme.CampusMapsTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
 // The whole app UI. Picks the screen, applies the theme rules from section 3:
-// S1, S1b, S4 and Settings follow the system theme; S2, S3 and the debug card are always dark.
-// In demo mode S1b is forced dark so the jump into S2 is not harsh on video.
+// Redesign: S0, S0b, S1, S1b and Settings are light in the campus colours (CampusTheme.kt); S2, S3, the 3D preview
+// and the debug card are always dark. S4 (add shortcut) still follows the system theme.
 @Composable
 fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutViewModel) {
     val screen by vm.screen.collectAsState()
@@ -69,6 +72,14 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     LaunchedEffect(Unit) { if (exploreVm.exploreShouldBeHome()) vm.showExploreAsHome() }
     // LEG 2: the 40 m trigger, the "Almost there" card and the 900 ms map-to-AR transition (geo/, ui/transition/).
     val handoffUi by vm.handoff.ui.collectAsState()
+    // Redesign: campus skin, "Guide me with" mode and the picked route card (MainViewModel S0 / S1b).
+    val campusId by vm.campus.collectAsState()
+    val campus = com.campusmaps.data.campus.Campuses.get(campusId)
+    val palette = com.campusmaps.ui.theme.CampusPalettes.of(campusId)
+    val guideMode by vm.guideMode.collectAsState()
+    val selectedRouteId by vm.selectedRouteId.collectAsState()
+    // Map mode is S2 with the camera forced off.
+    val effectiveAr = if (guideMode == GuideMode.MAP) com.campusmaps.platform.ArOverride.FORCE_OFF else arOverride
     val fromExplore by vm.fromExplore.collectAsState()
     val appContext = LocalContext.current.applicationContext
     val geo = androidx.compose.runtime.remember { com.campusmaps.geo.ArCoreGeospatialProvider(appContext) }
@@ -76,12 +87,12 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     val crossTarget = if (screen == Screen.GUIDANCE && fromExplore) Screen.EXPLORE else screen
 
     val systemDark = isSystemInDarkTheme()
-    val alwaysDark = screen == Screen.GUIDANCE || screen == Screen.GLASSES
+    val alwaysDark = screen == Screen.GUIDANCE || screen == Screen.GLASSES || screen == Screen.PREVIEW
+    // The redesign's flow is light and campus-coloured (CampusTheme.kt); S2, S3 and the 3D preview are dark.
     val screenDark = when (screen) {
-        Screen.GUIDANCE, Screen.GLASSES -> true
-        Screen.ROUTES -> systemDark || settings.demoMode
-        Screen.EXPLORE -> false
-        else -> systemDark
+        Screen.GUIDANCE, Screen.GLASSES, Screen.PREVIEW -> true
+        Screen.CAMPUS, Screen.BUILDINGS, Screen.DESTINATION, Screen.ROUTES, Screen.EXPLORE -> false
+        Screen.ADD_SHORTCUT -> systemDark
     }
 
     // Light status bar icons on dark screens, dark icons on light ones.
@@ -102,15 +113,31 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
         onDispose { }
     }
 
-    BackHandler(enabled = (screen != Screen.EXPLORE || exploreBackToS1) && (screen != Screen.DESTINATION || exploreHome)) { vm.back() }
+    BackHandler(enabled = screen != Screen.CAMPUS && (screen != Screen.EXPLORE || exploreBackToS1)) { vm.back() }
 
-    CampusMapsTheme(darkTheme = screenDark) {
+    CampusMapsTheme(darkTheme = screenDark && screen == Screen.ADD_SHORTCUT, campus = palette) {
         Box(Modifier.fillMaxSize()) {
             Crossfade(targetState = crossTarget, animationSpec = tween(250), label = "screen") { target ->
                 when (target) {
+                    Screen.CAMPUS -> CampusScreen(
+                        buildings = app.buildings,
+                        onCampus = vm::pickCampus,
+                        onSettings = vm::openSettings,
+                    )
+                    Screen.BUILDINGS -> BuildingsScreen(
+                        campus = campus,
+                        buildings = app.buildings,
+                        onBack = vm::openCampus,
+                        onSwap = vm::swapCampus,
+                        onBuilding = vm::openBuilding,
+                    )
+                    Screen.PREVIEW -> vm.selectedOption()?.let { option ->
+                        PreviewScreen(state = trip, option = option, onBack = vm::back, onStart = vm::startFromPreview)
+                    }
                     Screen.DESTINATION -> DestinationScreen(
                         state = trip.copy(query = vm.searchText), // Synchronous search text (docs/22 #2)
-                        buildings = app.buildings,
+                        campus = campus,
+                        buildings = app.buildings.filter { it.id in campus.mappedCodes },
                         actions = DestinationActions(
                             onBuilding = vm::selectBuilding,
                             onQuery = vm::setQuery,
@@ -124,10 +151,13 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onSettings = vm::openSettings,
                             onTitleLongPress = vm::toggleDebug,
                             onExplore = vm::openExplore,
+                            onBuildings = vm::openBuildings,
                         ),
                     )
                     Screen.ROUTES -> RouteOptionsScreen(
                         state = trip,
+                        guideMode = guideMode,
+                        selectedRouteId = selectedRouteId,
                         actions = RouteOptionsActions(
                             onBack = vm::back,
                             onReset = vm::reset,
@@ -137,12 +167,16 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onAlreadyHere = vm::startAlreadyHere,
                             onGlasses = vm::startGlasses,
                             onTitleLongPress = vm::toggleDebug,
+                            onSelectRoute = vm::selectRoute,
+                            onGuideMode = vm::setGuideMode,
+                            onStart = vm::startSelected,
+                            onPreview = vm::openPreview,
                         ),
                     )
                     Screen.GUIDANCE -> guidance?.let {
                         val t by (controller?.buildingToWorld ?: NoTransform).collectAsState()
                         GuidanceScreen(
-                            state = it, arOverride = arOverride, onEndRoute = vm::endGuidance, onDone = vm::done,
+                            state = it, arOverride = effectiveAr, guideMode = guideMode, onEndRoute = vm::endGuidance, onDone = vm::done,
                             buildingToWorld = t, onBuildingToWorld = { v -> controller?.buildingToWorld?.value = v },
                             geo = geo, outdoorEntrance = handoffUi.entrance, outdoorDistanceM = handoffUi.distanceToEntranceM,
                         )
@@ -209,7 +243,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                                 if (g != null && screen == Screen.GUIDANCE) {
                                     val t by (controller?.buildingToWorld ?: NoTransform).collectAsState()
                                     GuidanceScreen(
-                                        state = g, arOverride = arOverride, onEndRoute = vm::endGuidance, onDone = vm::done,
+                                        state = g, arOverride = arOverride, guideMode = GuideMode.PHONE, onEndRoute = vm::endGuidance, onDone = vm::done,
                                         buildingToWorld = t, onBuildingToWorld = { v -> controller?.buildingToWorld?.value = v },
                                         geo = geo, outdoorEntrance = handoffUi.entrance, outdoorDistanceM = handoffUi.distanceToEntranceM,
                                     )
@@ -224,7 +258,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
 
             if (showSettings) {
                 // The sheet follows the system theme even when the screen under it is forced dark.
-                CampusMapsTheme(darkTheme = if (alwaysDark) true else systemDark) {
+                CampusMapsTheme(darkTheme = alwaysDark, campus = palette) {
                     SettingsSheet(
                         settings = settings,
                         tts = tts,

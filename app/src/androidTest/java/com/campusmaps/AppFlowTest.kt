@@ -51,6 +51,14 @@ class AppFlowTest {
         container.clock.set(AppClock.DEFAULT_SIMULATED)
         rule.runOnUiThread { rule.activity.recreate() }
         rule.waitForIdle()
+        // The app opens on the campus picker (S0): Georgia State, then Classroom South, lands on S1.
+        waitForTag("campus_GSU")
+        rule.onNodeWithTag("campus_GSU").performClick()
+        waitForTag("building_CS")
+        settle()
+        rule.onNodeWithTag("building_CS").performClick()
+        waitForText("Where to?")
+        settle()
     }
 
     private fun waitForTag(tag: String, timeoutMs: Long = 5_000) =
@@ -80,11 +88,13 @@ class AppFlowTest {
         openRoutesFor608()
         // S1b: header, honest simulated time chip, best card from P1 (core: Library South entrance, floor 2, elevator).
         rule.onNodeWithText("Routed for", substring = true).assertIsDisplayed()
-        rule.onNodeWithText("Fastest").assertIsDisplayed()
+        rule.onNodeWithText("FASTEST").assertIsDisplayed()
         rule.onNodeWithText("also via: Classroom South main (floor 2)").assertIsDisplayed()
 
         // Tap the best card: S2 opens with the compact outside banner.
+        // The card selects the route; Start follows it with the chosen mode (Phone AR).
         rule.onNodeWithTag("routeCard_E-LM2-elevator-0").performClick()
+        rule.onNodeWithTag("startButton").performClick()
         waitForTag("guidanceScreen")
         rule.onNodeWithTag("instructionText").assertIsDisplayed()
         rule.onNodeWithText("Walk to Library South entrance (floor 2)").assertIsDisplayed()
@@ -114,7 +124,7 @@ class AppFlowTest {
         assertTrue(rule.onAllNodesWithText("by stairs", substring = true).fetchSemanticsNodes().isNotEmpty())
         rule.onNodeWithText("Avoid stairs").performClick()
         rule.waitUntil(5_000) { rule.onAllNodesWithText("by stairs", substring = true).fetchSemanticsNodes().isEmpty() }
-        rule.onNodeWithText("Fastest").assertIsDisplayed()
+        rule.onNodeWithText("FASTEST").assertIsDisplayed()
     }
 
     @Test
@@ -136,6 +146,7 @@ class AppFlowTest {
     fun glassesModeStartsAndStops() {
         openRoutesFor608()
         rule.onNodeWithTag("glassesButton").performClick()
+        rule.onNodeWithTag("startButton").performClick()
         waitForTag("glassesScreen")
         rule.onNodeWithText("GLASSES MODE").assertIsDisplayed()
         rule.onNodeWithText("Glasses connected").assertIsDisplayed()

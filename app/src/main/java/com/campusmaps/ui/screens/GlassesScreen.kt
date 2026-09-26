@@ -135,14 +135,14 @@ fun GlassesScreen(
                     buildAnnotatedString {
                         append("Seen: ")
                         if (glasses.seen != null) {
-                            withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) { append(glasses.seen) }
+                            withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.ExtraBold)) { append(glasses.seen) }
                         } else {
                             append("nothing yet")
                         }
                     },
                     color = ArOverlayColors.glassesMuted,
                     fontFamily = Sora,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                 )
             }
 
@@ -155,7 +155,7 @@ fun GlassesScreen(
                         .background(if (state.arrived) ArOverlayColors.arrived else ArOverlayColors.arrowCore),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(icon, contentDescription = null, tint = Color.Black, modifier = Modifier.size(40.dp))
+                    Icon(icon, contentDescription = null, tint = Color.Black, modifier = Modifier.size(44.dp))
                 }
                 Crossfade(targetState = instruction, animationSpec = tween(300), label = "instruction") { text ->
                     Text(text, style = AppTextStyles.glassesInstruction, color = Color.White, modifier = Modifier.testTag("glassesInstruction"))
@@ -182,11 +182,28 @@ fun GlassesScreen(
             }
 
             // 6. Floor and the Looking / Recognising / Speaking cycle
-            // On the S25 (384 dp wide) the pills beside the floor wrapped "Speaking" onto a second line (docs/22 #7):
-            // the floor goes above, the three pills get the full width.
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(Formats.floorLong(state.floor), color = Color.White, fontFamily = Sora, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
-                FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // Board 07 puts the pills beside the floor. On the S25 (384 dp wide) that wrapped "Speaking" onto a second
+            // line (docs/22 #7), so the pills move as one group: beside the floor when they fit, under it when not.
+            FlowRow(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    Formats.floorLong(state.floor),
+                    color = Color.White,
+                    fontFamily = Sora,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 12.dp),
+                )
+                FlowRow(
+                    Modifier.align(Alignment.CenterVertically),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     GlassesPhase.entries.forEach { phase -> PhasePill(phase, active = phase == glasses.phase && glasses.connected) }
                 }
             }
@@ -234,7 +251,7 @@ fun GlassesScreen(
                     .testTag("repeatButton"),
             ) {
                 Icon(AppIcons.replay, contentDescription = null, modifier = Modifier.size(26.dp))
-                Text("Repeat", fontFamily = Sora, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 10.dp))
+                Text("Repeat", fontFamily = Sora, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
             }
             Button(
                 onClick = onStop,
@@ -246,7 +263,7 @@ fun GlassesScreen(
                     .testTag("stopButton"),
             ) {
                 Icon(AppIcons.stop, contentDescription = null, modifier = Modifier.size(26.dp))
-                Text("Stop", fontFamily = Sora, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 10.dp))
+                Text("Stop", fontFamily = Sora, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
             }
         }
     }
@@ -308,12 +325,12 @@ private fun ConnectionChip(connected: Boolean) {
     if (connected) {
         Row(
             Modifier
-                .height(34.dp)
+                .height(30.dp)
                 .clip(CircleShape)
                 .background(ArOverlayColors.onArrived)
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
         ) {
             Box(
                 Modifier
@@ -321,17 +338,17 @@ private fun ConnectionChip(connected: Boolean) {
                     .clip(CircleShape)
                     .background(ArOverlayColors.arrived),
             )
-            Text("Glasses connected", color = ArOverlayColors.arrived, fontFamily = Sora, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text("Glasses connected", color = ArOverlayColors.arrived, fontFamily = Sora, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     } else {
         Row(
             Modifier
-                .height(34.dp)
+                .height(30.dp)
                 .border(1.5.dp, ArOverlayColors.glassesOutline, CircleShape)
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Not connected", color = ArOverlayColors.glassesMuted, fontFamily = Sora, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text("Not connected", color = ArOverlayColors.glassesMuted, fontFamily = Sora, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -376,29 +393,31 @@ private fun Thumbnail(still: ImageBitmap?, onHide: () -> Unit) {
 }
 
 // Active pill: white fill, black text, the phase's icon (eye / search / speaker, docs/22 #14). Inactive: outlined.
+// 30 dp tall, 11 sp, every pill outlined (board 07).
 @Composable
 private fun PhasePill(phase: GlassesPhase, active: Boolean) {
     val shape = CircleShape
     Row(
         Modifier
-            .height(34.dp)
+            .height(30.dp)
             .clip(shape)
-            .then(if (active) Modifier.background(Color.White) else Modifier.border(1.5.dp, ArOverlayColors.glassesOutline, shape))
+            .then(if (active) Modifier.background(Color.White) else Modifier)
+            .border(1.5.dp, if (active) Color.White else ArOverlayColors.glassesOutline, shape)
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         val icon = when (phase) {
             GlassesPhase.LOOKING -> AppIcons.visibility
             GlassesPhase.RECOGNISING -> AppIcons.search
             GlassesPhase.SPEAKING -> AppIcons.volumeUp
         }
-        if (active) Icon(icon, contentDescription = null, tint = Color.Black, modifier = Modifier.size(15.dp))
+        if (active) Icon(icon, contentDescription = null, tint = Color.Black, modifier = Modifier.size(14.dp))
         Text(
             phase.label,
             color = if (active) Color.Black else ArOverlayColors.glassesMuted,
             fontFamily = Sora,
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             fontWeight = if (active) FontWeight.ExtraBold else FontWeight.SemiBold,
         )
     }

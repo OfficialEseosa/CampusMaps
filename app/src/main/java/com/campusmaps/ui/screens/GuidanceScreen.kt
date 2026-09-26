@@ -33,6 +33,9 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ViewInAr
+import androidx.compose.material.icons.rounded.Map as MapModeIcon
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -80,7 +83,7 @@ import com.campusmaps.ui.map.CampusMap
 import com.campusmaps.ui.map.MapViewState
 import com.campusmaps.ui.theme.AppTextStyles
 import com.campusmaps.ui.theme.ArOverlayColors
-import com.campusmaps.ui.theme.LightColors
+import com.campusmaps.ui.theme.LocalCampusPalette
 import com.campusmaps.ui.theme.Sora
 
 private val BannerIconDark = Color(0xFF141110)
@@ -91,6 +94,8 @@ private val BannerIconDark = Color(0xFF141110)
 fun GuidanceScreen(
     state: GuidanceState,
     arOverride: ArOverride,
+    /** How the student chose to be guided (S1b). MAP arrives with the camera already forced off; Explore passes PHONE. */
+    guideMode: com.campusmaps.ui.GuideMode = com.campusmaps.ui.GuideMode.PHONE,
     onEndRoute: () -> Unit,
     onDone: () -> Unit,
     buildingToWorld: com.campusmaps.loc.BuildingToWorld? = null,
@@ -123,6 +128,8 @@ fun GuidanceScreen(
         ArOverride.AUTO -> arSupported == true && cameraGranted
     }
     val unavailableText = when {
+        // Map mode (camera forced off by the caller) is a choice, not a failure: say so, without waiting for the AR check.
+        guideMode == com.campusmaps.ui.GuideMode.MAP && !arOn -> "Map-only mode. Follow the text and the map."
         arOn || arSupported == null -> null
         arSupported == true && !cameraGranted && arOverride == ArOverride.AUTO -> "Camera is off, so AR is paused. Follow the text and the map."
         else -> "AR unavailable on this device. Follow the text and the map."
@@ -186,12 +193,15 @@ fun GuidanceScreen(
             }
             Crossfade(targetState = state.arrived, animationSpec = tween(350), label = "banner") { arrived ->
                 if (arrived) {
-                    ArrivedBanner(state)
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(Modifier.height(48.dp), contentAlignment = Alignment.CenterStart) { ProgressPill(state, guideMode) }
+                        ArrivedBanner(state)
+                    }
                 } else if (state.startsOutside) {
                     CompactBanner(state, onEndRoute, outdoorDistanceM.takeIf { geo != null })
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        TopRow(state, onEndRoute)
+                        TopRow(state, guideMode, onEndRoute)
                         InstructionBanner(state)
                     }
                 }
@@ -287,16 +297,21 @@ fun GuidanceScreen(
     }
 }
 
-// Reroute chip (left) and End route (right). 48 dp row under the status bar.
+// Progress pill (or, for about 3 s after a reroute, the reroute chip) on the left, End route on the right.
+// 48 dp row under the status bar.
 @Composable
-private fun TopRow(state: GuidanceState, onEndRoute: () -> Unit) {
+private fun TopRow(state: GuidanceState, guideMode: com.campusmaps.ui.GuideMode, onEndRoute: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .height(48.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.weight(1f)) { RerouteChip(state) }
+        Box(Modifier.weight(1f)) {
+            Crossfade(targetState = state.showRerouteChip, animationSpec = tween(300), label = "topLeft") { rerouted ->
+                if (rerouted) RerouteChip(state) else ProgressPill(state, guideMode)
+            }
+        }
         Surface(
             onClick = onEndRoute,
             shape = CircleShape,
@@ -315,6 +330,27 @@ private fun TopRow(state: GuidanceState, onEndRoute: () -> Unit) {
                 Text("End route", fontFamily = Sora, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
         }
+    }
+}
+
+// Design board 06: mode icon in the campus glow, then "Step N of M" (or "Arrived"). 36 dp, on the scrim.
+@Composable
+private fun ProgressPill(state: GuidanceState, guideMode: com.campusmaps.ui.GuideMode) {
+    val total = state.route.steps.size
+    val label = if (state.arrived) "Arrived" else "Step ${(state.progress.stepIndex + 1).coerceIn(1, maxOf(total, 1))} of $total"
+    val icon = if (guideMode == com.campusmaps.ui.GuideMode.MAP) Icons.Rounded.MapModeIcon else Icons.Rounded.ViewInAr
+    Row(
+        Modifier
+            .height(36.dp)
+            .clip(CircleShape)
+            .background(ArOverlayColors.scrim)
+            .padding(horizontal = 12.dp)
+            .testTag("progressPill"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Icon(icon, contentDescription = null, tint = LocalCampusPalette.current.glow, modifier = Modifier.size(16.dp))
+        Text(label, color = ArOverlayColors.textMuted, fontFamily = Sora, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -601,13 +637,14 @@ private fun SignBrackets(left: Float, top: Float, right: Float, bottom: Float) {
     }
 }
 
-// "Done": the brand primary (light scheme on purpose), resets to S1.
+// "Done": the campus accent (gold on navy for GT, blue on white for GSU), resets to S1.
 @Composable
 private fun DoneButton(onClick: () -> Unit) {
+    val palette = LocalCampusPalette.current
     Button(
         onClick = onClick,
         shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(containerColor = LightColors.primary, contentColor = Color.White),
+        colors = ButtonDefaults.buttonColors(containerColor = palette.accent, contentColor = palette.onAccent),
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
