@@ -454,11 +454,13 @@ private fun CardPromptCard(prompt: com.campusmaps.route.CardPrompt, palette: Cam
                 androidx.compose.material3.Button(
                     onClick = onHaveCard,
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = palette.line, contentColor = Color.White),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     modifier = Modifier.testTag("haveCardButton"),
-                ) { Text("I have my card") }
+                ) { Text("I have my card", maxLines = 1) }
             }
-            androidx.compose.material3.OutlinedButton(onClick = onRouteAround, modifier = Modifier.testTag("routeAroundButton")) {
-                Text("Route me around", color = palette.ink)
+            androidx.compose.material3.OutlinedButton(onClick = onRouteAround, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.testTag("routeAroundButton")) {
+                Text("Route me around", color = palette.ink, maxLines = 1)
             }
         }
     }
@@ -512,20 +514,18 @@ private fun RouteCard(
                     contentDescription = RouteCardText.methodWords(option.method),
                 )
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    if (isBest || option.usesStudentShortcut) {
+                    if (isBest || option.usesStudentShortcut || cardTag != null) {
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             if (isBest) SmallTag("FASTEST", container = palette.line, content = Color.White)
+                            // Card-only entrance the user can open with their card.
+                            if (cardTag != null) SmallTag(cardTag, container = palette.soft, content = palette.line, icon = Icons.Rounded.CreditCard,
+                                modifier = Modifier.border(1.dp, palette.line, MaterialTheme.shapes.extraSmall).testTag("cardTag"))
                             if (option.usesStudentShortcut) {
                                 SmallTag("Student shortcut", container = MaterialTheme.colorScheme.tertiaryContainer, content = MaterialTheme.colorScheme.onTertiaryContainer, icon = AppIcons.addRoad)
                             }
                         }
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold), color = palette.ink)
-                        // Card-only entrance the user can open with their card.
-                        if (cardTag != null) SmallTag(cardTag, container = palette.line, content = Color.White, icon = Icons.Rounded.CreditCard,
-                            modifier = Modifier.testTag("cardTag"))
-                    }
+                    Text(title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold), color = palette.ink)
                     Text(subtitle, style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp), color = palette.muted)
                 }
                 Text(
