@@ -14,6 +14,9 @@ object OutdoorGps {
     const val COMPLETE_M = 12.0
     // A fix older than this is stale: the walker (or the debug Step) drives the outdoor steps again.
     const val FRESH_MS = 10_000L
+    // The banner and watch keep the last GPS distance a little longer: indoors or standing still FusedLocation can pause
+    // for 10 to 20 s, and flipping to the walker's estimate and back (204 m, 147 m, 204 m on the S25) reads as a glitch.
+    const val DISPLAY_MS = 30_000L
     // The "Enter" step usually becomes current at the same moment the last street step is done (both end at the door),
     // so it stays up at least this long before the indoor steps take over.
     const val ENTER_MIN_SHOW_MS = 3_000L
@@ -21,6 +24,8 @@ object OutdoorGps {
     fun isOutdoor(step: RouteStep?): Boolean = step?.outdoorEnd != null
 
     fun fresh(fix: LocationFix?, nowMs: Long): Boolean = fix != null && abs(nowMs - fix.timeMs) <= FRESH_MS
+
+    fun shown(fix: LocationFix?, nowMs: Long): Boolean = fix != null && abs(nowMs - fix.timeMs) <= DISPLAY_MS
 
     /** GPS metres from [fix] to [step]'s end point; null when the step is not an outdoor step or there is no fix. */
     fun distanceM(step: RouteStep, fix: LocationFix?): Double? {
@@ -54,10 +59,10 @@ object OutdoorGps {
         return if (completes(route, previous, fix, nowMs, shownAtMs)) (previous + 1).coerceAtMost(last) else previous
     }
 
-    /** Banner and watch distance: GPS to the step's end with a fresh fix; along the route otherwise. */
+    /** Banner and watch distance: GPS to the step's end with a recent fix ([DISPLAY_MS]); along the route otherwise. */
     fun displayDistanceM(step: RouteStep, fix: LocationFix?, nowMs: Long, alongM: Double, engineDistanceM: Double): Double {
         if (!isOutdoor(step)) return engineDistanceM
-        if (fresh(fix, nowMs)) distanceM(step, fix)?.let { return it }
+        if (shown(fix, nowMs)) distanceM(step, fix)?.let { return it }
         return (step.completeAtM - alongM).coerceAtLeast(0.0)
     }
 }

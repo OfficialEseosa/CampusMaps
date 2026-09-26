@@ -291,7 +291,7 @@ class GuidanceController(
             arrived = progress.arrived,
             rerouteCount = rerouteCount,
             showRerouteChip = System.currentTimeMillis() < chipUntil,
-            gpsDistance = OutdoorGps.isOutdoor(step) && OutdoorGps.fresh(fix, nowMs),
+            gpsDistance = OutdoorGps.isOutdoor(step) && OutdoorGps.shown(fix, nowMs),
         )
     }
 

@@ -353,6 +353,8 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
                         "(${streets.size} from Directions${if (!sameDoor) ", map door differs: none" else ""}): " +
                         route.steps.filter { it.outdoorEnd != null }.joinToString(" | ") { it.text })
                     startSession(route, glasses = false)
+                    // The map's fix (seconds old) until FusedLocation's first one, so the first banner is already a GPS distance.
+                    if (gps != null) _guidance.value?.onFix(com.campusmaps.geo.LocationFix(gps.lat, gps.lng, 10.0, System.currentTimeMillis()))
                     handoff.startHandoff() // plays the 900 ms map-to-AR transition (no jump cut)
                 }
                 is RoutePlan.AlreadyHere -> startSession(plan.route, glasses = false)

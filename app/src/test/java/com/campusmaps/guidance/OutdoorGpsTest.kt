@@ -79,7 +79,8 @@ class OutdoorGpsTest {
         val w1 = GuidanceEngine.watchStep(route.steps[1], d1, null, false)
         assertEquals(WatchStepType.LEFT, w1.type)
         assertEquals("40 m", w1.bigText)
-        // Stale fix: distance along the route, not GPS.
-        assertEquals(step.completeAtM, OutdoorGps.displayDistanceM(step, fix(corner, 120.0, 20_000), now, 0.0, 15.0), 1e-9)
+        // A 20 s old fix still shows (no flicker while FusedLocation pauses); a 40 s old one gives the walker's distance.
+        assertEquals(d, OutdoorGps.displayDistanceM(step, fix(corner, 120.0, 20_000), now, 0.0, 15.0), 1e-9)
+        assertEquals(step.completeAtM, OutdoorGps.displayDistanceM(step, fix(corner, 120.0, 40_000), now, 0.0, 15.0), 1e-9)
     }
 }
