@@ -44,6 +44,7 @@ class AppFlowTest {
         runBlocking {
             container.settings.setDemoMode(false)
             container.settings.setAvoidStairs(false)
+            container.settings.setHasCard(false)
             container.settings.setBuilding("CS")
             container.settings.clearRecents("CS")
             container.settings.clearRecents("CSE")
@@ -106,16 +107,17 @@ class AppFlowTest {
         rule.onNodeWithText("To Room 608").assertIsDisplayed()
     }
 
-    // Demo C: Student Center East at Sat 21:00, the banner names both entrances.
+    // Demo C: Student Center East at Sat 21:00 with the PantherCard. Surveyed 2026-09-26: one entrance, card-only all weekend,
+    // so the route goes in the Main entrance with the PantherCard tag (the West entrance redirect is gone).
     @Test
-    fun lockedEntranceBannerNamesBothEntrances() {
-        runBlocking { container.settings.setBuilding("CSE") }
-        waitForTag("destination_R-220")
-        rule.onNodeWithTag("destination_R-220").performScrollTo().performClick()
-        waitForText("Route to Room 220")
-        rule.onNodeWithText("Route to Room 220").performClick()
-        waitForTag("lockedBanner")
-        rule.onNodeWithText("Main entrance is card-only now. Using West entrance instead.", substring = true).assertIsDisplayed()
+    fun cardHolderGoesInTheMainEntrance() {
+        runBlocking { container.settings.setHasCard(true); container.settings.setBuilding("CSE") }
+        waitForTag("destination_R-AUD")
+        rule.onNodeWithTag("destination_R-AUD").performScrollTo().performClick()
+        waitForText("Route to Speaker Auditorium")
+        waitForTag("cardTag")
+        rule.onNodeWithTag("cardPrompt").assertIsDisplayed()
+        rule.onNodeWithText("Main entrance needs a PantherCard right now").assertIsDisplayed()
     }
 
     @Test
@@ -129,14 +131,13 @@ class AppFlowTest {
 
     @Test
     fun everyEntranceLockedShowsNoRoute() {
-        // Student Center East closes both entrances at 23:00 on Saturday.
+        // Student Center East without a PantherCard on Saturday 21:00: its only entrance is card-only, so there is no route.
         runBlocking { container.settings.setBuilding("CSE") }
-        container.clock.set(ClockMode.Simulated(DayOfWeek.SATURDAY, LocalTime.of(23, 0)))
-        waitForTag("destination_R-220")
-        rule.onNodeWithTag("destination_R-220").performScrollTo().performClick()
+        waitForTag("destination_R-AUD")
+        rule.onNodeWithTag("destination_R-AUD").performScrollTo().performClick()
         waitForTag("routeError")
-        rule.onNodeWithText("No route to Room 220: every entrance is card-only at Sat 23:00.").performScrollTo().assertIsDisplayed()
-        rule.onNodeWithText("Route to Room 220").performClick()
+        rule.onNodeWithText("No route to Speaker Auditorium: every entrance is card-only at Sat 21:00.").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("Route to Speaker Auditorium").performClick()
         waitForTag("noRoute")
         rule.onNodeWithText("Pick another room").performClick()
         waitForText("Where to?")
