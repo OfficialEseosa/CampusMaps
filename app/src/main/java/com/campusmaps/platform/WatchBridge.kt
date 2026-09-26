@@ -46,11 +46,14 @@ class WatchBridge(context: Context, private val scope: CoroutineScope) {
     // The route ended (Done / End route / Stop): tell the watch to go back to its idle face.
     fun clear() {
         lastSent = null
+        Log.i(TAG, "Route ended: clearing the watch")
         scope.launch {
             try {
-                for (node in nodeClient.connectedNodes.await()) {
+                val nodes = nodeClient.connectedNodes.await()
+                for (node in nodes) {
                     messageClient.sendMessage(node.id, WatchProtocol.CLEAR_PATH, ByteArray(0)).await()
                 }
+                Log.i(TAG, "Watch clear sent to ${nodes.size} watch(es)")
             } catch (e: Exception) {
                 Log.i(TAG, "Watch not reachable: ${e.message}")
             }
@@ -59,5 +62,22 @@ class WatchBridge(context: Context, private val scope: CoroutineScope) {
 
     private companion object {
         const val TAG = "WatchBridge"
+    }
+}
+
+// Clears the watch exactly once per route: every exit (S2 Done / End route, S3 Stop / Done / Back to routes,
+// Reset, Reset demo) goes through MainViewModel.stopSession, and Done calls it twice (done -> reset).
+// Pure Kotlin so the rule is unit tested (WatchClearOnceTest).
+class WatchClearOnce(private val clear: () -> Unit) {
+    private var active = false
+
+    fun routeStarted() {
+        active = true
+    }
+
+    fun routeEnded() {
+        if (!active) return
+        active = false
+        clear()
     }
 }
