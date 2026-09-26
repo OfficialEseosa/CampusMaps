@@ -216,7 +216,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
             Screen.ROUTES, Screen.ADD_SHORTCUT -> go(Screen.DESTINATION)
             Screen.GUIDANCE, Screen.GLASSES -> endGuidance()
             Screen.DESTINATION -> if (_exploreHome.value) go(Screen.EXPLORE)
-            Screen.EXPLORE -> Unit
+            Screen.EXPLORE -> if (_exploreBackToS1.value) { _exploreBackToS1.value = false; go(Screen.DESTINATION) }
         }
     }
 
@@ -298,13 +298,20 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         if (_screen.value == Screen.DESTINATION && selection.value.destinationId == null) go(Screen.EXPLORE)
     }
 
+    // Explore opened from S1 (the map row or the debug link) while S1 is home: Back returns to S1 and S1 stays home.
+    private val _exploreBackToS1 = MutableStateFlow(false)
+    val exploreBackToS1: StateFlow<Boolean> = _exploreBackToS1.asStateFlow()
+
     fun openExplore() {
-        _exploreHome.value = true
+        _exploreBackToS1.value = !_exploreHome.value
         go(Screen.EXPLORE)
     }
 
     // Search field on the Explore top bar.
-    fun openSearchFromExplore() = go(Screen.DESTINATION)
+    fun openSearchFromExplore() {
+        _exploreBackToS1.value = false
+        go(Screen.DESTINATION)
+    }
 
     // "Start AR navigation" on Explore: same building, room and entrance as the map, started from a "Your location" node at
     // the real fix (ui/ExploreStart.kt; falls back to the nearest fixed start point without a fix), then the same S2 path S1b uses.

@@ -64,6 +64,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
     val glassesStill by app.glasses.lastStill.collectAsState()
     // Explore map (leg 1): its own state holder; home when far from every building (outdoor/ExploreViewModel.kt).
     val exploreHome by vm.exploreHome.collectAsState()
+    val exploreBackToS1 by vm.exploreBackToS1.collectAsState()
     val exploreVm: ExploreViewModel = viewModel(factory = ExploreViewModel.Factory(app, LocalContext.current))
     LaunchedEffect(Unit) { if (exploreVm.exploreShouldBeHome()) vm.showExploreAsHome() }
     // LEG 2: the 40 m trigger, the "Almost there" card and the 900 ms map-to-AR transition (geo/, ui/transition/).
@@ -101,7 +102,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
         onDispose { }
     }
 
-    BackHandler(enabled = screen != Screen.EXPLORE && (screen != Screen.DESTINATION || exploreHome)) { vm.back() }
+    BackHandler(enabled = (screen != Screen.EXPLORE || exploreBackToS1) && (screen != Screen.DESTINATION || exploreHome)) { vm.back() }
 
     CampusMapsTheme(darkTheme = screenDark) {
         Box(Modifier.fillMaxSize()) {
