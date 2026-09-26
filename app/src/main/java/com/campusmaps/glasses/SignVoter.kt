@@ -132,4 +132,20 @@ object SignVoter {
         val winner = sameText.firstOrNull { it.nodeId in preferNodes } ?: candidates.first()
         return BurstVote(winner.nodeId, winner, group.size, ocrPerStill.size, confidence)
     }
+    // Find me on the phone: a whole OCR token equal to a room number is a match on its own, even when no anchor
+    // lists that room (rooms are nodes). [rooms] maps the room number ("1116W", "608") to its node id.
+    // A number followed by a single letter token ("1116 W") also counts as "1116W". Tokens shorter than
+    // 3 characters never match (floor digits, arrows). Returns the node id or null.
+    fun matchRoomNumber(ocr: String, rooms: Map<String, String>): String? {
+        if (rooms.isEmpty()) return null
+        val tokens = normalize(ocr).split(' ').filter { it.isNotEmpty() }.map(::fixDigits)
+        for ((i, t) in tokens.withIndex()) {
+            val next = tokens.getOrNull(i + 1)
+            if (next != null && next.length == 1 && next[0].isLetter() && isNumber(t)) {
+                rooms[t + next]?.let { return it }
+            }
+            if (t.length >= 3) rooms[t]?.let { return it }
+        }
+        return null
+    }
 }
