@@ -33,7 +33,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -46,7 +48,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import com.campusmaps.platform.SpeechOutput
+import kotlinx.coroutines.delay
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -126,6 +131,7 @@ fun GlassesScreen(
                 )
                 ConnectionChip(glasses.connected)
             }
+            SpeechOutputLine()
 
             // 2. Seen line
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -298,6 +304,35 @@ private fun GlassesArrivalButtons(onRepeat: () -> Unit, onDone: () -> Unit, onBa
                 Text("Back to routes", fontFamily = Sora, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1)
             }
         }
+    }
+}
+
+// "Speech: glasses" or "Speech: phone speaker": where the voice comes out now (AudioManager, read every 2 s).
+// The demo team sees at a glance that the glasses are not an audio device yet. No rerouting.
+@Composable
+private fun SpeechOutputLine() {
+    val context = LocalContext.current
+    var label by remember { mutableStateOf(SpeechOutput.label(context)) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(2_000)
+            label = SpeechOutput.label(context)
+        }
+    }
+    Row(
+        Modifier.fillMaxWidth().testTag("speechOutput"),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(AppIcons.volumeUp, contentDescription = null, tint = ArOverlayColors.glassesMuted, modifier = Modifier.size(16.dp))
+        Text(
+            "Speech: $label",
+            color = if (label == "glasses") ArOverlayColors.arrived else ArOverlayColors.glassesMuted,
+            fontFamily = Sora,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 6.dp),
+        )
     }
 }
 

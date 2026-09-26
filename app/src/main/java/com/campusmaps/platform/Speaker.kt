@@ -1,6 +1,10 @@
 package com.campusmaps.platform
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import android.os.Build
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,4 +69,33 @@ class Speaker(context: Context) {
         tts?.stop()
         _isSpeaking.value = false
     }
+}
+
+// Where the spoken instructions will come out right now, for the S3 line under the connection pill:
+// "glasses" (any Bluetooth output: A2DP, SCO or LE audio), "phone speaker", or "headphones".
+// Read only; nothing is rerouted. Text to speech plays as media, so the media route is the one asked.
+object SpeechOutput {
+    fun label(context: Context): String {
+        val am = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return "phone speaker"
+        val type = if (Build.VERSION.SDK_INT >= 33) {
+            val attrs = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build()
+            runCatching { am.getAudioDevicesForAttributes(attrs).firstOrNull()?.type }.getOrNull()
+        } else {
+            null
+        } ?: am.getDevices(AudioManager.GET_DEVICES_OUTPUTS).map { it.type }.firstOrNull { isBluetooth(it) }
+        return when {
+            type == null -> "phone speaker"
+            isBluetooth(type) -> "glasses"
+            type == AudioDeviceInfo.TYPE_WIRED_HEADSET || type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
+                type == AudioDeviceInfo.TYPE_USB_HEADSET -> "headphones"
+            else -> "phone speaker"
+        }
+    }
+
+    private fun isBluetooth(type: Int) = type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP ||
+        type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+        (Build.VERSION.SDK_INT >= 31 && (type == AudioDeviceInfo.TYPE_BLE_HEADSET || type == AudioDeviceInfo.TYPE_BLE_SPEAKER))
 }
