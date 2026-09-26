@@ -252,6 +252,12 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         _walk.update { it.copy(paused = false) }
         controller.start()
         _guidance.value = controller
+        // Explore start: the outdoor steps are followed by FusedLocation (guidance/OutdoorGps.kt).
+        outdoorFixJob?.cancel()
+        outdoorFixJob = if (route.steps.any { it.outdoorEnd != null }) viewModelScope.launch {
+            runCatching { com.campusmaps.geo.FusedLocationFixes.flow(app.appContext).collect { controller.onFix(it) } }
+                .onFailure { android.util.Log.w("Outdoor", "no location fixes for the street steps", it) }
+        } else null
         watchEnd.routeStarted()
         // Outdoor leg (LEG 2): the entrance the route walks to and the FusedLocation distance to it (geo/HandoffController).
         handoff.newRoute(com.campusmaps.geo.GeoEntrances.forRoute(app.appContext, route))
@@ -316,7 +322,11 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
     // "Start AR navigation" on Explore: same building, room and entrance as the map, started from a "Your location" node at
     // the real fix (ui/ExploreStart.kt; falls back to the nearest fixed start point without a fix), then the same S2 path S1b uses.
     // [fromCard]: the "Almost there" card (tap or its own timer) is not a stray tap, so the tap guard does not apply.
-    fun startFromExplore(buildingId: String, destinationId: String, entranceId: String, lat: Double?, lng: Double?, fromCard: Boolean = false) {
+    // [streets]: Google's walking maneuvers from the map (empty without Directions); [entrance]: the map's entrance point,
+    // null when it is only approximate. S2's outdoor leg then follows them by GPS (outdoor/StreetSteps.kt).
+    fun startFromExplore(buildingId: String, destinationId: String, entranceId: String, lat: Double?, lng: Double?, fromCard: Boolean = false,
+                         streets: List<com.campusmaps.outdoor.StreetStep> = emptyList(), entrance: com.campusmaps.outdoor.LatLngPoint? = null,
+                         entranceName: String? = null) {
         if (!fromCard && !settled()) return
         if (startingFromExplore || _guidance.value != null) return
         startingFromExplore = true
@@ -335,7 +345,14 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
                     _fromExplore.value = true
                     val option = com.campusmaps.route.CoreRouter.optionForEntrance(t.building, plan.options, entranceId)
                     android.util.Log.i("Explore", "S2 from ${t.start.id}: map entrance $entranceId, S2 entrance ${option.entrance?.id}")
-                    startSession(option.route, glasses = false)
+                    val sameDoor = option.entrance?.id == entranceId
+                    val route = if (gps != null && entrance != null && sameDoor) com.campusmaps.outdoor.StreetSteps.apply(
+                        option.route, streets, entrance, t.building.name, entranceName ?: option.entrance?.name.orEmpty(),
+                    ) else option.route
+                    android.util.Log.i("Outdoor", "S2 outdoor steps: ${route.steps.count { it.outdoorEnd != null }} by GPS " +
+                        "(${streets.size} from Directions${if (!sameDoor) ", map door differs: none" else ""}): " +
+                        route.steps.filter { it.outdoorEnd != null }.joinToString(" | ") { it.text })
+                    startSession(route, glasses = false)
                     handoff.startHandoff() // plays the 900 ms map-to-AR transition (no jump cut)
                 }
                 is RoutePlan.AlreadyHere -> startSession(plan.route, glasses = false)
@@ -349,6 +366,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         }
     }
     private var startingFromExplore = false
+    private var outdoorFixJob: kotlinx.coroutines.Job? = null
 
     // ---------- S2 / S3 ----------
 
@@ -381,6 +399,8 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         watchEnd.routeEnded()
         handoff.detach()
         handoff.backToMap()
+        outdoorFixJob?.cancel()
+        outdoorFixJob = null
         _fromExplore.value = false
     }
 
