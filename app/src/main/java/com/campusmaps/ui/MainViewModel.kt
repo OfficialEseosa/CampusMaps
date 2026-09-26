@@ -236,6 +236,13 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
 
     fun selectStart(id: String) = updateSelection { it.copy(startId = id) }
 
+    // "Find me" on S1: the node a sign or room number was read at becomes the start. A room node carries its own
+    // floor, so a room read on floor 6 starts the route on floor 6. Unknown ids are ignored.
+    fun startFromSign(nodeId: String) {
+        if (trip.value.building.nodes[nodeId] == null) return
+        updateSelection { it.copy(startId = nodeId) }
+    }
+
     fun setAvoidStairs(on: Boolean) {
         viewModelScope.launch { app.settings.setAvoidStairs(on) }
     }

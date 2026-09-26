@@ -38,6 +38,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -46,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,10 +73,12 @@ import com.campusmaps.route.Formats
 import com.campusmaps.ui.TripUiState
 import com.campusmaps.ui.components.NavigationRow
 import com.campusmaps.ui.components.SmallTag
+import com.campusmaps.ui.findme.FindMeSheet
 import com.campusmaps.ui.icons.AppIcons
 import com.campusmaps.ui.theme.CampusPalettes
 import com.campusmaps.ui.theme.LocalCampusPalette
 import com.campusmaps.ui.theme.Space
+import kotlinx.coroutines.launch
 
 // Callbacks S1 needs. Grouped so the screen signature stays readable.
 class DestinationActions(
@@ -90,11 +95,42 @@ class DestinationActions(
     val onTitleLongPress: () -> Unit,
     val onExplore: (() -> Unit)? = null, // "See the campus map" (Explore, leg 1); null hides the row
     val onBuildings: (() -> Unit)? = null, // Campus pill opens the building list (S0b); null makes it a plain label
+    val onStartFromSign: ((String) -> Unit)? = null, // "Find me": start node read from a sign; null hides the button
 )
 
 // S1 Destination (redesign screen "03 Where to"). [buildings] are the mapped buildings of [campus] only.
+// "Find me" opens the camera sheet (ui/findme) on top; a match sets the start and shows "You are at <node>".
 @Composable
 fun DestinationScreen(state: TripUiState, campus: Campus, buildings: List<Building>, actions: DestinationActions) {
+    var findMe by remember { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    Box(Modifier.fillMaxSize()) {
+        DestinationContent(state, campus, buildings, actions, onFindMe = if (actions.onStartFromSign != null) ({ findMe = true }) else null)
+        if (findMe) {
+            FindMeSheet(
+                building = state.building,
+                onResult = { match ->
+                    findMe = false
+                    actions.onStartFromSign?.invoke(match.nodeId)
+                    val name = state.building.nodes[match.nodeId]?.name ?: match.nodeId
+                    scope.launch { snackbar.showSnackbar("You are at $name") }
+                },
+                onCancel = { findMe = false },
+            )
+        }
+        SnackbarHost(
+            snackbar,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 96.dp),
+        )
+    }
+}
+
+@Composable
+private fun DestinationContent(state: TripUiState, campus: Campus, buildings: List<Building>, actions: DestinationActions, onFindMe: (() -> Unit)?) {
     val demo = state.settings.demoMode
     val palette = LocalCampusPalette.current
     Column(
@@ -173,7 +209,10 @@ fun DestinationScreen(state: TripUiState, campus: Campus, buildings: List<Buildi
                 }
             }
 
-            DesignLabel("Where are you?")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f)) { DesignLabel("Where are you?") }
+                if (onFindMe != null) FindMeButton(onFindMe)
+            }
             StartPicker(state.start, state.startOptions, actions.onStart)
 
             AvoidStairsSwitchRow(checked = state.settings.avoidStairs, onChange = actions.onAvoidStairs)
@@ -507,6 +546,26 @@ private fun StartPicker(start: GraphNode, options: List<GraphNode>, onStart: (St
                 )
             }
         }
+    }
+}
+
+// Small pill next to "Where are you?": camera icon + "Find me". The picker below stays the manual override.
+@Composable
+private fun FindMeButton(onClick: () -> Unit) {
+    val palette = LocalCampusPalette.current
+    Row(
+        modifier = Modifier
+            .heightIn(min = 34.dp)
+            .clip(CircleShape)
+            .background(palette.soft)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .testTag("findMeButton"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Icon(AppIcons.photoCamera, contentDescription = null, tint = palette.line, modifier = Modifier.size(17.dp))
+        Text("Find me", style = MaterialTheme.typography.labelMedium, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = palette.ink)
     }
 }
 

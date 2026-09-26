@@ -189,6 +189,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onTitleLongPress = vm::toggleDebug,
                             onExplore = vm::openExplore,
                             onBuildings = vm::openBuildings,
+                            onStartFromSign = vm::startFromSign,
                         ),
                     )
                     Screen.ROUTES -> RouteOptionsScreen(
