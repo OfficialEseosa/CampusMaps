@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- "Your shortcut ... is live." -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Explore map: the blue dot and the walk to the entrance. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!-- AR is optional: phones without ARCore still get text and map guidance. -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
@@ -41,6 +44,11 @@
         <meta-data
             android:name="com.meta.wearable.mwdat.CLIENT_TOKEN"
             android:value="${mwdat_client_token}" />
+
+        <!-- Explore map. Filled from MAPS_API_KEY in local.properties; empty = blank tiles, straight-line route. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
 
         <!-- Portrait only (locked), per the design handoff. -->
         <activity
