@@ -82,7 +82,7 @@ class DirectionsClient(private val apiKey: String) {
             val distance = route["distanceMeters"]?.jsonPrimitive?.int?.toDouble() ?: OutdoorRoutes.distanceM(points.first(), points.last())
             val steps = route["legs"]?.jsonArray?.firstOrNull()?.jsonObject?.get("steps")?.jsonArray.orEmpty().mapNotNull { s ->
                 (s.jsonObject["navigationInstruction"] as? JsonObject)?.get("instructions")?.jsonPrimitive?.content
-                    ?.replace('\n', ' ')?.trim()?.takeIf { it.isNotBlank() }
+                    ?.let(::plainText)?.takeIf { it.isNotBlank() }
             }
             return OutdoorRoute(points, distance, OutdoorRoutes.walkingMinutes(distance), steps, RouteSource.DIRECTIONS,
                 streetLegs = parseRoutesStreetSteps(body))
@@ -143,11 +143,18 @@ class DirectionsClient(private val apiKey: String) {
             }
         }
 
-        // "Head <b>west</b> on <b>Gilmer St</b><div>Destination</div>" -> "Head west on Gilmer St. Destination"
+        // "Head <b>west</b> on <b>Gilmer St</b><div>Destination</div>" -> "Head west on Gilmer St. Destination".
+        // Every block break (<div>, <br>, and the Routes API's newline) becomes ". ", so two sentences never run together
+        // ("Head east\nTake the stairs" -> "Head east. Take the stairs"); a break after "St." gives one dot, not two.
+        // A newline before a lower-case word is a wrapped line of the same sentence ("...NE\ntoward ...") and becomes a space.
         fun plainText(html: String): String = html
-            .replace(Regex("<div[^>]*>"), ". ")
+            .replace(Regex("\\r?\\n(?=\\s*[a-z])"), " ")
+            .replace(Regex("<div[^>]*>|<br\\s*/?>|\\r?\\n"), ". ")
             .replace(Regex("<[^>]+>"), "")
             .replace("&nbsp;", " ").replace("&amp;", "&")
-            .replace(Regex("\\s+"), " ").replace(" .", ".").trim()
+            .replace(Regex("\\s+"), " ")
+            .replace(Regex("\\s*\\.(\\s*\\.)+"), ".")
+            .replace(" .", ".").trim()
+            .removePrefix(".").trim()
     }
 }
