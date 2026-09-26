@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CampusMaps cover</title>
+<style>
+@font-face{font-family:Sora;src:url(sora_medium.ttf);font-weight:500}
+@font-face{font-family:Sora;src:url(sora_semibold.ttf);font-weight:600}
+@font-face{font-family:Sora;src:url(sora_bold.ttf);font-weight:700}
+@font-face{font-family:Sora;src:url(sora_extrabold.ttf);font-weight:800}
+html,body{margin:0;background:#1b1614}
+.cover{position:relative;width:2400px;height:1600px;overflow:hidden;font-family:Sora,sans-serif;color:#fff8f4;
+  background:radial-gradient(1200px 900px at 78% 40%,rgba(198,124,78,.30),rgba(198,124,78,0) 70%),#1b1614}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(900px 700px at 70% 55%,#000 30%,transparent 100%)}
+.building{position:absolute;right:-60px;top:40px;width:1250px;opacity:.95;filter:drop-shadow(0 40px 80px rgba(0,0,0,.6))}
+.mark{position:absolute;left:150px;top:150px;width:300px}
+.mark img{width:100%;display:block}
+.word{position:absolute;left:150px;top:520px}
+.word h1{margin:0;font-weight:800;font-size:190px;letter-spacing:-.045em;line-height:.95}
+.word p{margin:26px 0 0;font-size:52px;font-weight:500;color:rgba(255,248,244,.8);max-width:1100px;line-height:1.2}
+.word p b{color:#ffb68c;font-weight:600}
+.tag{position:absolute;left:150px;top:1060px;display:flex;gap:16px;flex-wrap:nowrap}
+.tag span{border:2px solid rgba(255,255,255,.22);border-radius:999px;padding:12px 26px;font-size:28px;font-weight:600;color:#fff8f4}
+.tag span.on{border-color:#c67c4e;background:rgba(198,124,78,.22)}
+.foot{position:absolute;left:150px;bottom:110px;font-size:34px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,248,244,.6);font-weight:600}
+.foot b{color:#ffd166;font-weight:700}
+.badge{position:absolute;right:150px;bottom:110px;display:flex;align-items:center;gap:24px;font-size:34px;font-weight:600;color:rgba(255,248,244,.75)}
+.badge i{display:inline-block;width:22px;height:22px;border-radius:50%;background:#7ad0e0;box-shadow:0 0 30px #7ad0e0}
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="grid"></div>
+  <img class="building" src="building.png" alt="">
+  <div class="mark"><img src="mark.png" alt=""></div>
+  <div class="word">
+    <h1>CampusMaps</h1>
+    <p>Indoor AR navigation. <b>Walk to any room on campus — the arrows come to you.</b></p>
+  </div>
+  <div class="tag">
+    <span class="on">Phone AR</span><span class="on">Ray-Ban Meta glasses</span><span class="on">Galaxy Watch</span>
+    <span>Offline</span><span>Georgia Tech + Georgia State</span>
+  </div>
+  <div class="foot">HackGT 13 · <b>The Lighthouse Laboratory</b></div>
+  <div class="badge"><i></i>No network indoors · everything on the phone</div>
+</div>
+</body>
+</html>
