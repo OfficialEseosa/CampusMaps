@@ -35,7 +35,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.material.icons.rounded.Map
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -85,25 +84,14 @@ fun DestinationScreen(state: TripUiState, buildings: List<Building>, actions: De
     ) {
         // The map icon sits next to Reset and Settings in every mode (docs/22 O3): in demo mode the "See the map" row
         // is hidden, and this is the way to Explore.
-        Row(verticalAlignment = Alignment.Bottom) {
-            AppTopBar(
-                title = "CampusMaps",
-                modifier = Modifier.weight(1f),
-                tags = listOfNotNull(state.building.code, if (demo) "DEMO" else null),
-                onReset = actions.onReset,
-                onSettings = actions.onSettings,
-                onTitleLongPress = if (demo) null else actions.onTitleLongPress,
-            )
-            actions.onExplore?.let { open ->
-                androidx.compose.material3.IconButton(
-                    onClick = open,
-                    modifier = Modifier.padding(bottom = 8.dp, end = 8.dp).size(48.dp).testTag("s1MapButton"),
-                ) {
-                    Icon(androidx.compose.material.icons.Icons.Rounded.Map, contentDescription = "Campus map",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        }
+        AppTopBar(
+            title = "CampusMaps",
+            tags = listOfNotNull(state.building.code, if (demo) "DEMO" else null),
+            onReset = actions.onReset,
+            onSettings = actions.onSettings,
+            onTitleLongPress = if (demo) null else actions.onTitleLongPress,
+            onMap = actions.onExplore,
+        )
 
         Column(
             modifier = Modifier

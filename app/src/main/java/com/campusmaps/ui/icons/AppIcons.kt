@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.rounded.TrendingFlat
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.AddRoad
+import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -67,6 +68,7 @@ object AppIcons {
     val checkCircle = Icons.Rounded.CheckCircle
     val check = Icons.Rounded.Check
     val settings = Icons.Rounded.Settings
+    val map = Icons.Rounded.Map
     val restartAlt = Icons.Rounded.RestartAlt
     val schedule = Icons.Rounded.Schedule
     val openInFull = Icons.Rounded.OpenInFull
