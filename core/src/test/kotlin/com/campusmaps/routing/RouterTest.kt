@@ -51,7 +51,8 @@ class RouterTest {
         for (o in listOf(s1.first(), s2.first())) {
             assertEquals("Head toward the glass staircase", o.instructions.first().text)
             assertEquals(listOf(Direction.RIGHT), o.instructions.filter { it.type == InstructionType.TURN }.map { it.direction })
-            assertEquals("Room 1116W is on your right", o.instructions.last().text)
+            // The owner at Klaus: the door is straight ahead coming from the staircase (doorFacing south, was west).
+            assertEquals("Room 1116W is ahead", o.instructions.last().text)
         }
         for (o in listOf(s1.first(), s2.first())) {
             assertTrue(o.distanceM < 60, "route ${o.distanceM} m")

@@ -43,9 +43,10 @@ class CoreBridgeTest {
         val room = kl.node("R-1116W")
         assertNotNull(room.roomInside)
         val inside = room.roomInside!!
-        // Door faces west into the corridor (survey KL-20260926-0946, W03 video), so the room lies east of the door: larger x.
-        assertTrue(inside.x > room.position.x)
-        assertTrue(abs(inside.y - room.position.y) < 1e-6)
+        // Door faces south, toward someone walking up from the glass staircase (the owner at Klaus: "straight ahead"; was
+        // west), so the room lies north of the door: smaller y on the y-down floor plan, same x.
+        assertTrue(inside.y < room.position.y)
+        assertTrue(abs(inside.x - room.position.x) < 1e-6)
     }
 
     @Test
