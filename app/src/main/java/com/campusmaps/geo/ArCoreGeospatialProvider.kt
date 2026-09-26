@@ -23,8 +23,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.math.hypot
 
-/** The outdoor chevrons for the AR view, already gated. Empty when nothing may be drawn. */
-data class OutdoorArrowFrame(val arrows: List<WorldArrow> = emptyList(), val groundY: Float = 0f)
+/**
+ * The outdoor chevrons for the AR view, already gated. Empty when nothing may be drawn. [door] is the entrance's
+ * terrain anchor in ARCore world (same gate), for the card door sign.
+ */
+data class OutdoorArrowFrame(
+    val arrows: List<WorldArrow> = emptyList(), val groundY: Float = 0f,
+    val door: com.campusmaps.loc.Vec3? = null,
+)
 
 /**
  * ARCore 1.56 Geospatial provider (docs/03 section 4). It does not own a session: SceneView's ARScene does. The AR view
@@ -168,6 +174,7 @@ class ArCoreGeospatialProvider(private val context: Context) : GeospatialProvide
         _arrows.value = OutdoorArrowFrame(
             OutdoorChain.chain(cp.tx().toDouble(), cp.tz().toDouble(), ap.tx().toDouble(), ap.tz().toDouble()),
             (cp.ty() - OUTDOOR_GROUND_BELOW_CAMERA_M).toFloat(),
+            com.campusmaps.loc.Vec3(ap.tx().toDouble(), ap.ty().toDouble(), ap.tz().toDouble()),
         )
     }
 

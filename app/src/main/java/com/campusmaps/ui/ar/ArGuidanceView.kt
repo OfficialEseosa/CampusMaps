@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -135,7 +136,7 @@ private const val IMAGE_FIX_EVERY_MS = 1500L
  * S2's AR slot (docs/05): SceneView ARScene with the route drawn on the real floor, plus the debug "Place route here"
  * flow that fixes the building->world transform from one floor tap and the phone's heading (yaw-only, docs/03 section 1).
  *
- * Self-contained: it knows only [ArRouteInput] (building-frame route, floor, turn, destination, placement) and the
+ * Self-contained: it knows only [ArRouteInput] (building-frame route, floor, turn, destination, placement, card door) and the
  * transform, which the host owns ([buildingToWorld] in, [onBuildingToWorld] out) so a real localizer can set it too.
  * The host must compose this only when ARCore reports SUPPORTED_* and CAMERA is granted.
  */
@@ -309,6 +310,11 @@ fun ArGuidanceView(
             val red = remember(materialLoader) { materialLoader.createUnlitColorInstance(Color(0xFFEF5350)) }
 
             outdoor?.let { OutdoorArrowLayer(it) }
+
+            // PantherCard door sign (CardDoorSign.kt): at the entrance's terrain anchor on the outdoor leg, on the entrance
+            // node once the route is placed. World space, outside the building root, so one text node serves both legs.
+            val outdoorDoor = outdoor?.arrows?.collectAsState()?.value?.door
+            CardDoorSignNodes(input?.cardDoor, shown, outdoorDoor) { box.camWorld }
 
             val t = shown
             if (t != null && input != null && tracking == TrackingState.TRACKING) {
