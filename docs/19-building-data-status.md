@@ -4,7 +4,7 @@
 
 **Validator counts (2026-09-25 late, `ValidatorReportTest`: rule 7 against the real asset folder, rule 8 on the router's top demo routes):** KL 0 errors, 3 warnings (photos pending), 2 info; CS 1 error (known, rule 8 on the P2 route, see below), 0 warnings, 5 info; CSE 0, 0, 0. Before this pass: KL 3 errors, CS 3 errors.
 
-All three files load, pass the validator with no ERROR or WARN (rules 1 to 6, 9 and 11; rule 7 file check is a hook the app wires to its assets, and a test checks CS's two image files) and pass the routing tests. Rule 10 reports every entrance without posted hours as INFO (5 in CS, both of KL's, none in CSE); that is expected until the hours are photographed. Rule 8 (anchor spacing on demo routes) is not wired to a test and fails on the CS routes (see below). **Measured so far: CS only** (survey CS-20260925-1238: 4 entrance fixes, 7 edges, elevator, stairs-down, walking speed, floor height, 2 image anchors). KL and CSE are entirely estimated. Everything else carries `"estimated": true` and a `notes` string. Search the files for `estimated` before trusting a number.
+All three files load, pass the validator with no ERROR or WARN (rules 1 to 6, 9 and 11; rule 7 file check is a hook the app wires to its assets, and a test checks CS's two image files) and pass the routing tests. Rule 10 reports every entrance without posted hours as INFO (5 in CS, both of KL's, none in CSE); that is expected until the hours are photographed. Rule 8 (anchor spacing on demo routes) is not wired to a test and fails on the CS routes (see below). **Measured so far: CS** (survey CS-20260925-1238: 4 entrance fixes, 7 edges, elevator, stairs-down, walking speed, floor height, 2 image anchors) **and KL** (survey export KL-20260926-0946, see the Klaus section; KL is now 0 errors, 1 warning, 1 info). CSE is entirely estimated. Everything else carries `"estimated": true` and a `notes` string. Search the files for `estimated` before trusting a number.
 
 ## Conventions used in the files
 
@@ -13,7 +13,7 @@ All three files load, pass the validator with no ERROR or WARN (rules 1 to 6, 9 
 - Access: windows are matched on the day they open; a window whose close is not after its open runs into the next morning. If any `public` window covers `now` the door is public, otherwise card-only. No `access` at all means always public.
 - Extensions to the docs/02 schema (ignored by anything that does not know them): `estimated`, `notes` on nodes, edges, anchors, elevators; `demoDestinations` (rule 6 input); `startPoints` (P1, P2 as lat/lng); `stairsDownSecondsPerFloor` (default 18); `stairsId` on stairs nodes (family for rule 4, defaults to the id minus its trailing `-<floor>`).
 - Placeholder anchors use ids `<code>-A9x` so they never collide with survey anchors (`A01` upward).
-- **Entrance geo (outdoor leg):** every outdoor entrance carries `lat`, `lng` and `headingDeg`. In the files `headingDeg` is the bearing the door **faces out** (0 = north, clockwise), because that is what the survey tool records (standing on the threshold facing out). The heading you face when **walking in** is that plus 180: core `Node.walkInHeadingDeg`, app `GraphNode.headingDeg`, and `CoreBridge.entranceGeo(...)` (`headingDeg` = walk in, `facingOutDeg` = file value). Rule 11 (WARN) fires for an outdoor entrance missing any of the three. CS entrances are survey fixes (Walters side placed by hand); KL and CSE entrances are map guesses flagged `estimated`.
+- **Entrance geo (outdoor leg):** every outdoor entrance carries `lat`, `lng` and `headingDeg`. In the files `headingDeg` is the bearing the door **faces out** (0 = north, clockwise), because that is what the survey tool records (standing on the threshold facing out). The heading you face when **walking in** is that plus 180: core `Node.walkInHeadingDeg`, app `GraphNode.headingDeg`, and `CoreBridge.entranceGeo(...)` (`headingDeg` = walk in, `facingOutDeg` = file value). Rule 11 (WARN) fires for an outdoor entrance missing any of the three. CS entrances and the KL Research Wing door are survey fixes (Walters side placed by hand); CSE entrances are map guesses flagged `estimated`.
 - `imagePending: true` on an image anchor = the photo is not taken yet; its missing file is a rule 7 WARN instead of an ERROR. Remove the flag when the photo lands in `assets/anchors/<code>/`.
 
 ## Classroom South (CS.json), Demo B
@@ -94,30 +94,59 @@ gap = 4 floors of stairs up (4 × 16.6 = 66 s) − (wait 2.4 + ride 4 × 4.44 = 
 
 Not in 15 minutes: posted hours at all five doors (and Library South's hours), START nodes P1/P2, and an anchor every 15 to 20 m along the main hallway.
 
-## Klaus (KL.json), Demo A
+## Klaus (KL.json), Demo A: measured 2026-09-26
 
-**Nothing measured.** A plausible 17-node atrium graph: south entrance `E-S`, expo table `T` with starts `S1` and `S2` 4 m either side, atrium spine `H1`–`H2`–`H3`, west hallway `H4`–`W1` to destination `R-1116` (number made up), glass staircase `ST-1/ST-2`, elevator `EL-1/EL-2`, north entrance `E-N`. Six placeholder anchors (`KL-A01` to `A06`, three image, three text) spaced so rule 8 passes. Hand-checked routes: `S1 > H2 > H3 > H4 > W1 > R-1116` (44 m, 1 turn) and `S2 > H2 > H3 > H4 > W1 > R-1116` (48 m, 2 turns).
+Source: the survey export `KL-20260926-0946` (Saturday 09:46 to 10:14, stride 0.768 m by gps-walk: 8 places, 10 walks, 1 elevator ride 3 → 1, 2 stair climbs 1 → 2 → 3, 3 sign photo sets, 3 walk videos with sensor logs). Converted with `ConvertMain --keep`, then laid out by hand from the walks and the videos (frames and step counts). The zip stays outside git.
 
-**To photograph at the Klaus survey** (image anchors with no photo anywhere: not in the CS zip, not in `assets/`; marked `imagePending: true`, rule 7 WARN):
+**The layout in plain words.** The survey starts at the **Research Wing door** on the south side (`E-RWD`, the origin). A corridor runs north from it. 10 m in is the foot of the **glass staircase** (`H1`, `ST-1`); the atrium opens to the right (north-east) there. Straight on, 8.5 m further, is **Room 1116W** (Seminar Room West) on the right (`R-1116W`, the Demo A room). Turning right at the staircase you cross the **atrium** (sponsor tables in the W01 video), reach the doorway into the carpeted elevator wing after 23 m (`H2`) and the **elevator** after another 18.5 m (`EL-1`). Floor 3: from the elevator (`EL-3`) the stairs are 7 m away (`ST-3`); a 32 m corridor leads to a corner (`H3`) and 10 m on is the **COEUS lab, room 3361** (`R-3361`). The glass staircase climbs from the atrium toward the elevators (54 steps for two floors), so `ST-3` is not above `ST-1`.
 
-| Anchor | Node | What | Measure |
+**14 nodes, 18 edges, 4 anchors, 1 elevator.**
+
+| Item | Measured | Estimated (and from what) |
+|---|---|---|
+| Entrance | `E-RWD` GPS fix (10 samples, ±4 m), facing out 171.6 (so walk in 351.6) | access hours not photographed (rule 10 info) |
+| Floor 1 | `E-RWD`–`H1` 10.0 m (walk #6), `H1`–`R-1116W` 8.45 m (walk #25 minus walk #6), `H1`–`H2` 23.0 m and `H2`–`EL-1` 18.5 m (walk #10, 41.5 m, split at the elevator-wing doorway seen in the W01 video) | `ST-1` 1.5 m from `H1`; `S1`, `S2`, `T` (below); directions of the walks from the W01 and W03 video headings |
+| Floor 2 | stairs timing only | `ST-2` placed half way; no hallway |
+| Floor 3 | `EL-3`–`ST-3` 6.9 m (walks #20 and #22), `EL-3`–`H3` 32.3 m (W02 video, 42 steps), `H3`–`R-3361` 10.0 m (walk #18) | `ST-3`–`H3` 35.4 m (walk #14 split at the corner); `EL-3` placed above `EL-1`; room number 3361 from the plaque photo |
+| Elevator `ELEV-1` | 1 ride 3 → 1: wait 3.1 s, ride 24.8 s → **12.4 s per floor** | n = 1: the wait is luck |
+| Stairs | up **21.6 s/floor** (obs #7 + #8 and walk #12: 86.3 s over 4 floors), down **17.9 s/floor** (walk #23) | |
+| Walking speed | **1.36 m/s** from the three walk videos (111 m in 82 s) | |
+| Floor height | **4.7 m** from the barometer (1.06 hPa over 2 floors on the ride) | |
+
+**Hand fixes the converter could not make.** Walks #12 and #23 were stair climbs logged as walks (pressure changes by 1 hPa); the converter made them 40 m hallway edges between floors 1 and 3. They are removed and used as stair timings. The four wandered walks: #14 (stairs 3 → COEUS, ±48°) is split at the corner `H3` (the W02 video shows the turn there); #18 (COEUS → corner, ±65°) is straight in the video, the wander is the plaque photo taken during the walk; #22 (stairs 3 → elevator, ±57°) is 6 m, kept straight and averaged with #20; #12 is a stair climb (above). Walk #5 (elevator → door, 64 steps) is the same path as #10 + #6 (67 steps) and is not a separate edge. Door and sign directions: the node heading, the video and the sign photo disagree by 180° at both rooms; `doorFacing` follows the videos (1116W faces west into the corridor, COEUS faces south-west), noted in each node.
+
+**Start points.** The survey has no S1, S2 or T. They are placed in the atrium, 1 m beside the measured `H1` → elevator walk, 8 m (`S1`) and 16 m (`S2`) from the staircase, with the table `T` between them (both within 5 m of it), all `estimated`. Move them when our table is assigned. No outdoor `startPoints`: the app adds its synthetic `OUT` start at the origin (the Research Wing door fix).
+
+**Anchors** (`app/src/main/assets/anchors/KL/`, scores in `anchors/SCORES.md`):
+
+| Id | Node | Kind | Text | arcoreimg | File |
+|---|---|---|---|---|---|
+| KL-A01 | E-RWD | image, widthM 4.80 | RESEARCH WING (aliases KLAUS ADVANCED COMPUTING BUILDING) | straight 55, far 70, angle 50; **facade crop, equalised: 100** | 1600×1280, in `anchors.imgdb` |
+| KL-A02 | R-3361 | text | COEUS (aliases 3361, COEUS LAB) | 0 / 0 / 0 | straight shot, hint only |
+| KL-A03 | R-1116W | text | 1116W (aliases SEMINAR ROOM WEST) | fails / fails / fails | straight shot, hint only |
+| KL-A05 | H1 | image, PLACEHOLDER, `imagePending` | (poster or sign at the stair foot) | not photographed | none (rule 7 warn) |
+
+`anchors.imgdb` exists (one image, KL-A01). KL-A01 is outdoors: it confirms the door, it cannot localize anyone in the atrium. All widths are the owner's estimates (not taped). The old placeholders A02 (poster), A03 (elevator sign), A04 (1116 plaque), A06 (exit sign) are gone; A05 stays because rule 8 needs an anchor at the staircase on the S2 route.
+
+**Validator:** 0 errors, 1 warning (KL-A05 photo pending), 1 info (no posted hours at `E-RWD`).
+
+### Demo A routes (router output, Saturday 14:00)
+
+| Start | Route | Time and length | Spoken |
 |---|---|---|---|
-| KL-A01 | H2 | Building directory board, atrium centre | width of the board |
-| KL-A02 | H3 | Poster on the north atrium wall | width |
-| KL-A05 | ST-1 | Sign at the foot of the glass staircase | width |
+| S1 | `S1 > H1 > R-1116W` | 12 s, 17 m, 1 turn | "Head toward the glass staircase" (8 m), "Turn right at the glass staircase" (8 m), "Room 1116W is on your right" |
+| S2 | `S2 > H1 > R-1116W` | 18 s, 24 m, 1 turn | "Head toward the glass staircase" (16 m), "Turn right at the glass staircase" (8 m), "Room 1116W is on your right" |
 
-Straight-on photo, then crop to the flat sign, greyscale, 1600 px long side, JPEG 85, save as `app/src/main/assets/anchors/KL/KL-A0n.jpg`, set `widthM`, remove `imagePending`. If the survey picks other signs, drop these three instead.
+Both are well under 60 m (docs/01). Rule 8 passes with the A05 placeholder at `H1` and A03 at the room; without A05 the S2 route has 24 m without an anchor. Not a demo destination but routed: S1 to COEUS 84 s by elevator (76 m) or 84 s by the stairs (55 m).
 
-Entrance geo: `E-S` (origin, facing out 180) and `E-N` (facing out 0) are guesses near Klaus on the Georgia Tech campus. The survey's ENTRANCE fixes (10 s facing out) replace them.
+### Still missing (next Klaus visit, in this order)
 
-### What the Klaus survey must capture (Hour 0 to 2)
-
-1. Our expo table position (TABLE as a WAYPOINT node) and two start points within 10 m of it.
-2. The demo destination room (real number), ROOM node with door side.
-3. INTERSECTION nodes at each decision point from the table to the room, edge walks between them (target under 60 m, at most 2 turns).
-4. 8 to 12 anchors on the route, one at each decision point, at most 15 to 20 m apart: directory board and posters as image anchors (width measured), room plaques and signs as text anchors.
-5. Main south entrance GPS and facing (Geospatial is not used in Demo A, but the origin needs one fix).
-6. Glass staircase and elevator nodes on floors 1 and 2, if the route or the barometer test uses them.
+1. **Our table**: when it is assigned, save it as a Place `T` and two waypoints `S1`, `S2` within 10 m, with a walk from each to the glass staircase.
+2. **A05**: a poster or board at the foot of the glass staircase or in the atrium, photographed straight on, width taped; score ≥ 75. This is the only indoor image anchor Demo A would have. Also tape the Research Wing sign (KL-A01 scale).
+3. **Door directions**: one more Place at 1116W and at COEUS standing in the corridor facing the door, to settle the 180° disagreement.
+4. The corridor `H1` → 1116W as its own walk (today it is walk #25 minus walk #6), and the stairs floor 1 node at the actual first step.
+5. More elevator rides (n = 1), and posted hours at the Research Wing door.
+6. The other entrances and outside legs: only the Research Wing door is surveyed; no atrium or north entrance.
 
 ## Student Center East (CSE.json), Demo C
 
