@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+        Launch theme (the manifest points here). Shows the CampusMaps logo mark on Ink with the
+        Clay tint so there is no white flash; installSplashScreen() in MainActivity then switches
+        to Theme.CampusMaps.App and the Compose splash (ui/splash) takes over on the same colour.
+    -->
+    <style name="Theme.CampusMaps" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.CampusMaps.App</item>
+    </style>
+
     <!-- Window theme only. All real styling lives in Compose (ui/theme). -->
-    <style name="Theme.CampusMaps" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.CampusMaps.App" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
     </style>
 </resources>

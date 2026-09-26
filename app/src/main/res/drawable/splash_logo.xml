@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    System splash icon: the CampusMaps logo mark (viewfinder corners around a map pin), white.
+    288 dp canvas, mark 120 dp in the middle (inside the 192 dp safe circle). The Compose splash
+    draws the same mark at the same size on its first frame (SplashTiming.HANDOFF_MARK_DP).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+    <group
+        android:translateX="84"
+        android:translateY="84"
+        android:scaleX="3"
+        android:scaleY="3">
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="3"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M4,12V6a2,2 0 0,1 2,-2h6M28,4h6a2,2 0 0,1 2,2v6M36,28v6a2,2 0 0,1 -2,2h-6M12,36H6a2,2 0 0,1 -2,-2v-6" />
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="3"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M20,30s-7,-6.2 -7,-12a7,7 0 0,1 14,0c0,5.8 -7,12 -7,12z" />
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="3"
+            android:pathData="M22.5,18a2.5,2.5 0 1,1 -5,0a2.5,2.5 0 1,1 5,0z" />
+    </group>
+</vector>
