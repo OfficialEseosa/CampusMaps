@@ -1,6 +1,9 @@
 package com.campusmaps.data.shortcuts
 
+import android.util.Log
 import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,42 +22,46 @@ interface ShortcutBackend {
 
 data class StatusUpdate(val id: String, val status: ShortcutStatus, val reviewerNote: String?)
 
-// In-memory stand-in for the real backend, used until the admin page and API exist.
-// It starts with one approved shortcut from "another student" so the S1b tag can be seen.
+// Stand-in for the real backend, used until the admin page and API exist.
+// Its review queue is saved to a JSON file in app storage (attachStore), so approvals survive process death
+// and reinstall-with-data (docs/22 #9). The old seeded "Sparks side cut through" pointed at node ids that do not
+// exist in CS.json and was dropped (docs/22 #10).
 // The debug overlay can approve or reject your pending submissions to test the whole loop.
 class FakeShortcutBackend(private val isOnline: () -> Boolean) : ShortcutBackend {
 
     private val store = ConcurrentHashMap<String, ShortcutSubmission>()
+    private val json = Json { ignoreUnknownKeys = true }
+    @Volatile private var file: File? = null
 
-    init {
-        val seeded = ShortcutSubmission(
-            id = "seed-sparks",
-            submitterId = "another-student",
-            name = "Sparks side cut through",
-            fromNodeId = "cs_p1",
-            toNodeId = "cs_walters",
-            path = listOf(
-                PathPoint(40.0, 90.0, 1, 0),
-                PathPoint(20.0, 95.0, 1, 15_000),
-                PathPoint(5.0, 85.0, 1, 26_000),
-                PathPoint(10.0, 75.0, 1, 31_000),
-            ),
-            photos = emptyList(),
-            note = "Through the Sparks Hall breezeway",
-            status = ShortcutStatus.APPROVED,
-            reviewerNote = null,
-            createdAt = 0L,
-            buildingId = "cs",
-            routeLabel = "P1 Decatur St side to Walters side",
-            uploaded = true,
-        )
-        store[seeded.id] = seeded
+    // Loads the saved queue and saves every later change there. Call once, off the main thread.
+    fun attachStore(storeFile: File) {
+        synchronized(this) {
+            file = storeFile
+            if (storeFile.exists()) {
+                runCatching { json.decodeFromString<List<ShortcutSubmission>>(storeFile.readText()) }
+                    .onSuccess { saved -> saved.forEach { store.putIfAbsent(it.id, it) } }
+                    .onFailure { log("Could not read the fake review queue: ${it.message}") }
+            }
+            log("Fake review queue: ${store.size} shortcut(s), ${store.values.count { it.status == ShortcutStatus.APPROVED }} approved")
+        }
+    }
+
+    private fun persist() {
+        val target = file ?: return
+        synchronized(this) {
+            runCatching {
+                val tmp = File(target.parentFile, target.name + ".tmp")
+                tmp.writeText(json.encodeToString(store.values.sortedBy { it.createdAt }))
+                if (!tmp.renameTo(target)) { target.delete(); tmp.renameTo(target) }
+            }.onFailure { log("Could not save the fake review queue: ${it.message}") }
+        }
     }
 
     override suspend fun submit(submission: ShortcutSubmission) {
         delay(400) // Feels like a network call
         if (!isOnline()) throw IOException("Offline")
         store[submission.id] = submission.copy(status = ShortcutStatus.PENDING, uploaded = true)
+        persist()
     }
 
     override suspend fun statuses(submitterId: String): List<StatusUpdate> {
@@ -78,5 +85,15 @@ class FakeShortcutBackend(private val isOnline: () -> Boolean) : ShortcutBackend
                 }
             }
         }
+        persist()
+    }
+
+    // runCatching: android.util.Log is not available in JVM unit tests.
+    private fun log(message: String) {
+        runCatching { Log.i(TAG, message) }
+    }
+
+    private companion object {
+        const val TAG = "FakeShortcutBackend"
     }
 }

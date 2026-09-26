@@ -53,12 +53,26 @@ object RouteCardText {
             walkDelta > 0 -> "$walkDelta m more walking"
             else -> "${-walkDelta} m less walking"
         }
-        if (option.method != best.method || option.floorsChanged != best.floorsChanged) {
-            methodDetail(option)?.let { parts += it }
-        }
+        parts += methodDifference(option, best)
         option.shortcutName?.let { parts += "via $it" }
         val delta = (option.etaSeconds - best.etaSeconds).coerceAtLeast(0.0)
         return "${Formats.etaDifference(delta)}: ${parts.joinToString(", ")}"
+    }
+
+    // Only what differs from the best card (docs/22 #12): two elevator cards never repeat "elevator, avg wait N s".
+    private fun methodDifference(option: RouteOption, best: RouteOption): List<String> {
+        if (option.method != best.method) return listOfNotNull(methodDetail(option))
+        return when (option.method) {
+            FloorChange.ELEVATOR -> buildList {
+                if (option.floorsChanged != best.floorsChanged) {
+                    val n = option.floorsChanged
+                    add(if (n == 1) "rides 1 floor" else "rides $n floors")
+                }
+                if (option.elevatorWaitS != best.elevatorWaitS) add("avg wait ${option.elevatorWaitS ?: 0} s")
+            }
+            FloorChange.STAIRS -> if (option.floorsChanged != best.floorsChanged) listOfNotNull(methodDetail(option)) else emptyList()
+            FloorChange.LEVEL -> emptyList()
+        }
     }
 
     private fun methodDetail(option: RouteOption): String? = when (option.method) {

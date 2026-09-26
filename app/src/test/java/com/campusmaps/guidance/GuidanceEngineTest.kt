@@ -118,23 +118,67 @@ class GuidanceEngineTest {
         sim.follow(route)
         var progress = Progress()
         val visited = linkedSetOf<Int>()
+        val shownMs = mutableMapOf<Int, Long>()
         var ticks = 0
         while (!progress.arrived && ticks < 5_000) {
             advanceTimeBy(100)
-            progress = GuidanceEngine.update(route, sim.pose.value, progress)
+            progress = GuidanceEngine.update(route, sim.pose.value, progress, testScheduler.currentTime)
             visited += progress.stepIndex
+            shownMs[progress.stepIndex] = (shownMs[progress.stepIndex] ?: 0L) + 100
             ticks++
         }
         sim.stop()
         assertTrue("Should arrive (stopped at step ${progress.stepIndex})", progress.arrived)
         // Core can give two instructions a few metres apart ("Exit toward Elevator lobby, floor 6", then "Turn left at
-        // Elevator lobby, floor 6" 3 m later). GuidanceEngine completes a step within 1.5 m of its end, so the first of such
-        // a pair is passed in the same tick. Every other step must show, in order.
-        val shadowed = route.steps.indices.filter { k ->
-            val next = route.steps.getOrNull(k + 1)
-            next != null && next.completeFloor == route.steps[k].completeFloor && next.completeAtM - route.steps[k].completeAtM < 3.0
+        // Elevator lobby, floor 6" 3 m later). The exit step is now held until passed and for 2.5 s (docs/22 #16), so
+        // every step shows, in order, and the walk still arrives.
+        assertEquals((0..route.steps.lastIndex).toList(), visited.toList())
+        route.steps.forEachIndexed { k, step ->
+            if (step.kind == StepKind.EXIT_TOWARD) {
+                assertTrue("Exit step $k shown ${shownMs[k]} ms", (shownMs[k] ?: 0L) >= GuidanceEngine.EXIT_MIN_SHOW_MS)
+            }
         }
-        assertEquals((0..route.steps.lastIndex).filter { it !in shadowed }, visited.filter { it !in shadowed })
+    }
+
+    // P1 to 608 via EL-6: after the ride, "Exit toward Elevator lobby" is the current step and is not skipped,
+    // and "Turn left at Elevator lobby" 1.5 m later still gets its own moment.
+    @Test
+    fun exitTowardAfterTheElevatorIsShown() {
+        val exitIndex = route.steps.indexOfFirst { it.kind == StepKind.EXIT_TOWARD }
+        assertTrue("CS P1 to 608 should have an exit step", exitIndex > 0)
+        assertEquals(StepKind.ELEVATOR, route.steps[exitIndex - 1].kind)
+        val exit = route.steps[exitIndex]
+        val top = (0..route.points.lastIndex).first { route.points[it].floor == 6 } // EL-6
+        var progress = Progress()
+        var t = 0L
+        for (i in 0..top) { t += 1_000; progress = GuidanceEngine.update(route, pose(i), progress, t) }
+        assertEquals(exitIndex, progress.stepIndex)
+        // Already at the next point (past the exit's end) after 0.5 s: still the exit step.
+        progress = GuidanceEngine.update(route, pose(top + 1), progress, t + 500)
+        assertEquals(exitIndex, progress.stepIndex)
+        assertTrue(route.points[top + 1].cumulativeM > exit.completeAtM)
+        // After 2.5 s: the turn shows (not skipped), and it holds for 1.5 s even though its point is passed.
+        progress = GuidanceEngine.update(route, pose(top + 1), progress, t + 2_500)
+        assertEquals(exitIndex + 1, progress.stepIndex)
+        progress = GuidanceEngine.update(route, pose(top + 1), progress, t + 3_000)
+        assertEquals(exitIndex + 1, progress.stepIndex)
+        progress = GuidanceEngine.update(route, pose(top + 1), progress, t + 4_000)
+        assertEquals(exitIndex + 2, progress.stepIndex)
+        // Without a clock (old callers) the distance rule alone applies and the walk still arrives.
+        var plain = Progress()
+        for (i in route.points.indices) plain = GuidanceEngine.update(route, pose(i), plain)
+        assertTrue(plain.arrived)
+    }
+
+    // Standing still in the elevator lobby never completes the exit step, however long it is shown.
+    @Test
+    fun exitStepNeedsTheStudentToMove() {
+        val top = (0..route.points.lastIndex).first { route.points[it].floor == 6 }
+        var progress = Progress()
+        for (i in 0..top) progress = GuidanceEngine.update(route, pose(i), progress, i * 1_000L)
+        val exitIndex = progress.stepIndex
+        progress = GuidanceEngine.update(route, pose(top), progress, 60_000L)
+        assertEquals(exitIndex, progress.stepIndex)
     }
 
     // Starting outside, the simulator first "looks for a sign" (Locate me), then recovers.

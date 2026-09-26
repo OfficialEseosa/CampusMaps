@@ -248,6 +248,7 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         _walk.update { it.copy(paused = false) }
         controller.start()
         _guidance.value = controller
+        watchEnd.routeStarted()
         if (glasses) {
             // Demo C: the first thing the glasses say is core's locked-entrance notice, then the instruction.
             val notice = (t.plan as? RoutePlan.Options)?.lockedNotice
@@ -286,13 +287,15 @@ class MainViewModel(private val app: AppContainer) : ViewModel() {
         reset()
     }
 
+    private val watchEnd = com.campusmaps.platform.WatchClearOnce { app.watch.clear() }
+
     private fun stopSession() {
         stopWalk()
         _guidance.value?.stop()
         _guidance.value = null
         app.glasses.stop()
-        // Not in startSession(): a clear there would race the new route's first step.
-        app.watch.clear()
+        // Not in startSession(): a clear there would race the new route's first step. Once per route (done() calls this twice).
+        watchEnd.routeEnded()
     }
 
     // ---------- App bar ----------

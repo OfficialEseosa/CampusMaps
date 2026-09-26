@@ -133,10 +133,10 @@ class GuidanceController(
 
     private fun tick() {
         val pose = position.pose.value
-        progress = GuidanceEngine.update(route, pose, progress)
+        val nowMs = System.currentTimeMillis()
+        progress = GuidanceEngine.update(route, pose, progress, nowMs)
 
         // Reroute when clearly off the path (and not while we are unsure where we are).
-        val nowMs = System.currentTimeMillis()
         if (!progress.arrived &&
             pose.confidence >= LOCATE_CONFIDENCE &&
             progress.offRouteM > GuidanceEngine.OFF_ROUTE_M &&
