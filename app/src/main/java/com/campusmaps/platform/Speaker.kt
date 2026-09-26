@@ -32,7 +32,7 @@ enum class TtsStatus(val label: String) {
 }
 
 // Reads instructions out loud. With ELEVENLABS_API_KEY in local.properties it uses the ElevenLabs voice
-// "Sarah" (soft, reassuring), for directions only; each sentence is cached on the phone after the first
+// "Laura" (soft narration voice), for directions only; each sentence is cached on the phone after the first
 // fetch, so repeats cost no network and no characters. No key, no network or a failed fetch: the phone's
 // own text to speech engine, as before. Settings shows that engine's status ("TTS: ready"). Glasses mode
 // watches isSpeaking so the camera and the audio never overlap; it goes true as soon as speak() is
@@ -180,7 +180,7 @@ class Speaker(context: Context) {
     private companion object {
         const val TAG = "Speaker"
         val API_KEY: String = BuildConfig.ELEVENLABS_API_KEY
-        const val VOICE_ID = "EXAVITQu4vr4xnSDxMaL" // Sarah: warm, reassuring, American
+        const val VOICE_ID = "GZ4PpFJV8ikEGUtBrjK7" // Laura, narration voice (library; needs a paid plan)
         const val MODEL = "eleven_flash_v2_5" // Lowest latency, half the characters of the multilingual model
         const val VOICE_SETTINGS =
             """{"stability":0.65,"similarity_boost":0.75,"style":0,"use_speaker_boost":true,"speed":0.95}"""
