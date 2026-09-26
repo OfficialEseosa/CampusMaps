@@ -1,0 +1,837 @@
+{
+  "code": "CS",
+  "name": "Classroom South",
+  "origin": {
+    "description": "Walters main entrance (revolving door under the CLASSROOM SOUTH sign), averaged GPS fix of CS-20260925-1238 obs #1; x east, y north",
+    "lat": 33.75288157048278,
+    "lng": -84.38768797778242,
+    "headingDeg": 0
+  },
+  "floorHeightM": 3.9,
+  "walkingSpeedMps": 1.29,
+  "stairsSecondsPerFloor": 16.6,
+  "stairsDownSecondsPerFloor": 13.6,
+  "elevators": [
+    {
+      "id": "ELEV-1",
+      "avgWaitSec": 2.41,
+      "worstWaitSec": 3.45,
+      "secondsPerFloor": 4.44,
+      "notes": "CS-20260925-1238: 2 rides 1 -> 6 on Friday 13:03 and 13:05 (waits 3.4 and 1.4 s, rides 22.4 and 22.0 s). Sample of 2 at a quiet hour: the wait is luck, class changes will be longer."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "E-WM",
+      "type": "entrance",
+      "name": "Walters main entrance",
+      "floor": 1,
+      "x": 0.0,
+      "y": 0.0,
+      "lat": 33.75288157048278,
+      "lng": -84.38768797778242,
+      "headingDeg": 46.0,
+      "notes": "CS-20260925-1238 obs #1 'Walters main'; GPS +-3 m (10 samples); facing out 46.0 deg (spread 22.6); access hours not surveyed (missing means public); revolving door under the CLASSROOM SOUTH sign (CS-A01); building origin"
+    },
+    {
+      "id": "E-WS",
+      "type": "entrance",
+      "name": "Walters side entrance",
+      "floor": 1,
+      "x": 10.79,
+      "y": -5.26,
+      "lat": 33.7528343,
+      "lng": -84.38760369,
+      "headingDeg": 33.5,
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #7; POSITION ESTIMATED: its GPS fix (+-3 m, 10 samples) lands 42 m north of Walters main, but every walk (edge #6 23 steps to R-150, W02 34 steps to R-150, 20 steps from this node to the A01 photo spot, W04 15 steps to H1) puts it within about 12 m of Walters main. Placed 9.4 m from Walters main at bearing 124, the spacing of the two 2026-09-24 fixes (session CS-20260924-1614). lat/lng are that placement, not a fix. Glass double door with a ramp (W02, W04). Facing out 33.5 deg (spread 2.4). Access hours not surveyed. Moved 3 m east by the owner in the phone editor on site (2026-09-26). Survey export CS-20260926-1445 node #5 'Walters side' (2026-09-26 14:47): a new outdoor fix (10 samples, +-3.4 m) lands 5.2 m north-east of Walters main, again not on the facade the walks describe, so the owner's placement is kept; facing out 37.5 deg (spread 12) agrees with 33.5. Outside approach measured: outdoor steps down about 1 m (1 step counted, heading 126, pressure +0.12 hPa), then 12 steps (9.2 m) at heading 203 along the building wall to this glass double door (walks #2 and #4, video W01). Not in the graph: the router draws the outdoor leg as a straight line to the door."
+    },
+    {
+      "id": "E-95DS",
+      "type": "entrance",
+      "name": "95 Decatur Street entrance",
+      "floor": 1,
+      "x": 48.66,
+      "y": -28.47,
+      "lat": 33.75262551049758,
+      "lng": -84.38716163711864,
+      "headingDeg": 11.4,
+      "notes": "CS-20260925-1238 obs #11 '95 Decatur Street main'; GPS +-3 m (11 samples); facing out 11.4 deg (spread 2.0); access hours not surveyed (missing means public); single glass door with the '95 DECATUR ST.' plaque (CS-A02)"
+    },
+    {
+      "id": "H7",
+      "type": "intersection",
+      "name": "bottom of the short steps",
+      "floor": 1,
+      "x": 7.23,
+      "y": -10.09,
+      "estimated": true,
+      "notes": "Estimated: the junction at the bottom of the short steps down from the Walters main lobby, on the straight corridor from the Walters side door to Room 150 (owner, on site 2026-09-26). From the main door: ahead about 3 steps, then down the short steps turning left. Position unchanged by survey export CS-20260926-1445 (it has no walk from the main door); it sits 6.0 m in from E-WS on the measured side door > 150 line."
+    },
+    {
+      "id": "R-150",
+      "type": "room",
+      "name": "Room 150",
+      "floor": 1,
+      "x": -0.15,
+      "y": -20.1,
+      "doorFacing": "northeast",
+      "estimated": true,
+      "notes": "Survey export CS-20260926-1445 node #7 '150 Entrance', at the 150 double doors ('AUDITORIUM' sign left of the doors, '150' plaque right). Placed on the straight corridor from the Walters side door (owner's on-site line, bearing 216.4, matches the walk heading 215.4) at the MEASURED walk #6 length: 24 steps x 0.768 = 18.44 m from E-WS. This moves the room 7.2 m back toward the side door from the owner's on-site position (the walk wins; the direction is the owner's). The walkthrough video 'Mini stairs to 150' counts about 27 steps (20.7 m) from the door to the 150 doors, so the true figure is 18.4 to 20.7 m. doorFacing northeast = back along the approach. Earlier: CS-20260925-1238 obs #4."
+    },
+    {
+      "id": "H1",
+      "type": "intersection",
+      "name": "Main hallway door",
+      "floor": 1,
+      "x": 6.5,
+      "y": -11.5,
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #15 'Walters corner to main': glass double door from the Walters lobby into the long main hallway (W03, W04 frames). Position estimated (its GPS is one sample +-22 m at (5.4, -7.2)); placed so H1>H8 is 49.9 m straight, which W03 walked in 65 steps (49.9 m)."
+    },
+    {
+      "id": "H2",
+      "type": "intersection",
+      "name": "Elevator lobby turn",
+      "floor": 1,
+      "x": 30.24,
+      "y": -29.85,
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #17, 'where the vending machines are'. Placed 30.0 m from H1 along the hallway (edge #16, 39 steps); its GPS (2 samples, +-13 m) is 3.6 m away."
+    },
+    {
+      "id": "H8",
+      "type": "intersection",
+      "name": "Decatur hallway corner",
+      "floor": 1,
+      "x": 45.78,
+      "y": -42.78,
+      "estimated": true,
+      "notes": "Estimated (not a survey node): W03 walks 19 steps (14.6 m) in from 95 Decatur, faces a wall and turns into the main hallway. Placed along the entrance's facing-out heading reversed (191.4)."
+    },
+    {
+      "id": "H3",
+      "type": "intersection",
+      "name": "Library South stairs, floor 1",
+      "floor": 1,
+      "x": 61.35,
+      "y": -49.13,
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #22 'Libso down floor 1', at the foot of the Library South stairs, right of the library elevators (CS-A06). Position is its indoor GPS (10 samples, +-8 m), estimated."
+    },
+    {
+      "id": "H9",
+      "type": "intersection",
+      "name": "Elevator lobby, floor 1",
+      "floor": 1,
+      "x": 22.03,
+      "y": -38.05,
+      "estimated": true,
+      "notes": "Estimated (not a survey node): lobby in front of the elevator bank at the end of the vending-machine alcove (CS-A04 photo). H2>H9>EL-1 is 19 steps (14.6 m) of W04 after the turn; the call buttons were 4 more steps to the elevator ride #26."
+    },
+    {
+      "id": "EL-1",
+      "type": "elevator",
+      "name": "Elevator bank, floor 1",
+      "floor": 1,
+      "x": 19.91,
+      "y": -40.17,
+      "elevatorId": "ELEV-1",
+      "estimated": true,
+      "notes": "Estimated position (no ELEVATOR node was saved). Four cars modelled as one bank. Rides #26 and #28 (1 -> 6) board here."
+    },
+    {
+      "id": "ST-1",
+      "type": "stairs",
+      "name": "Stairwell, floor 1",
+      "floor": 1,
+      "x": 13.3,
+      "y": -41.23,
+      "estimated": true,
+      "notes": "Estimated position. 'STAIRS ->' sign at the end of the vending alcove (CS-A04). Stairs descent #27 (6 -> 1) ended here; 16 steps (12.3 m) later the surveyor boarded ride #28, so ST-1>H9>EL-1 = 12.3 m."
+    },
+    {
+      "id": "ST-LS-1",
+      "type": "stairs",
+      "name": "Library South stairs, floor 1",
+      "floor": 1,
+      "x": 60.04,
+      "y": -42.65,
+      "stairsId": "ST-LS",
+      "estimated": true,
+      "notes": "Estimated position, under ST-LS-2. Descent #21 (2 -> 1, 20.8 s, 29 steps) arrives here; 17 steps (13.1 m) more to H3."
+    },
+    {
+      "id": "E-LM2",
+      "type": "entrance",
+      "name": "Library South entrance (floor 2)",
+      "floor": 2,
+      "x": 61.75,
+      "y": -36.8,
+      "lat": 33.75255062999999,
+      "lng": -84.38702003999998,
+      "headingDeg": 16.3,
+      "notes": "CS-20260925-1238 obs #19 'LibSo main 2'; GPS +-3 m (10 samples); facing out 16.3 deg (spread 57.2); access hours not surveyed (missing means public); Library South's plaza doors ('LIBRARY SOUTH', 'Library Entrance', CS-A05). Routes through it cross Library South: library hours apply and were not photographed. Facing-out heading unreliable (spread 57)."
+    },
+    {
+      "id": "E-CSM2",
+      "type": "entrance",
+      "name": "Classroom South main (floor 2)",
+      "floor": 2,
+      "x": 47.18,
+      "y": -33.54,
+      "lat": 33.75257996299438,
+      "lng": -84.38717767032402,
+      "headingDeg": 18.4,
+      "notes": "CS-20260925-1238 obs #36 'Classroom South main floor 2'; GPS +-3 m (10 samples); facing out 18.4 deg (spread 8.9); access hours not surveyed (missing means public); double doors under the CLASSROOM SOUTH canopy sign (CS-A08)"
+    },
+    {
+      "id": "ST-LS-2",
+      "type": "stairs",
+      "name": "Library South stairs, floor 2",
+      "floor": 2,
+      "x": 60.04,
+      "y": -42.65,
+      "stairsId": "ST-LS",
+      "estimated": true,
+      "notes": "Estimated: 8 steps (6.1 m) in from E-LM2 (steps between the A05 anchor and the start of descent #21)."
+    },
+    {
+      "id": "H10",
+      "type": "intersection",
+      "name": "Hallway at Classroom South main",
+      "floor": 2,
+      "x": 46.23,
+      "y": -36.38,
+      "estimated": true,
+      "notes": "Estimated (not a survey node): where E-CSM2's doors meet the floor-2 hallway H4>E-LM2. The survey has no walk from E-CSM2 inward (walk #37 went outside to E-LM2), but E-CSM2's GPS fix lies on the straight line of walk #35; 3 m in along its facing-out heading reversed."
+    },
+    {
+      "id": "H4",
+      "type": "intersection",
+      "name": "T junction, floor 2",
+      "floor": 2,
+      "x": 34.06,
+      "y": -26.03,
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #34. Position estimated: 17 m from H5 at bearing 45 (walk #33 heading 50, GPS bearing 49); its GPS (2 samples, +-8 m) is 9 m away."
+    },
+    {
+      "id": "H5",
+      "type": "intersection",
+      "name": "Elevator lobby, floor 2",
+      "floor": 2,
+      "x": 22.03,
+      "y": -38.05,
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #32 'Floor 2 elevator lobby'. Placed above H9 (stacked floors); its GPS (3 samples, +-7 m) is 10 m west."
+    },
+    {
+      "id": "EL-2",
+      "type": "elevator",
+      "name": "Elevator bank, floor 2",
+      "floor": 2,
+      "x": 19.91,
+      "y": -40.17,
+      "elevatorId": "ELEV-1",
+      "estimated": true,
+      "notes": "Estimated position, above EL-1. The bank stops here: the surveyor went 6 -> 2 between 13:06:45 and 13:08:52 with 3 steps (ride not logged)."
+    },
+    {
+      "id": "ST-2",
+      "type": "stairs",
+      "name": "Stairwell, floor 2",
+      "floor": 2,
+      "x": 13.3,
+      "y": -41.23,
+      "estimated": true,
+      "notes": "Estimated position, above ST-1. Descent #27 (6 -> 1) passed floor 2; no door seen."
+    },
+    {
+      "id": "H6",
+      "type": "intersection",
+      "name": "Elevator lobby, floor 6",
+      "floor": 6,
+      "x": 22.03,
+      "y": -38.05,
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #29 '6th floor elevator lobby'. Placed above H9; its GPS (11 samples, +-5 m) is 10 m west."
+    },
+    {
+      "id": "EL-6",
+      "type": "elevator",
+      "name": "Elevator bank, floor 6",
+      "floor": 6,
+      "x": 19.91,
+      "y": -40.17,
+      "elevatorId": "ELEV-1",
+      "estimated": true,
+      "notes": "Estimated position, above EL-1. Rides #26 and #28 arrive here."
+    },
+    {
+      "id": "ST-6",
+      "type": "stairs",
+      "name": "Stairwell, floor 6",
+      "floor": 6,
+      "x": 13.3,
+      "y": -41.23,
+      "estimated": true,
+      "notes": "Estimated position, above ST-1. Descent #27 starts here, 27 steps (41 s) after ride #26 arrived; that walk wandered (0.5 m/s), so the floor-1 figure (12.3 m to the elevator) is used."
+    },
+    {
+      "id": "H11",
+      "type": "waypoint",
+      "name": "Floor 6 corridor bend",
+      "floor": 6,
+      "x": 14.76,
+      "y": -32.42,
+      "estimated": true,
+      "notes": "Estimated (not a survey node): W05 walks 12 steps (9.2 m) from the lobby, compass about 328, then turns right toward 608."
+    },
+    {
+      "id": "R-608",
+      "type": "room",
+      "name": "Room 608",
+      "floor": 6,
+      "x": 17.57,
+      "y": -28.78,
+      "doorFacing": "southwest",
+      "estimated": true,
+      "notes": "Not a survey node (the survey has the 608 plaque CS-A07, no ROOM node). Estimated from W05: 6 steps (4.6 m) after the bend, facing the door at compass 74. doorFacing from the plaque's facingDeg 233."
+    }
+  ],
+  "edges": [
+    {
+      "from": "E-WM",
+      "to": "H7",
+      "lengthM": 12.4,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Owner on site 2026-09-26: from the revolving door walk ahead about 3 steps, then down the short steps turning left onto the 150 corridor. Length is the straight-line distance.",
+      "hint": "ahead, then down the short steps on your left"
+    },
+    {
+      "from": "H7",
+      "to": "R-150",
+      "lengthM": 12.44,
+      "kind": "hallway",
+      "hint": "past the vaccine sign",
+      "estimated": true,
+      "notes": "Straight corridor from the bottom of the short steps to the 150 double doors. Survey export CS-20260926-1445 walk #6 measured Walters side door > 150 doors as 24 steps (18.44 m, heading 215.4); this edge is that walk minus E-WS>H7 (6.0 m). Walk #6's wide heading spread (36.7) is the turn from facing out at the door, not a turn in the corridor (the video shows it straight). Length is the straight-line distance."
+    },
+    {
+      "from": "E-WS",
+      "to": "H7",
+      "lengthM": 6.0,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Straight from the Walters side door onto the 150 corridor (owner on site 2026-09-26). The video 'Mini stairs to 150' (survey export CS-20260926-1445) passes the bottom of the short steps on the right about 6 to 9 steps (4.6 to 6.9 m) inside the door, which agrees. Length is the straight-line distance."
+    },
+    {
+      "from": "E-WS",
+      "to": "H1",
+      "lengthM": 7.6,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated from W04: 15 steps from the Walters side door to the hallway glass doors."
+    },
+    {
+      "from": "H7",
+      "to": "H1",
+      "lengthM": 1.6,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated from W03: glass doors (step 84) to Room 150 (step 118) is 34 steps (26.1 m); minus H7>R-150."
+    },
+    {
+      "from": "H1",
+      "to": "H2",
+      "lengthM": 29.97,
+      "kind": "hallway",
+      "hint": "down the main hallway",
+      "notes": "CS-20260925-1238 walk #16, 39 steps, heading spread 26 (straight). Measured."
+    },
+    {
+      "from": "H2",
+      "to": "H8",
+      "lengthM": 19.98,
+      "kind": "hallway",
+      "hint": "down the main hallway",
+      "estimated": true,
+      "notes": "Estimated from W03: the hallway from the Decatur corner (step 19) to the Walters glass doors (step 84) is 65 steps; minus walk #16's 39."
+    },
+    {
+      "from": "E-95DS",
+      "to": "H8",
+      "lengthM": 14.6,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated from W03: 19 steps in from the 95 Decatur door to the corner."
+    },
+    {
+      "from": "H3",
+      "to": "H8",
+      "lengthM": 20.75,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: walk #24 (H3>R-150, 126 steps, heading wandered +-81) minus W03's H8>R-150 (99 steps)."
+    },
+    {
+      "from": "H2",
+      "to": "H9",
+      "lengthM": 11.53,
+      "kind": "hallway",
+      "hint": "past the vending machines",
+      "estimated": true,
+      "notes": "Estimated from W04: the turn at the vending machines to the elevator lobby."
+    },
+    {
+      "from": "H9",
+      "to": "EL-1",
+      "lengthM": 3.0,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: lobby to the call buttons."
+    },
+    {
+      "from": "H9",
+      "to": "ST-1",
+      "lengthM": 9.29,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: stair door to boarding ride #28 was 16 steps (12.3 m), minus H9>EL-1."
+    },
+    {
+      "from": "H3",
+      "to": "ST-LS-1",
+      "lengthM": 13.06,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: 17 steps from the foot of descent #21 to node H3."
+    },
+    {
+      "from": "ST-LS-2",
+      "to": "E-LM2",
+      "lengthM": 6.15,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: 8 steps from anchor A05 at the door to the start of descent #21."
+    },
+    {
+      "from": "E-LM2",
+      "to": "H10",
+      "lengthM": 17.01,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated split of walk #35 (H4>E-LM2, 45 steps, 34.6 m, spread 44.8) at H10, by straight-line share."
+    },
+    {
+      "from": "H10",
+      "to": "H4",
+      "lengthM": 17.56,
+      "kind": "hallway",
+      "hint": "down the hallway",
+      "estimated": true,
+      "notes": "Estimated split of walk #35 at H10, by straight-line share."
+    },
+    {
+      "from": "H10",
+      "to": "E-CSM2",
+      "lengthM": 3.0,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: no walk from E-CSM2 inward was logged."
+    },
+    {
+      "from": "E-LM2",
+      "to": "E-CSM2",
+      "lengthM": 37.65,
+      "kind": "outdoor",
+      "notes": "CS-20260925-1238 walk #37, 49 steps (37.7 m), heading spread 47, ended outdoors (2729 lux): an outdoor walk between the two plaza doors (GPS straight line 15 m)."
+    },
+    {
+      "from": "H4",
+      "to": "H5",
+      "lengthM": 17.0,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "CS-20260925-1238 walk #33: 0 steps in 13.7 s (step counter missed). Length is the GPS straight line between the two node fixes (17.0 m, bearing 49, matching the walk heading 50). Estimated."
+    },
+    {
+      "from": "H5",
+      "to": "EL-2",
+      "lengthM": 3.0,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: lobby to the call buttons."
+    },
+    {
+      "from": "H5",
+      "to": "ST-2",
+      "lengthM": 9.29,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: same as floor 1 (stacked floors)."
+    },
+    {
+      "from": "H6",
+      "to": "EL-6",
+      "lengthM": 3.0,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: lobby to the call buttons."
+    },
+    {
+      "from": "H6",
+      "to": "ST-6",
+      "lengthM": 9.29,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated: same as floor 1 (stacked floors); the floor-6 walk to the stairs took 27 steps but wandered."
+    },
+    {
+      "from": "H6",
+      "to": "H11",
+      "lengthM": 9.22,
+      "kind": "hallway",
+      "estimated": true,
+      "notes": "Estimated from W05 (6th floor elevator lobby to 608): 12 steps before the right turn."
+    },
+    {
+      "from": "H11",
+      "to": "R-608",
+      "lengthM": 4.61,
+      "kind": "hallway",
+      "hint": "the room is on your right",
+      "estimated": true,
+      "notes": "Estimated from W05: 6 steps after the turn to the 608 doors."
+    },
+    {
+      "from": "EL-1",
+      "to": "EL-2",
+      "lengthM": 0,
+      "kind": "elevator",
+      "floors": 1,
+      "notes": "CS-20260925-1238 rides #26, #28 (1 -> 6) time the bank; the stop at 2 is inferred (6 -> 2 unlogged)."
+    },
+    {
+      "from": "EL-2",
+      "to": "EL-6",
+      "lengthM": 0,
+      "kind": "elevator",
+      "floors": 4,
+      "notes": "CS-20260925-1238 rides #26, #28 (1 -> 6)."
+    },
+    {
+      "from": "ST-1",
+      "to": "ST-2",
+      "lengthM": 0,
+      "kind": "stairs",
+      "floors": 1,
+      "notes": "CS-20260925-1238 descent #27 (6 -> 1, 60.9 s, 98 steps)."
+    },
+    {
+      "from": "ST-2",
+      "to": "ST-6",
+      "lengthM": 0,
+      "kind": "stairs",
+      "floors": 4,
+      "notes": "CS-20260925-1238 descent #27 (6 -> 1)."
+    },
+    {
+      "from": "ST-LS-1",
+      "to": "ST-LS-2",
+      "lengthM": 0,
+      "kind": "stairs",
+      "floors": 1,
+      "notes": "CS-20260925-1238 descent #21 (2 -> 1, 20.8 s, 29 steps)."
+    }
+  ],
+  "anchors": [
+    {
+      "id": "CS-A01",
+      "node": "E-WM",
+      "kind": "image",
+      "image": "anchors/CS/CS-A01.jpg",
+      "widthM": 3.29,
+      "x": 0.0,
+      "y": 0.0,
+      "floor": 1,
+      "heightM": 2.5,
+      "facing": "northeast",
+      "text": "CLASSROOM SOUTH",
+      "description": "CLASSROOM SOUTH sign over the Walters main revolving door, corner of Decatur and Peachtree",
+      "notes": "CS-20260925-1238 obs #8, facingDeg 41.7, offset 0, widthCm 200 (widthEstimated false). Image = straight shot cropped to the sign and the facade panel around it (the panel is coplanar), greyscale, 1600x541: the sign is 972 of 1600 px, so widthM = 2.0 x 1600/972 = 3.29. heightM 2.5 as recorded; the photo puts the sign higher (about 3.5 m, above the canopy). Outdoors: confirms the entrance at the hand-off, cannot localize indoors. Same wording and logo as CS-A08: check arcoreimg and on-device for confusion. Not yet scored (rule 7 needs >= 75)."
+    },
+    {
+      "id": "CS-A02",
+      "node": "E-95DS",
+      "kind": "text",
+      "x": 48.66,
+      "y": -28.47,
+      "floor": 1,
+      "heightM": 1.8,
+      "facing": "northeast",
+      "text": "95 DECATUR ST",
+      "aliases": [
+        "95 DECATUR ST.",
+        "DECATUR ST",
+        "OM SOUTH DECATUR ST",
+        "OM SOUTH S DECHTUR ST",
+        "ECATURST"
+      ],
+      "description": "95 DECATUR ST. plaque right of the 95 Decatur Street door",
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #12 (logged twice, #13 identical). Text anchor: the photo is a glass door (reflections) with a small '95 DECATUR ST.' plaque and the end of a CLASSROOM SOUTH sign; not an image anchor. Surveyor text 'OM SOUTH DECATUR ST'; recorded width 100 cm is the door, not the plaque."
+    },
+    {
+      "id": "CS-A03",
+      "node": "R-150",
+      "kind": "text",
+      "x": 0.44,
+      "y": -19.3,
+      "floor": 1,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "150",
+      "aliases": [
+        "AUDITORIUM 150",
+        "AUDITORIUNM 150",
+        "I50",
+        "15O"
+      ],
+      "description": "Room 150 plaque right of the auditorium doors",
+      "estimated": true,
+      "notes": "Carried over from session CS-20260924-1614 (its CS-A02, facingDeg 81.4) because this session has no 150 anchor; id A03 is unused in CS-20260925-1238. The plaque (grey, '150' plus the GSU logo, right of the doors) is visible in the last W03 frame. Width not measured (plaque about 15 to 20 cm). Facing set to match R-150's doorFacing. Moved with R-150 (2026-09-26): 1 m in front of the doors, back along the corridor; the video 'Mini stairs to 150' shows the plaque right of the doors."
+    },
+    {
+      "id": "CS-A04",
+      "node": "H2",
+      "kind": "text",
+      "x": 25.34,
+      "y": -36.18,
+      "floor": 1,
+      "heightM": 2.1,
+      "facing": "northeast",
+      "text": "STAIRS",
+      "aliases": [
+        "STAIRS ->",
+        "NOTICE STAIRS"
+      ],
+      "description": "'STAIRS ->' sign at the end of the vending-machine alcove",
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #18, facingDeg 54.2, widthCm 150 (estimated). offsetFromNodeM recorded as 300 (typo); the photo puts the 'STAIRS ->' sign about 8 to 10 m down the vending alcove from H2, so it is placed 8 m in. Text anchor: a corridor scene, not a flat image. Dim (45 lux)."
+    },
+    {
+      "id": "CS-A05",
+      "node": "E-LM2",
+      "kind": "text",
+      "x": 61.75,
+      "y": -36.8,
+      "floor": 2,
+      "heightM": 3.0,
+      "facing": "north",
+      "text": "LIBRARY SOUTH",
+      "aliases": [
+        "LIBRARY ENTRANCE",
+        "OMATIC CAUTION PUTH BLIBRARY ENTRANCE",
+        "CAUTION DOO 13UTH LIBRARY ENTRANCE"
+      ],
+      "description": "LIBRARY SOUTH lettering over the library plaza doors",
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #20, facingDeg 9.5, widthCm 150 (estimated). Text anchor: letters on glass over glass doors (reflections), not an image anchor."
+    },
+    {
+      "id": "CS-A06",
+      "node": "H3",
+      "kind": "text",
+      "x": 61.35,
+      "y": -49.13,
+      "floor": 1,
+      "heightM": 1.8,
+      "facing": "north",
+      "text": "LIBRARY SOUTH",
+      "aliases": [
+        "LIBRARY SOUTH FIRE ALARN",
+        "LIBRARY SOUTH FIREALARM"
+      ],
+      "description": "LIBRARY SOUTH arrow sign right of the library elevators",
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #23, facingDeg 346.8, widthCm 80 (estimated), no offset. Text anchor: flat but low-texture sign (text and an arrow) in 18 lux; could be retried as an image anchor if arcoreimg scores it >= 75 in better light."
+    },
+    {
+      "id": "CS-A07",
+      "node": "R-608",
+      "kind": "text",
+      "x": 18.37,
+      "y": -28.18,
+      "floor": 6,
+      "heightM": 1.5,
+      "facing": "southwest",
+      "text": "608",
+      "aliases": [
+        "6O8",
+        "60B"
+      ],
+      "description": "608 plaque left of the room's double doors",
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #31, facingDeg 233, widthCm 30 (estimated), nearest node was the floor-6 lobby with offset 6 m (the survey has no R-608 node); that offset disagrees with W05 (13.8 m walked), so the plaque is placed 1 m in front of R-608. Small plaque: text anchor. Replaces placeholder CS-A91."
+    },
+    {
+      "id": "CS-A08",
+      "node": "E-CSM2",
+      "kind": "image",
+      "image": "anchors/CS/CS-A08.jpg",
+      "widthM": 2.2,
+      "x": 47.18,
+      "y": -33.54,
+      "floor": 2,
+      "heightM": 2.5,
+      "facing": "northeast",
+      "text": "CLASSROOM SOUTH",
+      "description": "CLASSROOM SOUTH canopy sign over the floor-2 main entrance",
+      "estimated": true,
+      "notes": "CS-20260925-1238 obs #38, facingDeg 34.7, widthCm 200 (estimated), no offset. Image = straight shot cropped to the canopy sign, greyscale, 1600x329; the sign is 1454 of 1600 px, so widthM = 2.0 x 1600/1454 = 2.20 (inherits the estimated 200 cm). Outdoors. Same wording as CS-A01 (the stains on this one differ). Not yet scored."
+    },
+    {
+      "id": "CS-A09",
+      "node": "H7",
+      "kind": "image",
+      "image": "anchors/CS/CS-A09.jpg",
+      "widthM": 1.2,
+      "x": 4.97,
+      "y": -15.18,
+      "floor": 1,
+      "heightM": 1.3,
+      "facing": "350",
+      "text": "VACCINE",
+      "aliases": [
+        "GET YOUR VACCINE",
+        "SLEEVEUPGSU",
+        "DO YOUR PART FOR PUBLIC HEALTH",
+        "PUBLIC HEALTH",
+        "COVIDINFO GSU EDU",
+        "REGISTER AT COVIDINFO"
+      ],
+      "description": "#SLEEVEUPGSU vaccine roll-up banner on the left wall of the 150 corridor (walking toward Room 150)",
+      "estimated": true,
+      "notes": "Survey export CS-20260926-1445 obs #9 (logged there as CS-A01; the survey tool restarts anchor ids per session, so it gets a new id here). Free-standing roll-up banner, 100 cm wide (widthEstimated), recorded height 180 cm, facingDeg 350.1 from the straight-on shot, offset 7.0 m from '150 Entrance' (walk #8: 11 steps 'to the sign'). Position ESTIMATED: 7.0 m back from R-150 along the H7 > R-150 line, 1.2 m to the left wall (owner: the vaccine sign is on the left walking toward 150). facing 350 is the measured value (the compass agreed with the corridor within 1 deg on walk #6), not perpendicular to the corridor (306): the banner is angled toward the side door. Image = the straight shot, banner plus a small wall margin, greyscale equalised, 1200x1787, arcoreimg 100: the banner is about 1000 of 1200 px, so widthM = 1.0 x 1200/1000 = 1.2. heightM 1.3 = estimated centre of the image (a 2 m banner seen from its top bar down); 180 cm as recorded is likely the phone. Movable banner: check it is still there before the demo."
+    },
+    {
+      "id": "CS-A92",
+      "node": "H10",
+      "kind": "text",
+      "x": 46.23,
+      "y": -36.38,
+      "floor": 2,
+      "heightM": 1.6,
+      "facing": "southwest",
+      "text": "EXIT",
+      "aliases": [
+        "EXlT",
+        "EX1T"
+      ],
+      "description": "Exit sign over the inside of the Classroom South main (floor 2) doors",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Every exterior door has one; closes the rule 8 gap E-LM2 to H4 on the P1 608 route. Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    },
+    {
+      "id": "CS-A93",
+      "node": "H4",
+      "kind": "text",
+      "x": 34.06,
+      "y": -26.03,
+      "floor": 2,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "ELEVATORS",
+      "aliases": [
+        "ELEVATOR",
+        "ELEVAT0RS"
+      ],
+      "description": "Direction sign at the floor 2 T junction (guessed wording)",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Wording is a guess; read the real sign. Closes the rule 8 gap H10 to H5 on the P1 608 route. Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    },
+    {
+      "id": "CS-A94",
+      "node": "H9",
+      "kind": "text",
+      "x": 22.03,
+      "y": -38.05,
+      "floor": 1,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "FLOOR 1",
+      "aliases": [
+        "1",
+        "1ST FLOOR",
+        "LEVEL 1"
+      ],
+      "description": "Floor number plaque, floor 1 elevator lobby",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Elevator lobby anchor (docs/22). Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    },
+    {
+      "id": "CS-A95",
+      "node": "H5",
+      "kind": "text",
+      "x": 22.03,
+      "y": -38.05,
+      "floor": 2,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "FLOOR 2",
+      "aliases": [
+        "2",
+        "2ND FLOOR",
+        "LEVEL 2"
+      ],
+      "description": "Floor number plaque, floor 2 elevator lobby",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Elevator lobby anchor (docs/22); closes the rule 8 gap H4 to EL-2. Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    },
+    {
+      "id": "CS-A96",
+      "node": "H6",
+      "kind": "text",
+      "x": 22.03,
+      "y": -38.05,
+      "floor": 6,
+      "heightM": 1.6,
+      "facing": "northeast",
+      "text": "FLOOR 6",
+      "aliases": [
+        "6",
+        "6TH FLOOR",
+        "LEVEL 6"
+      ],
+      "description": "Floor number plaque, floor 6 elevator lobby",
+      "estimated": true,
+      "notes": "PLACEHOLDER (2026-09-25, data agent): no sign logged here in survey CS-20260925-1238; sign text inferred, position at the node. Elevator lobby anchor (docs/22); first sign after leaving the elevator on 6. Replace from the next CS visit (docs/19 'What one more 15-minute visit would fix', item 3)."
+    }
+  ],
+  "demoDestinations": [
+    "R-150",
+    "R-608"
+  ],
+  "startPoints": [
+    {
+      "id": "P1",
+      "name": "Decatur St side",
+      "lat": 33.7525066,
+      "lng": -84.3868704,
+      "estimated": true,
+      "notes": "30 m outward from the 95 Decatur Street entrance fix, away from the centroid of the five entrances (regenerated for CS-20260925-1238); not surveyed"
+    },
+    {
+      "id": "P2",
+      "name": "Walters side",
+      "lat": 33.7530253,
+      "lng": -84.3879626,
+      "estimated": true,
+      "notes": "30 m outward from the Walters main entrance fix, away from the centroid of the five entrances (regenerated for CS-20260925-1238); not surveyed"
+    }
+  ],
+  "notes": "Survey CS-20260925-1238 (survey 0.3, stride 0.768 m calibrated by gps-walk: 12 places, 7 walks, 2 rides, 2 descents, 8 sign photos, 5 walkthrough videos), hand-merged. Positions: entrance GPS fixes except E-WS; interior placed from step counts of walks and of the videos' sensor logs. walkingSpeedMps 1.29 = the 5 walkthrough videos (223.6 m in 173.0 s, range 1.23 to 1.38). floorHeightM 3.9 = barometer, 2.21 hPa over 5 floors on both rides. stairsDownSecondsPerFloor 13.6 = 81.7 s over 6 floors (descents #21, #27). stairsSecondsPerFloor 16.6 is ESTIMATED: no upward climb was timed; descent x 22/18 (the doc defaults' up/down ratio). Anything with estimated=true is a guess; see docs/19-building-data-status.md."
+}

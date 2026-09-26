@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CampusMaps — HackGT 13</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="vendor/reveal.css">
+<link rel="icon" href="data:,">
+<script type="importmap">
+{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}
+</script>
+<style>
+@font-face{font-family:Sora;src:url(media/sora_regular.ttf);font-weight:400}
+@font-face{font-family:Sora;src:url(media/sora_medium.ttf);font-weight:500}
+@font-face{font-family:Sora;src:url(media/sora_semibold.ttf);font-weight:600}
+@font-face{font-family:Sora;src:url(media/sora_bold.ttf);font-weight:700}
+@font-face{font-family:Sora;src:url(media/sora_extrabold.ttf);font-weight:800}
+:root{
+  --ink:#1b1614; --ink2:#251e1b; --clay:#c67c4e; --warm:#ffb68c; --teal:#7ad0e0; --gold:#ffd166; --err:#e05a4e;
+  --fg:#fff8f4; --mute:rgba(255,248,244,.62);
+  --r-background-color:var(--ink);
+}
+html,body,.reveal-viewport{background:var(--ink)!important}
+.reveal{font-family:Sora,system-ui,sans-serif;color:var(--fg);font-size:30px}
+.reveal .slides{text-align:left}
+.reveal .slides section{padding:0 60px;height:1080px!important;box-sizing:border-box;flex-direction:column;justify-content:flex-start;padding-top:70px}
+.reveal .slides section.present{display:flex}
+.reveal h1,.reveal h2,.reveal h3{font-family:Sora;font-weight:700;letter-spacing:-.02em;color:var(--fg);text-transform:none;margin:0}
+.reveal h1{font-size:96px;line-height:1.02}
+.reveal h2{font-size:58px;line-height:1.08}
+.reveal h3{font-size:34px;font-weight:600}
+.reveal p{margin:0}
+.eyebrow{font-weight:600;font-size:20px;letter-spacing:.18em;text-transform:uppercase;color:var(--clay);margin-bottom:18px}
+.claim{font-size:34px;color:var(--mute);margin-top:14px;max-width:1200px;font-weight:400}
+.stage{position:relative;width:100%;height:700px;margin-top:26px}
+.stage.fill{margin-top:0;height:900px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;height:900px}
+.bg-anim{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.bg-anim canvas{width:100%;height:100%;display:block}
+
+/* title */
+.title{align-items:center;text-align:center;justify-content:center!important;padding-top:0!important}
+.title video{width:1100px;max-width:70vw;display:block;margin:0 auto}
+.title .meta{font-size:22px;color:var(--mute);letter-spacing:.06em;margin-top:8px}
+.title .meta b{color:var(--gold);font-weight:600}
+
+/* stats / chips */
+.stats{display:flex;gap:26px;margin-top:30px}
+.stat{background:var(--ink2);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:22px 30px;min-width:220px}
+.stat .n{font-size:64px;font-weight:800;color:var(--warm);letter-spacing:-.03em;line-height:1}
+.stat .l{font-size:19px;color:var(--mute);margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.chip{border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:8px 18px;font-size:20px;color:var(--fg)}
+.chip.on{border-color:var(--clay);background:rgba(198,124,78,.16)}
+ul.big{list-style:none;padding:0;margin:20px 0 0}
+ul.big li{font-size:30px;padding:10px 0 10px 40px;position:relative;color:var(--fg)}
+ul.big li::before{content:"";position:absolute;left:0;top:22px;width:18px;height:18px;border-radius:50%;background:var(--clay)}
+ul.big li small{display:block;font-size:20px;color:var(--mute);margin-top:2px}
+
+/* screenshots */
+.shots{display:flex;gap:34px;align-items:center;justify-content:center;height:900px}
+.shot{position:relative;border-radius:34px;overflow:hidden;border:2px solid rgba(255,255,255,.12);background:#000;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.shot img{display:block;height:640px;width:auto}
+.shot .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 18px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-size:18px;color:#fff}
+
+/* problem slide: doors diagram */
+.doors{position:relative;width:100%;height:100%}
+.doors svg{width:100%;height:100%}
+
+/* status */
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:34px;margin-top:26px}
+.card{background:var(--ink2);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:26px 30px}
+.card h3{font-size:24px;color:var(--clay);margin-bottom:12px}
+.card li{font-size:22px;margin:6px 0 6px 0;color:var(--fg)}
+.card ul{padding-left:22px;margin:0}
+.ok::marker{color:var(--teal)}
+.todo::marker{color:var(--gold)}
+
+.reveal .progress{color:var(--clay)}
+.reveal .controls{color:var(--clay)}
+.foot{position:absolute;left:60px;bottom:26px;font-size:16px;color:var(--mute);letter-spacing:.1em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- 1 Title -->
+<section class="title" data-auto-animate>
+  <video id="logo" src="media/logo.webm" muted playsinline preload="auto"></video>
+  <p class="claim" style="text-align:center;max-width:none;margin-top:-30px">Walk to any room on campus. The arrows come to you.</p>
+  <p class="meta">HackGT 13 · <b>The Lighthouse Laboratory</b> (Immersive) · Uyiosa Nehikhuere &amp; Raphael Omorose</p>
+  <aside class="notes">Press → to replay the logo. Everything indoors runs on the phone with no network.</aside>
+</section>
+
+<!-- 2 Problem -->
+<section>
+  <p class="eyebrow">The problem</p>
+  <h2>The closest door isn't the fastest way to your seat.</h2>
+  <p class="claim">Classroom South has five entrances on two floors. After 8 PM half of them need a PantherCard. Maps stop at the door.</p>
+  <div class="stage" data-module="doors"></div>
+</section>
+
+<!-- 3 Three devices -->
+<section>
+  <p class="eyebrow">How it works</p>
+  <h2>Three devices, one route engine.</h2>
+  <p class="claim">The phone routes and localises. The glasses look and speak. The watch buzzes. Nothing leaves the building.</p>
+  <div class="stage" data-module="arch"></div>
+</section>
+
+<!-- 4 Buildings as graphs (3D hero) -->
+<section>
+  <p class="eyebrow">Surveyed on foot</p>
+  <h2>Every building is a graph we measured ourselves.</h2>
+  <div class="stage fill" data-module="building3d" data-opts='{"code":"KL"}'></div>
+  <div class="stats" style="position:absolute;right:60px;top:140px;flex-direction:column;gap:14px">
+    <div class="stat"><div class="n" data-count="42">0</div><div class="l">nodes, 3 buildings</div></div>
+    <div class="stat"><div class="n" data-count="49">0</div><div class="l">edges, all walked</div></div>
+    <div class="stat"><div class="n" data-count="20">0</div><div class="l">visual anchors</div></div>
+    <div class="stat"><div class="n">1.36<span style="font-size:28px"> m/s</span></div><div class="l">measured walking speed</div></div>
+  </div>
+  <aside class="notes">Klaus: floors 1 and 3, 4.7 m apart, elevator and stairs shafts link them. Drag to orbit. Press → for Classroom South.</aside>
+</section>
+
+<!-- 4b CS -->
+<section>
+  <p class="eyebrow">Classroom South</p>
+  <h2>Three floors, five doors, one elevator that waits 3 s.</h2>
+  <div class="stage fill" data-module="building3d" data-opts='{"code":"CS"}'></div>
+  <div class="chips" style="position:absolute;right:60px;top:150px;flex-direction:column;align-items:flex-end">
+    <span class="chip on">stairs 21.6 s / floor up · 17.9 s down</span>
+    <span class="chip on">elevator 3.1 s wait · 12.4 s / floor</span>
+    <span class="chip on">floor from the barometer</span>
+  </div>
+</section>
+
+<!-- 5 Routing -->
+<section>
+  <p class="eyebrow">Routing that thinks</p>
+  <h2>Doors, hours, stairs versus elevator, PantherCard.</h2>
+  <div class="stage" data-module="pathfind"></div>
+  <aside class="notes">Pure Kotlin Dijkstra, 45 tests. Considers entrance × vertical method, card-only doors by time of day, avoid stairs, approved student shortcuts. The router takes "now" as a parameter.</aside>
+</section>
+
+<!-- 6 Localisation -->
+<section>
+  <p class="eyebrow">Localisation</p>
+  <h2>GPS to the door. Signs, compass and barometer to the room.</h2>
+  <div class="stage" data-module="anchors"></div>
+</section>
+
+<!-- 7 Phone AR -->
+<section>
+  <p class="eyebrow">On the phone</p>
+  <div class="two">
+    <div>
+      <h2>Metre-wide arrows on the floor.<br>An amber arrow at the turn.</h2>
+      <ul class="big">
+        <li>ARCore + SceneView, on-device<small>no cloud anchors indoors</small></li>
+        <li>Reroutes when you drift<small>"Heads up: rerouting via the stairs"</small></li>
+        <li>Arrival line<small>"Room 1116 is on your right."</small></li>
+      </ul>
+    </div>
+    <div class="stage fill" data-module="armock" data-opts='{"video":"media/ar-walk-short.mp4","start":0}' style="height:860px;max-height:78vh;display:flex;justify-content:center"></div>
+  </div>
+</section>
+
+<!-- 8 Glasses -->
+<section>
+  <p class="eyebrow">Hands-free</p>
+  <div class="two">
+    <div>
+      <h2>Look, then listen.</h2>
+      <ul class="big">
+        <li>Ray-Ban Meta Gen 2 camera bursts<small>2–3 stills in ~2 s, then speech — camera and mic never overlap</small></li>
+        <li>Sign OCR + image anchors on the phone<small>ML Kit, everything offline</small></li>
+        <li>Voice cached per sentence<small>ElevenLabs, phone TTS as fallback</small></li>
+      </ul>
+    </div>
+    <div class="shots">
+      <div class="shot"><img src="media/31-s3-glasses-b.png" alt=""><div class="cap">Recognising · KL-A03</div></div>
+      <div class="shot"><img src="media/34-s3-glasses-arrived.png" alt=""><div class="cap">Arrived</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 Watch -->
+<section>
+  <p class="eyebrow">On the wrist</p>
+  <h2>The watch buzzes each turn. You never look down.</h2>
+  <p class="claim">Every step reaches the Galaxy Watch within a second. Each step type has its own rhythm.</p>
+  <div class="stage" data-module="haptics" style="zoom:1.3;margin-top:50px"></div>
+</section>
+
+<!-- 10 Status -->
+<section>
+  <p class="eyebrow">Where it stands</p>
+  <h2>Built, tested, and ready for more buildings.</h2>
+  <div class="grid3">
+    <div class="card"><h3>Works today</h3><ul>
+      <li class="ok">3 buildings surveyed: Klaus, Classroom South, Student Center East</li>
+      <li class="ok">Time-aware routing, 45 core tests</li>
+      <li class="ok">Phone AR guidance + reroute</li>
+      <li class="ok">Watch arrows and haptics</li>
+      <li class="ok">Glasses loop: look, recognise, speak</li>
+    </ul></div>
+    <div class="card"><h3>Honest gaps</h3><ul>
+      <li class="todo">Glasses link is simulated (toolkit port pending)</li>
+      <li class="todo">Indoor position provider is simulated</li>
+      <li class="todo">AR path untested on the S25 hardware</li>
+    </ul></div>
+    <div class="card"><h3>Next</h3><ul>
+      <li>Class-schedule sync: "take me to my 2 PM"</li>
+      <li>Crowd-sourced anchors and shortcuts</li>
+      <li>More buildings, a university pilot</li>
+    </ul></div>
+  </div>
+  <div class="foot">CampusMaps · HackGT 13 · Klaus Atrium</div>
+</section>
+
+</div>
+</div>
+
+<script src="vendor/reveal.js"></script>
+<script src="vendor/notes.js"></script>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/MotionPathPlugin.min.js"></script>
+<script type="module">
+import { doorsModule } from './js/doors.js';
+gsap.registerPlugin(MotionPathPlugin);
+
+const loaders = {
+  building3d: () => import('./js/building3d.js'),
+  arch: () => import('./js/arch.js'),
+  pathfind: () => import('./js/pathfind.js'),
+  anchors: () => import('./js/anchors.js'),
+  armock: () => import('./js/armock.js'),
+  haptics: () => import('./js/haptics.js'),
+  doors: async () => ({ mount: doorsModule }),
+};
+const live = new Map(); // el -> handle
+
+async function activate(section) {
+  for (const el of section.querySelectorAll('[data-module]')) {
+    const name = el.dataset.module;
+    if (!loaders[name]) continue;
+    if (!live.has(el)) {
+      // Store the promise at once so a second activate() for the same slide cannot mount twice.
+      live.set(el, loaders[name]().then(m => m.mount(el, el.dataset.opts ? JSON.parse(el.dataset.opts) : {})));
+    }
+    let h;
+    try { h = await live.get(el); } catch (e) { console.error('module', name, e); live.delete(el); continue; }
+    if (section.classList.contains('present')) h.play?.();
+  }
+  section.querySelectorAll('[data-count]').forEach(n => {
+    const o = { v: 0 }; const target = +n.dataset.count;
+    gsap.to(o, { v: target, duration: 1.4, ease: 'power2.out', onUpdate: () => n.textContent = Math.round(o.v) });
+  });
+  const logo = section.querySelector('#logo');
+  if (logo) { logo.currentTime = 0; logo.play().catch(() => {}); }
+}
+// The logo clip ends with a fade-out; on the title slide hold it at the last full frame instead.
+document.getElementById('logo').addEventListener('timeupdate', function () {
+  if (this.currentTime >= 3.4) this.pause();
+});
+function deactivate(section) {
+  for (const el of section.querySelectorAll('[data-module]')) live.get(el)?.then?.(h => h.pause?.());
+  const logo = section.querySelector('#logo'); if (logo) logo.pause();
+}
+
+Reveal.initialize({
+  width: 1920, height: 1080, margin: 0.04,
+  hash: true, controls: false, progress: true, transition: 'fade', transitionSpeed: 'fast',
+  backgroundTransition: 'none', plugins: [RevealNotes],
+}).then(() => {
+  activate(Reveal.getCurrentSlide());
+  // Warm the heavy modules while the title slide is up so the 3D slide does not stall on first entry.
+  setTimeout(() => ['building3d', 'armock'].forEach(n => loaders[n]()), 1500);
+});
+Reveal.on('slidechanged', e => { if (e.previousSlide) deactivate(e.previousSlide); activate(e.currentSlide); });// Space replays the current slide's animations.
+document.addEventListener('keydown', e => {
+  if (e.key === 'r') { const s = Reveal.getCurrentSlide(); deactivate(s); activate(s); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+{
+  "code": "CSE",
+  "name": "Student Center East",
+  "origin": {
+    "description": "Main entrance doors (survey export CSE-20260926-1530, averaged GPS), x east, y north",
+    "lat": 33.753006667828835,
+    "lng": -84.38503712295093,
+    "headingDeg": 0
+  },
+  "floorHeightM": 4.0,
+  "walkingSpeedMps": 1.3,
+  "stairsSecondsPerFloor": 22,
+  "stairsDownSecondsPerFloor": 18,
+  "nodes": [
+    {
+      "id": "E-MAIN",
+      "type": "entrance",
+      "name": "Main entrance",
+      "floor": 1,
+      "x": 0.0,
+      "y": 0.0,
+      "lat": 33.753006667828835,
+      "lng": -84.38503712295093,
+      "headingDeg": 307.8,
+      "access": [
+        { "days": "Mon-Thu", "open": "08:00", "close": "22:00", "rule": "public" },
+        { "days": "Fri", "open": "08:00", "close": "20:00", "rule": "public" },
+        { "days": "Mon-Sun", "open": "00:00", "close": "24:00", "rule": "card" }
+      ],
+      "notes": "Survey export CSE-20260926-1530 obs #3 ('Door 1'), GPS 3 m (11 samples). The STUDENT CENTER EAST doors: a glass vestibule with two sets of double doors. headingDeg 307.8 = facing out as recorded (spread 57 deg, the owner turned round); the walk in (123.2 deg, spread 7) gives 303. The only entrance surveyed. Access (owner, 2026-09-26): public Mon-Thu 08:00-22:00 and Fri 08:00-20:00 (weekday hours from engagement.gsu.edu); PantherCard-only at every other time, all weekend included."
+    },
+    {
+      "id": "H1",
+      "type": "intersection",
+      "name": "the main lobby",
+      "floor": 1,
+      "x": 2.66,
+      "y": -4.68,
+      "notes": "Survey obs #5 ('Speaker's Auditorium Lobby'): the lobby by the elevators, information desk and the September Movies poster. Walk #4 from the door: 7 steps = 5.38 m at 150.4 deg. Its +-42 deg wander is the owner turning round after the facing-out reading plus the start of the right turn here; the video shows one turn only, at this spot (about 150 to 230 deg)."
+    },
+    {
+      "id": "R-AUD",
+      "type": "room",
+      "name": "Speaker Auditorium",
+      "floor": 1,
+      "x": -5.64,
+      "y": -11.52,
+      "doorFacing": "southeast",
+      "notes": "Survey obs #7 ('Speaker's Auditorium', doorSide RIGHT). No room number seen. The SPEAKER'S AUDITORIUM lettering is on the end wall ahead; the double doors are in the recess on the right of that wall (video, last seconds), so doorFacing southeast makes the arrival read 'on your right'. Walk #6: 14 steps = 10.76 m at 230.5 deg (GPS says 5 m, indoor fix 7 m: steps win)."
+    }
+  ],
+  "edges": [
+    {
+      "from": "E-MAIN",
+      "to": "H1",
+      "lengthM": 5.38,
+      "kind": "hallway",
+      "hint": "through both sets of glass doors",
+      "notes": "Walk #4, 7 steps x 0.768 m"
+    },
+    {
+      "from": "H1",
+      "to": "R-AUD",
+      "lengthM": 10.76,
+      "kind": "hallway",
+      "hint": "toward the Speaker's Auditorium sign",
+      "notes": "Walk #6, 14 steps x 0.768 m"
+    }
+  ],
+  "anchors": [
+    {
+      "id": "CSE-A01",
+      "node": "R-AUD",
+      "kind": "text",
+      "x": -5.64,
+      "y": -11.52,
+      "floor": 1,
+      "heightM": 2.5,
+      "facing": "46.5",
+      "text": "SPEAKER'S AUDITORIUM",
+      "aliases": [
+        "SPEAKERS AUDITORIUM",
+        "AUDITORIUM",
+        "SPEA ER'S AUDITC RIUM"
+      ],
+      "description": "SPEAKER'S AUDITORIUM lettering on the end wall, doors on its right",
+      "estimated": true,
+      "notes": "Survey obs #8, facingDeg 46.5 from the straight-on shot, widthCm 500 (estimated, not taped), centre 250 cm, offset 0 (at the room node; the wall is a few metres further). Thin light letters on a plain wall: OCR reads 'SPEA ER'S AUDITC RIUM' at 136 px per character. Photo anchors/CSE/CSE-A01.jpg is the straight shot (hint only; arcoreimg 0)."
+    },
+    {
+      "id": "CSE-A02",
+      "node": "H1",
+      "kind": "image",
+      "image": "anchors/CSE/CSE-A02.jpg",
+      "widthM": 1.02,
+      "x": 2.89,
+      "y": -5.12,
+      "floor": 1,
+      "heightM": 1.0,
+      "facing": "332.2",
+      "text": "FREE FOR STUDENTS",
+      "aliases": [
+        "SEPTEMBER MOVIES",
+        "CINEFEST",
+        "FILM THEATER",
+        "TOY STORY 5",
+        "MINIONS & MONSTERS"
+      ],
+      "description": "SEPTEMBER MOVIES @ CINEFEST poster tower in the main lobby, facing the entrance",
+      "estimated": true,
+      "notes": "Survey obs #9, facingDeg 332.2, widthCm 50 (estimated), recorded height 50 cm (the tower stands on the floor and is about 2 m tall, so heightM 1.0 = estimated centre), offset 0.5 m from the lobby node. Image = straight shot, tower plus a margin of lobby, greyscale equalised, 860x1600, arcoreimg 80; the tower is about 420 of 860 px, so widthM = 0.5 x 860/420 = 1.02. Temporary poster (films to Sept 30): check it is still there before the demo."
+    }
+  ],
+  "demoDestinations": [
+    "R-AUD"
+  ],
+  "startPoints": [
+    {
+      "id": "P1",
+      "name": "Passio Go stop",
+      "lat": 33.75302375639821,
+      "lng": -84.3850687556217,
+      "notes": "Survey START obs #1 ('Passio Go'), GPS 3 m (10 samples). Walk #2 to the door: 9 steps = 6.9 m at 123 deg (GPS gives 3.5 m)."
+    }
+  ],
+  "notes": "Measured 2026-09-26 from the survey export CSE-20260926-1530 (stride 0.768 m, gps-walk) and its video 'Passio Go sign to Speaker Auditorium'. Floor 1 only: Main entrance, main lobby (turn right), Speaker Auditorium. Access hours from the owner. The placeholder's West entrance, elevators, floor 2 and Room 220 were never surveyed and are removed."
+}
