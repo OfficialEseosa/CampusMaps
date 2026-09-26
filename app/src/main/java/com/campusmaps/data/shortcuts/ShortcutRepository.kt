@@ -47,6 +47,10 @@ class ShortcutRepository(
 
     init {
         scope.launch {
+            // The fake review queue keeps its approvals in app storage too (docs/22 #9).
+            (backend as? FakeShortcutBackend)?.let { fake ->
+                withContext(Dispatchers.IO) { fake.attachStore(File(context.filesDir, "fake-review-queue.json")) }
+            }
             _submissions.value = load()
             // Every time we come back online, try to catch up.
             online.filter { it }.collect { sync() } // StateFlow already skips repeats
