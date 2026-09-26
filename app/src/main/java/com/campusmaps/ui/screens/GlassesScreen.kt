@@ -57,6 +57,8 @@ import androidx.compose.ui.unit.sp
 import com.campusmaps.guidance.GlassesPhase
 import com.campusmaps.guidance.GuidanceState
 import com.campusmaps.route.Formats
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.campusmaps.ui.MainViewModel
 import com.campusmaps.ui.icons.AppIcons
 import com.campusmaps.ui.theme.AppTextStyles
 import com.campusmaps.ui.theme.ArOverlayColors
@@ -81,6 +83,10 @@ fun GlassesScreen(
     onRepeat: () -> Unit,
     onStop: () -> Unit,
     onFakeStep: () -> Unit,
+    // Arrival buttons (WHATS-LEFT 4). Null = use the activity's MainViewModel (done / endGuidance),
+    // so the call site in CampusMapsApp works unchanged; pass them explicitly when wiring is next touched.
+    onDone: (() -> Unit)? = null,
+    onBackToRoutes: (() -> Unit)? = null,
 ) {
     var thumbnailHidden by rememberSaveable { mutableStateOf(false) }
 
@@ -185,8 +191,8 @@ fun GlassesScreen(
                 }
             }
 
-            // 8. Debug only (hidden in demo mode)
-            if (showFakeStep) {
+            // 8. Debug only (hidden in demo mode, and gone after arrival)
+            if (showFakeStep && !state.arrived) {
                 OutlinedButton(
                     onClick = onFakeStep,
                     shape = CircleShape,
@@ -197,6 +203,17 @@ fun GlassesScreen(
                     Text("Fake step", fontFamily = Sora, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             }
+        }
+
+        // 7a. Arrived: Done (to S1) and Back to routes (to S1b), like S2; Repeat stays for the door side.
+        if (state.arrived) {
+            val vm = if (onDone == null || onBackToRoutes == null) viewModel<MainViewModel>() else null
+            GlassesArrivalButtons(
+                onRepeat = onRepeat,
+                onDone = onDone ?: vm!!::done,
+                onBackToRoutes = onBackToRoutes ?: vm!!::endGuidance,
+            )
+            return@Column
         }
 
         // 7. Repeat and Stop, half width each, 80 dp tall.
@@ -230,6 +247,56 @@ fun GlassesScreen(
             ) {
                 Icon(AppIcons.stop, contentDescription = null, modifier = Modifier.size(26.dp))
                 Text("Stop", fontFamily = Sora, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 10.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun GlassesArrivalButtons(onRepeat: () -> Unit, onDone: () -> Unit, onBackToRoutes: () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Button(
+            onClick = onDone,
+            shape = RoundedCornerShape(22.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = ArOverlayColors.arrived, contentColor = Color.Black),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(72.dp)
+                .testTag("doneButton"),
+        ) {
+            Icon(AppIcons.check, contentDescription = null, modifier = Modifier.size(26.dp))
+            Text("Done", fontFamily = Sora, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 10.dp))
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(
+                onClick = onRepeat,
+                shape = RoundedCornerShape(22.dp),
+                border = BorderStroke(2.dp, Color.White),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Black, contentColor = Color.White),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(64.dp)
+                    .testTag("repeatButton"),
+            ) {
+                Icon(AppIcons.replay, contentDescription = null, modifier = Modifier.size(22.dp))
+                Text("Repeat", fontFamily = Sora, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 8.dp))
+            }
+            OutlinedButton(
+                onClick = onBackToRoutes,
+                shape = RoundedCornerShape(22.dp),
+                border = BorderStroke(2.dp, ArOverlayColors.glassesOutline),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Black, contentColor = Color.White),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(64.dp)
+                    .testTag("backToRoutesButton"),
+            ) {
+                Text("Back to routes", fontFamily = Sora, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1)
             }
         }
     }
@@ -308,7 +375,7 @@ private fun Thumbnail(still: ImageBitmap?, onHide: () -> Unit) {
     }
 }
 
-// Active pill: white fill, black text, volume_up icon. Inactive: outlined.
+// Active pill: white fill, black text, the phase's icon (eye / search / speaker, docs/22 #14). Inactive: outlined.
 @Composable
 private fun PhasePill(phase: GlassesPhase, active: Boolean) {
     val shape = CircleShape
@@ -321,7 +388,12 @@ private fun PhasePill(phase: GlassesPhase, active: Boolean) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {
-        if (active) Icon(AppIcons.volumeUp, contentDescription = null, tint = Color.Black, modifier = Modifier.size(15.dp))
+        val icon = when (phase) {
+            GlassesPhase.LOOKING -> AppIcons.visibility
+            GlassesPhase.RECOGNISING -> AppIcons.search
+            GlassesPhase.SPEAKING -> AppIcons.volumeUp
+        }
+        if (active) Icon(icon, contentDescription = null, tint = Color.Black, modifier = Modifier.size(15.dp))
         Text(
             phase.label,
             color = if (active) Color.Black else ArOverlayColors.glassesMuted,
