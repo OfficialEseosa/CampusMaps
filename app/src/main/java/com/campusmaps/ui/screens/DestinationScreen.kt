@@ -93,7 +93,8 @@ class DestinationActions(
     val onReset: () -> Unit,
     val onSettings: () -> Unit,
     val onTitleLongPress: () -> Unit,
-    val onExplore: (() -> Unit)? = null, // "See the campus map" (Explore, leg 1); null hides the row
+    val onExplore: (() -> Unit)? = null,
+    val onHasCard: (() -> Unit)? = null, // "I have my PantherCard" under a card-only no-route message // "See the campus map" (Explore, leg 1); null hides the row
     val onBuildings: (() -> Unit)? = null, // Campus pill opens the building list (S0b); null makes it a plain label
     val onStartFromSign: ((String) -> Unit)? = null, // "Find me": start node read from a sign; null hides the button
 )
@@ -230,6 +231,12 @@ private fun DestinationContent(state: TripUiState, campus: Campus, buildings: Li
 
             state.routeError?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("routeError"))
+                // Every door is card-only right now: one tap says the student carries the card, and the plan is recomputed.
+                if (it.contains("card-only") && actions.onHasCard != null) {
+                    androidx.compose.material3.Button(onClick = actions.onHasCard, modifier = Modifier.padding(top = 8.dp).testTag("hasCard")) {
+                        Text("I have my ${com.campusmaps.route.CardAccess.cardName(state.building.id)}")
+                    }
+                }
             }
         }
 

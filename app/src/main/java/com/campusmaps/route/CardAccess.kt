@@ -37,7 +37,10 @@ object CardAccess {
     // S1 hint under the building pill: some outdoor entrance is card-only now and the user has not said they carry the card.
     fun hint(building: Building, now: LocalDateTime, hasCard: Boolean): String? {
         if (hasCard) return null
-        if (building.core.nodes.none { it.isOutdoorEntrance && Access.isLocked(it, now) }) return null
+        val doors = building.core.nodes.filter { it.isOutdoorEntrance }
+        if (doors.none { Access.isLocked(it, now) }) return null
+        // Every door locked (Student Center East evenings and weekends): there is no public door to route to.
+        if (doors.all { Access.isLocked(it, now) }) return "After hours: every door needs your ${cardName(building.id)}"
         return "After hours: bring your ${cardName(building.id)} or we route you to the public door"
     }
 

@@ -70,7 +70,7 @@ class CardAccessTest {
         assertNull(CardAccess.prompt(plan(tue14, false), cse, tue14, hasCard = false, routedAround = false))
         assertNull(CardAccess.hint(cse, tue14, hasCard = false))
         // Saturday 14:00 is card-only now (weekends are card-only), so the hint shows.
-        assertEquals("After hours: bring your PantherCard or we route you to the public door", CardAccess.hint(cse, sat14, hasCard = false))
+        assertEquals("After hours: every door needs your PantherCard", CardAccess.hint(cse, sat14, hasCard = false)) // one door, card-only all weekend
         // 23:30 is card-only, not closed (owner): the card still gets you in.
         assertTrue(plan(sat2330, true) is RoutePlan.Options)
         assertTrue(plan(sat2330, false) is RoutePlan.NoRoute)
@@ -78,7 +78,7 @@ class CardAccessTest {
 
     @Test
     fun hintOnS1OnlyWhenCardOnlyAndSettingOff() {
-        assertEquals("After hours: bring your PantherCard or we route you to the public door", CardAccess.hint(cse, sat21, hasCard = false))
+        assertEquals("After hours: every door needs your PantherCard", CardAccess.hint(cse, sat21, hasCard = false))
         assertNull(CardAccess.hint(cse, sat21, hasCard = true))
         assertNull(CardAccess.hint(TestBuildings.kl, sat21, hasCard = false)) // no access windows: always public
     }

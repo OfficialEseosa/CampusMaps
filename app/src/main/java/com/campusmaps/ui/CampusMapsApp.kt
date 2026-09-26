@@ -188,6 +188,7 @@ fun CampusMapsApp(app: AppContainer, vm: MainViewModel, shortcutVm: ShortcutView
                             onSettings = vm::openSettings,
                             onTitleLongPress = vm::toggleDebug,
                             onExplore = vm::openExplore,
+                            onHasCard = { vm.setHasCard(true) },
                             onBuildings = vm::openBuildings,
                             onStartFromSign = vm::startFromSign,
                         ),
