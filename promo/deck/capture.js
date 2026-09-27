@@ -35,5 +35,6 @@ const port = flag('port', '8770');
     if (i % fps === 0) console.log(`t=${i / fps}s`);
   }
   await b.close();
+  try { fs.rmSync('C:/Users/rapha/AppData/Local/Temp/claude/edge-cap-' + process.pid, { recursive: true, force: true }); } catch {}
   console.log('done', n, 'frames in', outDir);
 })();

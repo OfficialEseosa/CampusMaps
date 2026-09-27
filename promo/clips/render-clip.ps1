@@ -23,8 +23,6 @@ foreach ($a in $Aspects) {
   Push-Location $deck
   node capture.js $Module $Seconds $frames --fps=30 --warm=0 --w=$w --h=$h --b64=$b64 --pre="window.__handle.play()" 2>&1 | Select-String "done|pageerror|error"
   Pop-Location
-  Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -like '*--headless*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-  Remove-Item -Recurse -Force "C:\Users\rapha\AppData\Local\Temp\claude\edge-cap-*" -ErrorAction SilentlyContinue
   $F = Join-Path $frames "f_%05d.png"
   $O = Join-Path $out "$Name-$tag"
   ffmpeg -v error -y -threads 2 -framerate 30 -i $F -c:v libvpx-vp9 -pix_fmt yuva420p -auto-alt-ref 0 -crf 20 -b:v 0 "$O-alpha.webm"
