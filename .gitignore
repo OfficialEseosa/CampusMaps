@@ -21,3 +21,6 @@ captures/
 # stale IDE output of the plain-Kotlin modules
 core/bin/
 shared/bin/
+
+# the deck vendors three.js; its build/ folder is not a Gradle output
+!promo/deck/vendor/three/build/
