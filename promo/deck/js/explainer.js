@@ -6,7 +6,9 @@
 //   seek(s)  jumps to s seconds and holds (paused)
 // opts.aspect: '16:9' (1920x1080, default), '3:2' (2160x1440) or '3:4' (1620x2160, portrait reflow).
 // opts.chapter: 0..4 renders that chapter alone: 0.4 s fade-in, build, hold, 0.5 s fade-out, 7.5 s total,
-//   no progress dots, eyebrow "HOW CAMPUSMAPS WORKS". Without it: the full run, chapter starts
+//   no progress dots, eyebrow "HOW CAMPUSMAPS WORKS". opts.seconds (single-chapter only) stretches the
+//   clip to that length; chapter 5 (index 4) then uses a paced beat sheet written for 10 s, the others
+//   scale their 7.5 s timeline. Without opts.chapter: the full run, chapter starts
 //   0, 7, 14, 21, 28 s, everything fades out 34.5 -> 35.0 (fully transparent at 35).
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -120,6 +122,8 @@ export function mount(el, opts = {}) {
   const PORT = !!LY.portrait;
   const chOpt = opts.chapter === undefined || opts.chapter === null ? NaN : Number(opts.chapter);
   const SINGLE = Number.isInteger(chOpt) && chOpt >= 0 && chOpt < N_CH ? chOpt : null;
+  const secOpt = Number(opts.seconds);
+  const SEC = SINGLE !== null && secOpt > 1 ? secOpt : SINGLE_LEN;   // single-chapter clip length
   const LX = LY.mx, LR = LY.W - LY.mx, LW = LR - LX;
   const GF = PORT ? 1.35 : 1;   // graph label boost: the portrait graph is scaled less, so its labels need more size
   const svg = E('svg', { viewBox: `0 0 ${LY.W} ${LY.H}`, width: '100%', height: '100%',
@@ -891,6 +895,65 @@ export function mount(el, opts = {}) {
 
     },
   ];
+  // Chapter 5 paced for a voiceover: look (glasses to phone), speak (phone to glasses), buzz (phone to watch).
+  // Beat sheet written for 10 s and scaled to SEC.
+  function pacedHandsFree(tl) {
+    const B = (t) => t * SEC / 10;
+    const ch = CH[4];
+    tl.to(root, { opacity: 1, duration: B(0.4), ease: 'power1.out' }, 0);
+    tl.set(ch.g, { opacity: 1 }, B(0.2));
+    tl.to(ch.kick, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }, B(0.4));
+    tl.to(ch.ttl, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, B(0.45));
+    tl.to([c5.glasses, c5.phone, c5.watch], { opacity: 1, y: 0, duration: 0.45, stagger: 0.12, ease: 'power2.out' }, B(0.6));
+    // 1.2 to 4.0: the glasses take pictures, the phone reads the sign
+    tl.to(c5.camOn, { opacity: 1, duration: 0.15 }, B(1.3));
+    tl.to([c5.arcUp, c5.lookTx], { opacity: 1, y: 0, duration: 0.3 }, B(1.3));
+    c5.frames.forEach((f, i) => {
+      const pr = { u: 0 };
+      tl.to(pr, { u: 1, duration: B(0.9), ease: 'power1.inOut', onUpdate: () => {
+        const [x, y] = quad(ARC_UP[0], ARC_UP[1], ARC_UP[2], pr.u);
+        const sc = 1 - 0.35 * pr.u;
+        f.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${sc.toFixed(3)})`);
+        f.setAttribute('opacity', (pr.u <= 0 ? 0 : pr.u < 0.1 ? pr.u * 10 : pr.u > 0.85 ? (1 - pr.u) / 0.15 : 1).toFixed(3));
+      } }, B(1.5 + i * 0.3));
+    });
+    tl.to(c5.camOn, { opacity: 0, duration: 0.2 }, B(3.1));   // camera stops before audio
+    tl.to(c5.sign, { opacity: 1, scale: 1, duration: 0.3 }, B(3.0));
+    tl.to(c5.scan, { opacity: 1, scale: 1, duration: 0.35, ease: 'power2.out' }, B(3.2));
+    tl.to(c5.found, { opacity: 1, y: 0, duration: 0.3, ease: 'back.out(2)' }, B(3.55));
+    // 4.0 to 6.8: the phone sends directions back to the glasses' speakers
+    tl.to([c5.arcDn, c5.speakTx], { opacity: 1, y: 0, duration: 0.3 }, B(4.0));
+    const vp = { u: 0 };
+    tl.to(vp, { u: 1, duration: B(0.9), ease: 'power1.inOut', onUpdate: () => {
+      const [x, y] = quad(ARC_DN[0], ARC_DN[1], ARC_DN[2], vp.u);
+      c5.voice.setAttribute('cx', x.toFixed(1)); c5.voice.setAttribute('cy', y.toFixed(1));
+      c5.voice.setAttribute('opacity', (vp.u <= 0 || vp.u >= 1 ? 0 : 1).toString());
+    } }, B(4.15));
+    tl.to(c5.waves, { opacity: 1, duration: 0.2, stagger: 0.12 }, B(4.9));
+    tl.to(c5.bubble, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.8)' }, B(5.0));
+    tl.to(c5.waves, { opacity: 0.45, duration: 0.3, stagger: 0.12 }, B(5.8));
+    tl.to(c5.waves, { opacity: 1, duration: 0.3, stagger: 0.12 }, B(6.2));
+    tl.to(c5.waves, { opacity: 0.35, duration: 0.4, stagger: 0.12 }, B(6.8));
+    // 6.8 to 9.3: the phone sends the step and the haptics to the watch
+    tl.to(c5.stepCard, { opacity: 1, y: 0, duration: 0.3 }, B(6.8));
+    tl.to(c5.link, { strokeDashoffset: 0, duration: 0.4, ease: 'power2.out' }, B(6.9));
+    tl.to(c5.linkTx, { opacity: 1, y: 0, duration: 0.3 }, B(7.0));
+    tl.to(c5.pk, { opacity: 1, duration: 0.1 }, B(7.2));
+    tl.to(c5.pk, { x: c5.pkd[0], y: c5.pkd[1], duration: B(0.5), ease: 'power1.inOut' }, B(7.2));
+    tl.to(c5.pk, { opacity: 0, duration: 0.1 }, B(7.65));
+    tl.to(c5.wchev, { opacity: 1, x: 0, duration: 0.35, ease: 'back.out(2)' }, B(7.75));
+    [7.8, 8.02, 8.7, 8.92].forEach((t, i) => {
+      tl.fromTo(c5.rings[i], { attr: { r: 72 }, opacity: 0.9 }, { attr: { r: 128 }, opacity: 0, duration: 0.9, ease: 'power2.out', immediateRender: false }, B(t));
+    });
+    tl.to(c5.wchev, { x: -6, duration: 0.15, yoyo: true, repeat: 1, ease: 'sine.inOut' }, B(7.95));
+    tl.to(c5.wchev, { x: -6, duration: 0.15, yoyo: true, repeat: 1, ease: 'sine.inOut' }, B(8.85));
+    tl.to(ch.cap, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, B(8.0));
+    tl.to(ch.chips, { opacity: 1, y: 0, duration: 0.45, stagger: 0.1, ease: 'back.out(1.6)' }, B(8.1));
+    // 9.3 to 10: fade out
+    tl.to(root, { opacity: 0, duration: B(0.7), ease: 'power1.in' }, B(9.3));
+    tl.set({}, {}, SEC);
+  }
+
   // Graph fully drawn (used when chapter 2 plays on its own).
   function showGraph() {
     gsap.set(gSlab, { opacity: 1 });
@@ -907,13 +970,19 @@ export function mount(el, opts = {}) {
 
     if (SINGLE !== null) {
       gsap.set(root, { opacity: 0 });
-      tl.to(root, { opacity: 1, duration: 0.4, ease: 'power1.out' }, 0);
       if (SINGLE === 1) showGraph();
       if (SINGLE >= 2) gsap.set(Lgraph, { opacity: 0 });
-      enter(tl, CH[SINGLE], 0);
-      BUILD[SINGLE](tl, 0);
-      tl.to(root, { opacity: 0, duration: 0.5, ease: 'power1.in' }, SINGLE_LEN - 0.5);
-      tl.set({}, {}, SINGLE_LEN);
+      if (SINGLE === 4 && SEC !== SINGLE_LEN) { pacedHandsFree(tl); return; }
+      // the standard 7.5 s clip, stretched to SEC by a nested timeline's timeScale
+      const inner = gsap.timeline();
+      inner.to(root, { opacity: 1, duration: 0.4, ease: 'power1.out' }, 0);
+      enter(inner, CH[SINGLE], 0);
+      BUILD[SINGLE](inner, 0);
+      inner.to(root, { opacity: 0, duration: 0.5, ease: 'power1.in' }, SINGLE_LEN - 0.5);
+      inner.set({}, {}, SINGLE_LEN);
+      inner.timeScale(SINGLE_LEN / SEC);
+      tl.add(inner, 0);
+      tl.set({}, {}, SEC);
       return;
     }
 
@@ -946,6 +1015,6 @@ export function mount(el, opts = {}) {
   }
   function seek(s) { if (!master) return; master.pause(); master.seek(s); }
   if (opts.autoplay) play();
-  const total = SINGLE === null ? DURATION : SINGLE_LEN;
+  const total = SINGLE === null ? DURATION : SEC;
   return { play, pause, destroy, seek, duration: total, chapters: SINGLE === null ? [0, 7, 14, 21, 28] : [0], aspect: ASPECT, chapter: SINGLE };
 }
