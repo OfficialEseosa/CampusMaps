@@ -131,6 +131,9 @@ function makeTurnArrow() {
 export function mount(el, opts = {}) {
   injectStyle();
   const videoSrc = opts.video || 'media/ar-walk.mp4';
+  // overlay: false plays the recording clean (no 3D chevrons, no label),
+  // for recordings that already show the app's own arrows and banners.
+  const overlay = opts.overlay !== false;
   const gsap = window.gsap;
 
   const root = document.createElement('div');
@@ -139,6 +142,7 @@ export function mount(el, opts = {}) {
     <div class="armock-label"><span class="armock-ico">${ICON_LEFT}</span><span class="armock-text"></span></div>
     <div class="armock-phone"><div class="armock-screen"><video muted loop playsinline preload="auto"></video></div><div class="armock-hole"></div></div>`;
   el.appendChild(root);
+  if (!overlay) root.querySelector('.armock-label').style.display = 'none';
 
   const label = root.querySelector('.armock-label');
   const ico = root.querySelector('.armock-ico');
@@ -193,7 +197,7 @@ export function mount(el, opts = {}) {
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  screen.appendChild(renderer.domElement);
+  if (overlay) screen.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, 9 / 19.5, 0.05, 60);
@@ -267,6 +271,7 @@ export function mount(el, opts = {}) {
     arrow.group.position.y = 0.5 + 0.06 * Math.sin(t * 2.2);
     arrow.group.rotation.y = 0.35 + 0.08 * Math.sin(t * 1.1);
     arrow.halo.material.opacity = 0.14 + 0.08 * (0.5 + 0.5 * Math.sin(t * 2.2));
+    if (!overlay) return;
     renderer.domElement.style.opacity = String(state.fade);
     renderer.render(scene, camera);
   }
@@ -314,7 +319,7 @@ export function mount(el, opts = {}) {
     tln.to({}, { duration: 0.01 }, 9);
     return tln;
   }
-  tl = buildTimeline();
+  tl = overlay ? buildTimeline() : null;
 
   layout();
 
@@ -329,7 +334,7 @@ export function mount(el, opts = {}) {
       if (tl) tl.restart();
       cancelAnimationFrame(raf);
       last = 0;
-      raf = requestAnimationFrame(frame);
+      if (overlay) raf = requestAnimationFrame(frame);
     },
     pause() {
       playing = false;
