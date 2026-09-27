@@ -25,8 +25,7 @@ foreach ($a in $Aspects) {
   Pop-Location
   $F = Join-Path $frames "f_%05d.png"
   $O = Join-Path $out "$Name-$tag"
-  ffmpeg -v error -y -threads 2 -framerate 30 -i $F -c:v libvpx-vp9 -pix_fmt yuva420p -auto-alt-ref 0 -crf 20 -b:v 0 "$O-alpha.webm"
-  ffmpeg -v error -y -threads 2 -f lavfi -i "color=0x00FF00:s=${w}x${h}:r=30" -framerate 30 -i $F -filter_complex "[0][1]overlay=shortest=1" -c:v libx264 -crf 16 -pix_fmt yuv420p "$O-greenscreen.mp4"
+  ffmpeg -v error -y -threads 2 -framerate 30 -i $F -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le -alpha_bits 16 -vendor apl0 "$O-alpha.mov"
   ffmpeg -v error -y -threads 2 -f lavfi -i "color=0x1b1614:s=${w}x${h}:r=30" -framerate 30 -i $F -filter_complex "[0][1]overlay=shortest=1" -c:v libx264 -crf 20 -pix_fmt yuv420p "$O-preview.mp4"
 }
 Get-ChildItem $out -Filter "$Name-*" | Select-Object Name, Length
