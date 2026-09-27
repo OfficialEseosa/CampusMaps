@@ -17,7 +17,7 @@ foreach ($a in $Aspects) {
   $w, $h = $sizes[$a]
   $tag = $a.Replace(":", "x")
   $frames = Join-Path $cap $tag
-  $json = $Opts.TrimEnd("}").TrimEnd() + (if ($Opts.Trim() -eq "{}") { "" } else { "," }) + "`"aspect`":`"$a`"}"
+  if ($Opts.Trim() -eq "{}") { $json = "{`"aspect`":`"$a`"}" } else { $json = $Opts.TrimEnd("}").TrimEnd() + ",`"aspect`":`"$a`"}" }
   $b64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($json))
   Write-Host "== $Name $a  $json"
   Push-Location $deck
