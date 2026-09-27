@@ -11,7 +11,7 @@ $deck = Join-Path $PSScriptRoot "..\deck"
 $out = Join-Path $PSScriptRoot "out"
 $cap = "C:\Users\rapha\AppData\Local\Temp\claude\cap\$Name"
 New-Item -ItemType Directory -Force $out | Out-Null
-$sizes = @{ "16:9" = @(1920, 1080); "3:2" = @(2160, 1440); "3:4" = @(1620, 2160) }
+$sizes = @{ "16:9" = @(1920, 1080); "3:2" = @(2160, 1440); "4:3" = @(1920, 1440); "3:4" = @(1620, 2160) }
 
 foreach ($a in $Aspects) {
   $w, $h = $sizes[$a]
